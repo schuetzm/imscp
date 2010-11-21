@@ -84,6 +84,19 @@
 					</tfoot>
 				<!-- EDP: mails_total -->
 				<tbody>
+					<!-- BDP: maillist_item -->
+						<tr>
+							<td>
+								<span class="icon i_maillist_icon">{MAILLIST_ACC}</span>
+							</td>
+							<td>{TR_MAILLIST}</td>
+							<td>{MAILLIST_STATUS}</td>
+							<td>
+								<a href="{MAILLIST_EDIT_SCRIPT}" class="icon i_edit">{MAILLIST_EDIT}</a>
+								<a href="#" class="icon i_delete" onclick="action_delete('{MAILLIST_DELETE_SCRIPT}', '{MAILLIST_ACC}')">{MAILLIST_DELETE}</a>
+							</td>
+						</tr>
+					<!-- EDP: maillist_item -->
 					<!-- BDP: mail_item -->
 						<tr>
 							<td>
