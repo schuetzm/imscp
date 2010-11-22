@@ -1865,21 +1865,36 @@ class iMSCP_Update_Database extends iMSCP_Update {
 		return $sqlUpd;
 	}
 
-	/**
-	 * Removed unused 'suexec_props' table
-	 *
-	 *  @author Laurent Declercq <laurent.declercq@ispcp.net>
-	 *  @since r3709
-	 *  @return array
-	 */
-	protected function _databaseUpdate_47() {
-		$sqlUpd = array();
+    /**
+     * Removed unused 'suexec_props' table
+     *
+     *  @author Laurent Declercq <laurent.declercq@ispcp.net>
+     *  @since r3709
+     *  @return array
+     */
+    protected function _databaseUpdate_47() {
+        $sqlUpd = array();
 
-		$sqlUpd[] = "DROP TABLE IF EXISTS `suexec_props`;";
+        $sqlUpd[] = "DROP TABLE IF EXISTS `suexec_props`;";
 
-		return $sqlUpd;
-	}
+        return $sqlUpd;
+    }
 
+    /**
+     * Alter table `hosting_plan` for whois-feature
+     *
+     *  @author Peter Ziergoebel <info@fisa4.de>
+     *  @since
+     *  @return array
+     */
+    protected function _databaseUpdate_48() {
+        $sqlUpd = array();
+
+        $sqlUpd[] = "ALTER TABLE `hosting_plans` ADD `tld` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;";
+
+        return $sqlUpd;
+    }
+    
 	/*
 	 * DO NOT CHANGE ANYTHING BELOW THIS LINE!
 	 */

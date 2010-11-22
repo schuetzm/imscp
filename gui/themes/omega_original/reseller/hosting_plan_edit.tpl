@@ -186,7 +186,14 @@
                       <tr>
                         <td>&nbsp;</td>
                         <td class="content2">{TR_PAYMENT}</td>
-                        <td class="content"><input name="hp_payment" {READONLY} type="text" class="textinput" id="hp_payment" style="width:100px" value="{HP_PAYMENT}" /></td>
+                        <td class="content">
+                            <select name="hp_payment" style="width:100px">
+                                <option value="1 Month">{TR_MONTH}</option>
+                                <option value="3 Month">{TR_QUARTER}</option>
+                                <option value="6 Month">{TR_HALFYEAR}</option>
+                                <option value="1 Year">{TR_YEAR}</option>
+                            </select>
+                        </td>
                       </tr>
                       <!-- TOS -->
                       <tr>

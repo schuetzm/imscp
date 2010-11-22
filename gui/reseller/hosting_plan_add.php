@@ -105,14 +105,19 @@ $tpl->assign(
 		'TR_VALUE'					=> tr('Currency'),
 		'TR_PAYMENT'				=> tr('Payment period'),
 		'TR_STATUS'					=> tr('Available for purchasing'),
-		'TR_TEMPLATE_DESCRIPTON'	=> tr('Description'),
+        'TR_TEMPLATE_DESCRIPTON'	=> tr('Description'),
+        'TR_AVAILABLE_TLD'	        => tr('Available TLDs <br>(end with <b> ; </b> and without spaces e.g. <b>.com;.net;.org;</b>)'),
 		'TR_EXAMPLE'				=> tr('(e.g. EUR)'),
 		// BEGIN TOS
 		'TR_TOS_PROPS'				=> tr('Term Of Service'),
 		'TR_TOS_NOTE'				=> tr('<b>Optional:</b> Leave this field empty if you do not want term of service for this hosting plan.'),
 		'TR_TOS_DESCRIPTION'		=> tr('Text Only'),
 		// END TOS
-		'TR_ADD_PLAN'				=> tr('Add plan')
+		'TR_ADD_PLAN'				=> tr('Add plan'),
+        'TR_MONTH'                  => tr('1 Month'),
+        'TR_QUARTER'                => tr('3 Month'),
+        'TR_HALFYEAR'               => tr('6 Month'),
+        'TR_YEAR'                   => tr('1 Year'),
 	)
 );
 
@@ -188,7 +193,8 @@ function gen_empty_ahp_page(&$tpl) {
 			'HP_DISK_VALUE'			=> '',
 			'TR_STATUS_YES'			=> $cfg->HTML_CHECKED,
 			'TR_STATUS_NO'			=> '',
-			'HP_TOS_VALUE'			=> ''
+			'HP_TOS_VALUE'			=> '',
+            'HP_TLD_VALUE'			=> ''
 		)
 	);
 
@@ -205,7 +211,7 @@ function gen_data_ahp_page(&$tpl) {
 	global $hp_traff, $hp_disk;
 	global $price, $setup_fee, $value, $payment, $status;
 	global $hp_backup, $hp_dns;
-	global $tos;
+	global $tos, $tld;
 
 	$cfg = iMSCP_Registry::get('Config');
 
@@ -225,7 +231,8 @@ function gen_data_ahp_page(&$tpl) {
 			'HP_SETUPFEE'			=> tohtml($setup_fee),
 			'HP_VELUE'				=> tohtml($value),
 			'HP_PAYMENT'			=> tohtml($payment),
-			'HP_TOS_VALUE'			=> tohtml($tos)
+			'HP_TOS_VALUE'			=> tohtml($tos),
+            'HP_tld_VALUE'			=> tohtml($tld)
 		)
 	);
 
@@ -258,7 +265,7 @@ function check_data_correction(&$tpl) {
 	global $hp_traff, $hp_disk;
 	global $price, $setup_fee, $value, $payment, $status;
 	global $hp_backup, $hp_dns;
-	global $tos;
+	global $tos, $tld;
 
 	$ahp_error 		= array();
 
@@ -276,6 +283,7 @@ function check_data_correction(&$tpl) {
 	$status			= $_POST['status'];
 	$description	= clean_input($_POST['hp_description']);
 	$tos			= clean_input($_POST['hp_tos']);
+    $tld            = clean_input($_POST['hp_tld']);
 
 	if (empty($_POST['hp_price'])) {
 		$price = 0;
@@ -305,7 +313,11 @@ function check_data_correction(&$tpl) {
 		$hp_backup = $_POST['backup'];
 	}
 
-	if ($hp_name == '') {
+    if (isset($_POST['tld'])) {
+        $tld = $_POST['tld'];
+    }
+
+    if ($hp_name == '') {
 		$ahp_error[] = tr('Incorrect template name length!');
 	}
 	if ($description == '') {
@@ -393,7 +405,7 @@ function save_data_to_db(&$tpl, $admin_id) {
 	global $hp_traff, $hp_disk;
 	global $price, $setup_fee, $value, $payment, $status;
 	global $hp_backup, $hp_dns;
-	global $tos;
+	global $tos, $tld;
 
 	$sql = iMSCP_Registry::get('Db');
 	$err_msg = '';
@@ -426,12 +438,13 @@ function save_data_to_db(&$tpl, $admin_id) {
 							`value`,
 							`payment`,
 							`status`,
-							`tos`
+							`tos`,
+							`tld`
 						)
-					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 				";
 
-				$res = exec_query($sql, $query, array($admin_id, $hp_name, $description, $hp_props, $price, $setup_fee, $value, $payment, $status, $tos));
+				$res = exec_query($sql, $query, array($admin_id, $hp_name, $description, $hp_props, $price, $setup_fee, $value, $payment, $status, $tos, $tld));
 
 				$_SESSION['hp_added'] = '_yes_';
 				user_goto('hosting_plan.php');

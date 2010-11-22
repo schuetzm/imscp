@@ -65,6 +65,11 @@
                         <td class="content2">{TR_TEMPLATE_DESCRIPTON}</td>
                         <td class="content"><textarea name="hp_description" class="textinput2" style="width:210px" cols="40" rows="8">{HP_DESCRIPTION_VALUE}</textarea></td>
                       </tr>
+                      <tr>
+                        <td>&nbsp;</td>
+                        <td class="content2">{TR_AVAILABLE_TLD}</td>
+                        <td class="content"><textarea name="hp_tld" class="textinput2" style="width:100px" cols="20" rows="5">{HP_TLD_VALUE}</textarea></td>
+                      </tr>
                       <!-- BDP: subdomain_add -->
                       <tr>
                         <td width="35">&nbsp;</td>
@@ -177,7 +182,14 @@
                       <tr>
                         <td>&nbsp;</td>
                         <td class="content2">{TR_PAYMENT}</td>
-                        <td class="content"><input name="hp_payment" type="text" class="textinput" id="hp_payment" style="width:100px" value="{HP_PAYMENT}" /></td>
+                        <td class="content">
+                            <select name="hp_payment" style="width:100px">
+                                <option value="1 Month">{TR_MONTH}</option>
+                                <option value="3 Month">{TR_QUARTER}</option>
+                                <option value="6 Month">{TR_HALFYEAR}</option>
+                                <option value="1 Year">{TR_YEAR}</option>
+                            </select>
+                        </td>
                       </tr>
                       <tr>
                         <td>&nbsp;</td>

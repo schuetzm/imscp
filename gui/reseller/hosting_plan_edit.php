@@ -106,6 +106,10 @@ $tpl->assign(
 		'TR_TOS_NOTE' => tr('<b>Optional:</b> Leave this field empty if you do not want term of service for this hosting plan.'),
 		'TR_TOS_DESCRIPTION' => tr('Text'),
 		'TR_EDIT_HOSTING_PLAN' => tr('Update plan'),
+        'TR_MONTH'                  => tr('1 Month'),
+        'TR_QUARTER'                => tr('3 Month'),
+        'TR_HALFYEAR'               => tr('6 Month'),
+        'TR_YEAR'                   => tr('1 Year'),
 		'TR_UPDATE_PLAN' => tr('Update plan')
 	)
 );
