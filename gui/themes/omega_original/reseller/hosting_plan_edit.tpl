@@ -66,6 +66,11 @@
                         <td class="content2">{TR_TEMPLATE_DESCRIPTON}</td>
                         <td class="content"><textarea name="hp_description" {READONLY} class="textinput2" style="width:210px" cols="40" rows="8">{HP_DESCRIPTION_VALUE}</textarea></td>
                       </tr>
+                      <tr>
+                        <td>&nbsp;</td>
+                        <td class="content2">{TR_AVAILABLE_TLD}</td>
+                        <td class="content"><textarea name="hp_tld" class="textinput2" style="width:100px" cols="20" rows="5">{HP_TLD_VALUE}</textarea></td>
+                      </tr>
                       <!-- BDP: subdomain_edit -->
                       <tr>
                         <td width="25">&nbsp;</td>

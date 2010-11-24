@@ -74,6 +74,7 @@
 								<th>{TR_HP}</th>
 								<th>{TR_USER}</th>
 								<th>{TR_STATUS}</th>
+								<th>{TR_ORDERTYPE}</th>
 								<th>{TR_ACTION}</th>
 							</tr>
 						</thead>
@@ -85,6 +86,7 @@
 									<td>{HP}</td>
 									<td>{USER}v</td>
 									<td>{STATUS}</td>
+									<td>{ORDERTYPE}</td>
 									<td>
 										<a href="{LINK}" class="icon i_add_user">{TR_ADD}</a>
 										<a href="#" onclick="delete_order('orders_delete.php?order_id={ID}', '{DOMAIN}')" class="icon i_delete">{TR_DELETE}</a>

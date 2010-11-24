@@ -101,6 +101,7 @@ $tpl->assign(
 		'TR_PAYMENT' => tr('Payment period'),
 		'TR_STATUS' => tr('Available for purchasing'),
 		'TR_TEMPLATE_DESCRIPTON' => tr('Description'),
+        'TR_AVAILABLE_TLD'	        => tr('Available TLDs <br>(end with <b> ; </b> and without spaces e.g. <b>.com;.net;.org;</b>)'),
 		'TR_EXAMPLE' => tr('(e.g. EUR)'),
 		'TR_TOS_PROPS' => tr('Term Of Service'),
 		'TR_TOS_NOTE' => tr('<b>Optional:</b> Leave this field empty if you do not want term of service for this hosting plan.'),
@@ -172,6 +173,7 @@ function restore_form(&$tpl, &$sql) {
 			'HP_CURRENCY' => clean_input($_POST['hp_currency'], true),
 			'HP_PAYMENT' => clean_input($_POST['hp_payment'], true),
 			'HP_TOS_VALUE' => clean_input($_POST['hp_tos'], true),
+            'HP_TLD_VALUE' => clean_input($_POST['hp_tld'], true),
 			'TR_PHP_YES' => ($_POST['php'] == '_yes_') ? $cfg->HTML_CHECKED : '',
 			'TR_PHP_NO' => ($_POST['php'] == '_no_') ? $cfg->HTML_CHECKED : '',
 			'TR_CGI_YES' => ($_POST['cgi'] == '_yes_') ? $cfg->HTML_CHECKED : '',
@@ -249,6 +251,7 @@ function gen_load_ehp_page(&$tpl, &$sql, $hpid, $admin_id) {
 	$payment = $data['payment'];
 	$status = $data['status'];
 	$tos = $data['tos'];
+    $tld = $data['tld'];
 
 	list(
 		$hp_php, $hp_cgi, $hp_sub, $hp_als, $hp_mail, $hp_ftp, $hp_sql_db,
@@ -308,6 +311,7 @@ function gen_load_ehp_page(&$tpl, &$sql, $hpid, $admin_id) {
 			'DISBLED' => $disabled,
 			'HP_PAYMENT' => tohtml($payment),
 			'HP_TOS_VALUE' => tohtml($tos),
+            'HP_TLD_VALUE' => tohtml($tld),
 
 			'TR_PHP_YES' => ($hp_php == '_yes_') ? $cfg->HTML_CHECKED : '',
 			'TR_PHP_NO' => ($hp_php == '_no_')	? $cfg->HTML_CHECKED : '',
@@ -473,6 +477,7 @@ function save_data_to_db() {
 	$payment = clean_input($_POST['hp_payment']);
 	$status = clean_input($_POST['status']);
 	$tos = clean_input($_POST['hp_tos']);
+    $tld = clean_input($_POST['hp_tld']);
 
 	$hp_props = "$hp_php;$hp_cgi;$hp_sub;$hp_als;$hp_mail;$hp_ftp;$hp_sql_db;" .
 		"$hp_sql_user;$hp_traff;$hp_disk;$hp_backup;$hp_dns";
@@ -497,7 +502,8 @@ function save_data_to_db() {
 					`value` = ?,
 					`payment` = ?,
 					`status` = ?,
-					`tos` = ?
+					`tos` = ?,
+					`tld` = ?
 				WHERE
 					`id` = ?
 				;
@@ -508,7 +514,7 @@ function save_data_to_db() {
 				$query,
 				array(
 					$hp_name, $description, $hp_props, $price, $setup_fee,
-					$currency, $payment, $status, $tos, $hpid
+					$currency, $payment, $status, $tos, $tld, $hpid
 				)
 			);
 

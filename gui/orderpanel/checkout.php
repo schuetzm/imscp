@@ -54,6 +54,9 @@ function gen_checkout(&$tpl, &$sql, $user_id, $plan_id) {
 	$lname = $_SESSION['lname'];
 	$gender = $_SESSION['gender'];
     $ordertype = $_SESSION['new_kk'];
+    if($ordertype == 'kk'){
+        $ordertype = 'transfer';
+    }
 
 	$firm = (isset($_SESSION['firm'])) ? $_SESSION['firm'] : '';
 

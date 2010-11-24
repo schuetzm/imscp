@@ -28,7 +28,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="content">{TR_RADIO_NEW_KK}</td><td class="content2"><input type="radio" name="new_kk" value="new" checked> {VL_NEW} <input type="radio" name="new_kk" value="kk"> KK (New is not working yet)</td>
+			<td class="content">{TR_RADIO_NEW_KK}</td><td class="content2"><input type="radio" name="new_kk" value="new" checked> {VL_NEW} <input type="radio" name="new_kk" value="kk"> {VL_KK} <input type="radio" name="new_kk" value="hosting_only"> {ONLY_HOSTING}</td>
 		</tr>
 		<tr>
 			<td colspan="2">&nbsp;</td>

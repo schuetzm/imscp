@@ -65,12 +65,13 @@ function addon_domain($dmn_name) {
 
     $_SESSION['new_kk'] = $_POST['new_kk'];
 	$_SESSION['domainname'] = $dmn_name;
-    if($_POST['new_kk'] == "kk"){
+    if($_POST['new_kk'] == "kk") {
 	    user_goto('address.php');
-        }
-    if($_POST['new_kk'] == "new"){
-	    user_goto('checkwhois.php');
-        }
+        } else if($_POST['new_kk'] == "new") {
+	        user_goto('checkwhois.php');
+        } else if ($_POST['new_kk'] == "hosting_only") {
+            user_goto('address.php');
+    }
 }
 
 function is_plan_available(&$sql, $plan_id, $user_id) {
@@ -113,7 +114,6 @@ function is_plan_available(&$sql, $plan_id, $user_id) {
 /**
  * static page messages.
  */
-// @TODO: Look why it sets the "registered" page_message twice.
 
 if(isset($_SESSION['already_registered'])) {
     set_page_message(tr('You choose a already registered Domain'));
@@ -155,6 +155,11 @@ if (isset($_SESSION['domainname'])&& $_SESSION['new_kk'] == 'kk') {
 	user_goto('address.php');
 }
 
+if (isset($_SESSION['domainname'])&& $_SESSION['new_kk'] == 'hosting_only') {
+    $_SESSION['new_kk'] = $_POST['new_kk'];
+	user_goto('address.php');
+}
+
 if (isset($_POST['domainname']) && $_POST['domainname'] != '') {
 	if (isset($_POST['tld']) && $_POST['tld'] != 'select') {
         $_SESSION['new_kk'] = $_POST['new_kk'];
@@ -179,8 +184,10 @@ $tpl->assign(
 		'TR_EXAMPLE'		=> tr('(e.g. domain-of-your-choice ) and select a TLD'),
 		'THEME_CHARSET'		=> tr('encoding'),
 		'THEME_CHARSET'		=> tr('encoding'),
-        'TR_RADIO_NEW_KK'   => 'New order <br>or KK',
+        'TR_RADIO_NEW_KK'   => 'New order,<br>Transfer<br>or Hosting only',
         'VL_NEW'		    => 'New',
+        'VL_KK'		        => 'Transfer',
+        'ONLY_HOSTING'	    => 'Hosting only',
 	)
 );
 

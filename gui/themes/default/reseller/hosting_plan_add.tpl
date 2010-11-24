@@ -68,6 +68,10 @@
 								<td><textarea id="hp_description" name="hp_description" cols="40" rows="8">{HP_DESCRIPTION_VALUE}</textarea></td>
 							</tr>
 							<tr>
+                                <td class="content2">{TR_AVAILABLE_TLD}</td>
+                                <td class="content"><textarea name="hp_tld" class="textinput2" style="width:100px" cols="20" rows="5">{HP_TLD_VALUE}</textarea></td>
+                            </tr>
+							<tr>
 								<td><label for="hp_sub">{TR_MAX_SUBDOMAINS}</label></td>
 								<td><input id="hp_sub"  type="text" name="hp_sub" value="{TR_MAX_SUB_LIMITS}"/></td>
 							</tr>
@@ -132,8 +136,8 @@
 						</table>
 					</fieldset>
 					<fieldset>
-						<legend>{TR_BILLING_PROPS}</legend>
-						<table>
+					    <legend>{TR_BILLING_PROPS}</legend>
+						    <table>
 							<tr>
 								<td><label for="hp_price">{TR_PRICE}</label></td>
 								<td><input name="hp_price" type="text" id="hp_price" value="{HP_PRICE}" /></td>
@@ -148,7 +152,14 @@
 							</tr>
 							<tr>
 								<td><label for="hp_payment">{TR_PAYMENT}</label></td>
-								<td><input name="hp_payment" type="text" id="hp_payment" value="{HP_PAYMENT}" /></td>
+								<td>
+                                    <select name="hp_payment">
+                                        <option value="1 Month">{TR_MONTH}</option>
+                                        <option value="3 Month">{TR_QUARTER}</option>
+                                        <option value="6 Month">{TR_HALFYEAR}</option>
+                                        <option value="1 Year">{TR_YEAR}</option>
+                                    </select>
+                                </td>
 							</tr>
 							<tr>
 								<td>{TR_STATUS}</td>
@@ -157,6 +168,18 @@
 									<input type="radio" name="status" value="0" {TR_STATUS_NO} id="status_no" /><label for="status_no">{TR_NO}</label>
 								</td>
 							</tr>
+							<!-- TOS -->
+                            <tr>
+                                <td><b>{TR_TOS_PROPS}</b></td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;{TR_TOS_NOTE}</td>
+                            </tr>
+                            <tr>
+                                <td>{TR_TOS_DESCRIPTION}</td>
+                                <td class="content"><textarea class="textinput2" name="hp_tos" cols="60" rows="8">{HP_TOS_VALUE}</textarea></td>
+                            </tr>
+                            <!-- TOS END -->
 						</table>
 					</fieldset>
 					<div class="buttons">

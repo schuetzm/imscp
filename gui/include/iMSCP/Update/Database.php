@@ -1905,7 +1905,7 @@ class iMSCP_Update_Database extends iMSCP_Update {
     protected function _databaseUpdate_49() {
         $sqlUpd = array();
 
-        $sqlUpd[] = "ALTER TABLE `orders` ADD `ordertype` VARCHAR( 5 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;";
+        $sqlUpd[] = "ALTER TABLE `orders` ADD `ordertype` VARCHAR( 12 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;";
 
         return $sqlUpd;
     }

@@ -53,6 +53,7 @@ if ($len < "200"){
 } else {
     if($pos < "5"){
         $_SESSION['already_registered'] = "registered";
+        unset($_SESSION['domainname']);
         user_goto('addon.php');
     }else{
         user_goto('address.php');

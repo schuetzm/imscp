@@ -232,7 +232,7 @@ function gen_data_ahp_page(&$tpl) {
 			'HP_VELUE'				=> tohtml($value),
 			'HP_PAYMENT'			=> tohtml($payment),
 			'HP_TOS_VALUE'			=> tohtml($tos),
-            'HP_tld_VALUE'			=> tohtml($tld)
+            'HP_TLD_VALUE'			=> tohtml($tld)
 		)
 	);
 
