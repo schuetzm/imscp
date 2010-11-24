@@ -1512,7 +1512,7 @@ function reseller_limits_check(&$sql, &$err_msg, $reseller_id, $hpid, $newprops 
 }
 
 function send_order_emails($admin_id, $domain_name, $ufname, $ulname, $uemail,
-	$order_id) {
+	$order_id, $ordertype) {
 
 	$cfg = iMSCP_Registry::get('Config');
 
@@ -1559,6 +1559,8 @@ function send_order_emails($admin_id, $domain_name, $ufname, $ulname, $uemail,
 	$replace[] = $name;
 	$search [] = '{ACTIVATE_LINK}';
 	$replace[] = $activate_link;
+    $search [] = '{ORDERTYPE}';
+    $replace[] = $ordertype;
 
 	$subject = str_replace($search, $replace, $subject);
 	$message = str_replace($search, $replace, $message);

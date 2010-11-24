@@ -41,6 +41,7 @@ $tpl->define_dynamic('page', $cfg->PURCHASE_TEMPLATE_PATH . '/addon.tpl');
 $tpl->define_dynamic('page_message', 'page');
 $tpl->define_dynamic('purchase_header', 'page');
 $tpl->define_dynamic('purchase_footer', 'page');
+$tpl->define_dynamic('op_tld_list', 'page');
 
 /**
  * functions start
@@ -62,8 +63,14 @@ function addon_domain($dmn_name) {
 		return;
 	}
 
+    $_SESSION['new_kk'] = $_POST['new_kk'];
 	$_SESSION['domainname'] = $dmn_name;
-	user_goto('address.php');
+    if($_POST['new_kk'] == "kk"){
+	    user_goto('address.php');
+        }
+    if($_POST['new_kk'] == "new"){
+	    user_goto('checkwhois.php');
+        }
 }
 
 function is_plan_available(&$sql, $plan_id, $user_id) {
@@ -106,6 +113,12 @@ function is_plan_available(&$sql, $plan_id, $user_id) {
 /**
  * static page messages.
  */
+// @TODO: Look why it sets the "registered" page_message twice.
+
+if(isset($_SESSION['already_registered'])) {
+    set_page_message(tr('You choose a already registered Domain'));
+    unset($_SESSION['already_registered']);
+}
 
 if (isset($_SESSION['user_id'])) {
 	$user_id = $_SESSION['user_id'];
@@ -132,26 +145,46 @@ if (isset($_SESSION['user_id'])) {
 	);
 }
 
-if (isset($_SESSION['domainname'])) {
+if (isset($_SESSION['domainname'])&& $_SESSION['new_kk'] == 'new') {
+    $_SESSION['new_kk'] = $_POST['new_kk'];
+	user_goto('checkwhois.php');
+}
+
+if (isset($_SESSION['domainname'])&& $_SESSION['new_kk'] == 'kk') {
+    $_SESSION['new_kk'] = $_POST['new_kk'];
 	user_goto('address.php');
 }
 
 if (isset($_POST['domainname']) && $_POST['domainname'] != '') {
-	addon_domain($_POST['domainname']);
+	if (isset($_POST['tld']) && $_POST['tld'] != 'select') {
+        $_SESSION['new_kk'] = $_POST['new_kk'];
+	    addon_domain($_POST['domainname']."".$_POST['tld']);
+    } else {
+        set_page_message(tr('You have to select a TLD !'));
+    }
+} else {
+    if (isset($_POST['tld']) && $_POST['tld'] != 'select') {
+            set_page_message(tr('You can not set an order without a domainname !'));
+    }
 }
 
 gen_purchase_haf($tpl, $sql, $user_id);
 gen_page_message($tpl);
-
+$tld = $_SESSION['tld'];
 $tpl->assign(
 	array(
 		'DOMAIN_ADDON'		=> tr('Add On A Domain'),
 		'TR_DOMAIN_NAME'	=> tr('Domain name'),
 		'TR_CONTINUE'		=> tr('Continue'),
-		'TR_EXAMPLE'		=> tr('(e.g. domain-of-your-choice.com)'),
+		'TR_EXAMPLE'		=> tr('(e.g. domain-of-your-choice ) and select a TLD'),
 		'THEME_CHARSET'		=> tr('encoding'),
+		'THEME_CHARSET'		=> tr('encoding'),
+        'TR_RADIO_NEW_KK'   => 'New order <br>or KK',
+        'VL_NEW'		    => 'New',
 	)
 );
+
+gen_tld_list($tpl, $sql, $plan_id, $user_id);
 
 $tpl->parse('PAGE', 'page');
 $tpl->prnt();

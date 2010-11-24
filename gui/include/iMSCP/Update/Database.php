@@ -1881,21 +1881,36 @@ class iMSCP_Update_Database extends iMSCP_Update {
     }
 
     /**
+         * Alter table `hosting_plan` for whois-feature
+         *
+         *  @author Peter Ziergoebel <info@fisa4.de>
+         *  @since r3811
+         *  @return array
+         */
+        protected function _databaseUpdate_48() {
+            $sqlUpd = array();
+
+            $sqlUpd[] = "ALTER TABLE `hosting_plans` ADD `tld` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;";
+
+            return $sqlUpd;
+        }
+
+/**
      * Alter table `hosting_plan` for whois-feature
      *
      *  @author Peter Ziergoebel <info@fisa4.de>
-     *  @since
+     *  @since r3811
      *  @return array
      */
-    protected function _databaseUpdate_48() {
+    protected function _databaseUpdate_49() {
         $sqlUpd = array();
 
-        $sqlUpd[] = "ALTER TABLE `hosting_plans` ADD `tld` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;";
+        $sqlUpd[] = "ALTER TABLE `orders` ADD `ordertype` VARCHAR( 5 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;";
 
         return $sqlUpd;
     }
-    
-	/*
+
+    /*
 	 * DO NOT CHANGE ANYTHING BELOW THIS LINE!
 	 */
 }

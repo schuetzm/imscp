@@ -281,6 +281,8 @@ This is an automatic confirmation for the order of the domain:
 
 {DOMAIN}
 
+Your Ordertype is: {ORDERTYPE} (New registration or KK)
+
 You have to click the following link to continue the domain creation process.
 
 {ACTIVATE_LINK}

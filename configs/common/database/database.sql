@@ -448,6 +448,7 @@ CREATE TABLE `orders` (
   `street1` varchar(200) collate utf8_unicode_ci default NULL,
   `street2` varchar(200) collate utf8_unicode_ci default NULL,
   `status` varchar(255) collate utf8_unicode_ci default NULL,
+  `ordertype` varchar(5) collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

@@ -94,7 +94,8 @@ function gen_packages_list(&$tpl, &$sql, $user_id) {
 		while (!$rs->EOF) {
 			$description = $rs->fields['description'];
 
-			$price = $rs->fields['price'];
+            $tld = $rs->fields['tld'];
+            $price = $rs->fields['price'];
 			if ($price == 0 || $price == '') {
 				$price = "/ " . tr('free of charge');
 			} else {
@@ -109,6 +110,8 @@ function gen_packages_list(&$tpl, &$sql, $user_id) {
 					'PURCHASE'	=> tr('Purchase'),
 					'PACK_INFO'	=> tohtml($description),
 					'PRICE'		=> $price,
+                    'TLD'       => $tld,
+                    'TLD_INFO'  => 'Available TLDs:',
 				)
 			);
 

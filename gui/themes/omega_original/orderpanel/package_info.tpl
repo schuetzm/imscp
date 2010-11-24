@@ -25,6 +25,10 @@
 		<td style="white-space:nowrap;" class="content2">{SUBDOMAIN}</td>
 	</tr>
 	<tr>
+		<td class="content">{TR_TLD}</td>
+		<td style="white-space:nowrap;" class="content2">{TLD}</td>
+	</tr>
+	<tr>
 		<td colspan="2" class="content3"><strong>{TR_WEBSPACE}</strong></td>
 	</tr>
 	<tr>

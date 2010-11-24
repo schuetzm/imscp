@@ -142,6 +142,7 @@ function gen_order_page(&$tpl, &$sql, $user_id) {
 		while (!$rs->EOF) {
 			$plan_id = $rs->fields['plan_id'];
 			$order_status = tr('New order');
+            $ordertype = $rs->fields['ordertype'];
 			// let's get hosting plan name
 			$planname_query = "
 				SELECT
@@ -196,6 +197,7 @@ function gen_order_page(&$tpl, &$sql, $user_id) {
 					'DOMAIN'	=> tohtml($rs->fields['domain_name']),
 					'USER'		=> $user_details,
 					'STATUS'	=> $order_status,
+                    'ORDERTYPE' => $ordertype,
 				)
 			);
 
@@ -229,6 +231,7 @@ $tpl->assign(
 		'TR_USER'					=> tr('Customer data'),
 		'TR_ACTION'					=> tr('Action'),
 		'TR_STATUS'					=> tr('Order'),
+        'TR_ORDERTYPE'				=> tr('Registration'),
 		'TR_EDIT'					=> tr('Edit'),
 		'TR_DELETE'					=> tr('Delete'),
 		'TR_DETAILS'				=> tr('Details'),

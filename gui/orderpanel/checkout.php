@@ -53,6 +53,7 @@ function gen_checkout(&$tpl, &$sql, $user_id, $plan_id) {
 	$fname = $_SESSION['fname'];
 	$lname = $_SESSION['lname'];
 	$gender = $_SESSION['gender'];
+    $ordertype = $_SESSION['new_kk'];
 
 	$firm = (isset($_SESSION['firm'])) ? $_SESSION['firm'] : '';
 
@@ -91,15 +92,16 @@ function gen_checkout(&$tpl, &$sql, $user_id, $plan_id) {
 				`fax`,
 				`street1`,
 				`street2`,
-				`status`)
+				`status`,
+				`ordertype`)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	";
 
-	$rs = exec_query($sql, $query, array($user_id, $plan_id, $date, $domain_name, $fname, $lname, $gender, $firm, $zip, $city, $state, $country, $email, $phone, $fax, $street1, $street2, $status));
+	$rs = exec_query($sql, $query, array($user_id, $plan_id, $date, $domain_name, $fname, $lname, $gender, $firm, $zip, $city, $state, $country, $email, $phone, $fax, $street1, $street2, $status, $ordertype));
 
 	$order_id = $sql->insertId();
-	send_order_emails($user_id, $domain_name, $fname, $lname, $email, $order_id);
+	send_order_emails($user_id, $domain_name, $fname, $lname, $email, $order_id, $ordertype);
 
 	// Remove useless data
 	unset($_SESSION['details']);
@@ -167,7 +169,7 @@ if ((isset($_SESSION['fname']) && $_SESSION['fname'] != '')
 	) {
 	gen_checkout($tpl, $sql, $user_id, $plan_id);
 } else {
-	user_goto('index.php?user_id=' . $user_id);
+	// user_goto('index.php?user_id=' . $user_id);
 }
 
 gen_purchase_haf($tpl, $sql, $user_id);

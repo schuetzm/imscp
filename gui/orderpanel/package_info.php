@@ -117,6 +117,9 @@ function gen_plan_details(&$tpl, &$sql, $user_id, $plan_id) {
 		}
 		$description = $rs->fields['description'];
 
+        $tld = $rs->fields['tld'];
+        $_SESSION['tld'] = $tld;
+
 		$hp_disk = translate_limit_value($hp_disk, true) . "<br />";
 
 		$hp_traff = translate_limit_value($hp_traff, true);
@@ -132,6 +135,7 @@ function gen_plan_details(&$tpl, &$sql, $user_id, $plan_id) {
 				'PURCHASE'		=> tr('Purchase'),
 				'ALIAS'			=> translate_limit_value($hp_als),
 				'SUBDOMAIN'		=> translate_limit_value($hp_sub),
+                'TLD'           => str_replace(";", ", ",$tld),
 				'HDD'			=> $hp_disk,
 				'TRAFFIC'		=> $hp_traff,
 				'PHP'			=> translate_sse($hp_php),
@@ -215,6 +219,7 @@ $tpl->assign(
 		'TR_DNS_SUPPORT'		=> tr('Manual DNS support'),
 		'TR_MYSQL_SUPPORT'		=> tr('SQL support'),
 		'TR_SUBDOMAINS'			=> tr('Subdomains'),
+        'TR_TLD'			    => tr('Available TLDs'),
 		'TR_DOMAIN_ALIAS'		=> tr('Domain aliases'),
 		'TR_MAIL_ACCOUNTS'		=> tr('Mail accounts'),
 		'TR_FTP_ACCOUNTS'		=> tr('FTP accounts'),

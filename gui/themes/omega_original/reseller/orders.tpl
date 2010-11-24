@@ -73,6 +73,7 @@ function delete_order(url, domain) {
              <td class="content3"><strong>{TR_HP}</strong></td>
              <td class="content3"><strong>{TR_USER}</strong></td>
              <td align="center" class="content3"><strong>{TR_STATUS}</strong></td>
+             <td align="center" class="content3"><strong>{TR_ORDERTYPE}</strong></td>
              <td width="200" colspan="2" align="center" class="content3"><b>{TR_ACTION}</b></td>
             </tr>
             <!-- BDP: order -->
@@ -83,6 +84,7 @@ function delete_order(url, domain) {
              <td class="{ITEM_CLASS}">{HP}</td>
              <td class="{ITEM_CLASS}">{USER}</td>
              <td align="center" class="{ITEM_CLASS}">{STATUS}</td>
+             <td align="center" class="{ITEM_CLASS}">{ORDERTYPE}</td>
              <td class="{ITEM_CLASS}" align="center"><img src="{THEME_COLOR_PATH}/images/icons/details.png" width="16" height="16" border="0" style="vertical-align:middle" alt="" /> <a href="{LINK}" class="link">{TR_ADD}</a></td>
              <td class="{ITEM_CLASS}" align="center"><img src="{THEME_COLOR_PATH}/images/icons/delete.png" width="16" height="16" border="0" style="vertical-align:middle" alt="" /> <a href="#" onClick="delete_order('orders_delete.php?order_id={ID}', '{DOMAIN}')" class="link">{TR_DELETE}</a></td>
             </tr>

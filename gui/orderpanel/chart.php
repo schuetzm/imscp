@@ -43,7 +43,6 @@ $tpl->define_dynamic('purchase_header', 'page');
 $tpl->define_dynamic('tos_field', 'page');
 $tpl->define_dynamic('purchase_footer', 'page');
 
-
 /*
  * functions start
  */
