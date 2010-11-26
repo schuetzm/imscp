@@ -22,7 +22,6 @@
 
 			<div class="logo">
 				<img src="{THEME_COLOR_PATH}/images/imscp_logo.png" alt="i-MSCP logo" />
-				<img src="{THEME_COLOR_PATH}/images/imscp_webhosting.png" alt="i-MSCP" />
 			</div>
 		</div>
 
@@ -74,7 +73,10 @@
 
 			<a href="{FILEMANAGER_PATH}">{TR_FILEMANAGER}</a>
 			<p>{TR_FILEMANAGER_TEXT}</p>
-
+			<!-- BDP: t_software_support -->
+ 				<a href="software.php">{TR_SOFTWARE_MENU}</a>
+ 				<p>{TR_SOFTWARE_SUPPORT}</p>
+ 			<!-- EDP: t_software_support -->
 			<!-- BDP: active_awstats -->
 				<a href="{AWSTATS_PATH}">{TR_AWSTATS}</a>
 				<p>{TR_AWSTATS_TEXT}</p>

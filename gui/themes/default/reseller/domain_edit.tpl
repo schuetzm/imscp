@@ -59,7 +59,6 @@
 
 			<div class="logo">
 				<img src="{THEME_COLOR_PATH}/images/imscp_logo.png" alt="i-MSCP logo" />
-				<img src="{THEME_COLOR_PATH}/images/imscp_webhosting.png" alt="i-MSCP" />
 			</div>
 		</div>
 
@@ -128,6 +127,16 @@
 							</select>
 						</td>
 					</tr>
+					<!-- BDP: t_software_support -->
+					<tr>
+						<td>{TR_SOFTWARE_SUPP}</td>
+						<td><select name="domain_software_allowed" id="domain_software_allowed">
+								<option value="yes" {SOFTWARE_YES}>{TR_YES}</option>
+								<option value="no" {SOFTWARE_NO}>{TR_NO}</option>
+ 							</select>
+						</td>
+					</tr>
+					<!-- EDP: t_software_support -->
 					<tr>
 						<td>{TR_CGI_SUPP}</td>
 						<td><select id="domain_cgi" name="domain_cgi">

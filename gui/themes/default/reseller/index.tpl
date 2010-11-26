@@ -23,7 +23,6 @@
 
 			<div class="logo">
 				<img src="{THEME_COLOR_PATH}/images/imscp_logo.png" alt="i-MSCP logo" />
-				<img src="{THEME_COLOR_PATH}/images/imscp_webhosting.png" alt="i-MSCP" />
 			</div>
 		</div>
 
@@ -103,6 +102,12 @@
 					<td>{SQL_USERS}</td>
 					<td>{SQL_USER_MSG}</td>
 				</tr>
+				<!-- BDP: software_allowed -->
+				<tr>
+	 				<td>{SW_ALLOWED}</td>
+	 				<td>{SW_MSG}</td>
+				</tr>
+				<!-- EDP: software_allowed -->
 			</table>
 
 			<!-- BDP: traff_warn -->

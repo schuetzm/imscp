@@ -23,7 +23,6 @@
 
 			<div class="logo">
 				<img src="{THEME_COLOR_PATH}/images/imscp_logo.png" alt="i-MSCP logo" />
-				<img src="{THEME_COLOR_PATH}/images/imscp_webhosting.png" alt="i-MSCP" />
 			</div>
 		</div>
 
@@ -129,6 +128,15 @@
 									<input type="radio" name="backup" value="_no_" {VL_BACKUPN} id="backup_none" /><label for="backup_none">{TR_BACKUP_NO}</label>
 								</td>
 							</tr>
+							<!-- BDP: t_software_support -->
+							<tr>
+								<td>{TR_SOFTWARE_SUPP}</td>
+								<td>
+									<input type="radio" name="software_allowed" value="_yes_" {VL_SOFTWAREY} id="software_allowed_yes" /><label for="software_allowed_yes">{TR_YES}</label>
+									<input type="radio" name="software_allowed" value="_no_" {VL_SOFTWAREN} id="software_allowed_no" /><label for="software_allowed_no">{TR_NO}</label>
+								</td>
+							</tr>
+ 							<!-- EDP: t_software_support -->
 						</table>
 					</fieldset>
 					<fieldset>
@@ -159,6 +167,22 @@
 							</tr>
 						</table>
 					</fieldset>
+					<fieldset>
+						<legend>{TR_TOS_PROPS}</legend>
+						<table>
+							<!-- TOS --> 
+							<tr>
+								<td colspan="2">{TR_TOS_NOTE}</td>
+							</tr>
+							<tr>
+								<td>{TR_TOS_DESCRIPTION}</td>
+								<td>
+									<textarea name="hp_tos" cols="70" rows="8">{HP_TOS_VALUE}</textarea>
+								</td>
+							</tr>
+							<!-- TOS END -->
+						</table>
+					</fieldset
 					<div class="buttons">
 						<input name="Submit" type="submit" value="{TR_ADD_PLAN}" />
 					</div>

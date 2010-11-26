@@ -32,7 +32,6 @@
 
 			<div class="logo">
 				<img src="{THEME_COLOR_PATH}/images/imscp_logo.png" alt="i-MSCP logo" />
-				<img src="{THEME_COLOR_PATH}/images/imscp_webhosting.png" alt="i-MSCP" />
 			</div>
 		</div>
 
@@ -59,10 +58,12 @@
 
 
 		<div class="body">
-				<h2 class="serverstatus"><span>{TR_HOSTING_PLANS}</span></h2>
+		
 				<!-- BDP: page_message -->
 					<div class="warning">{MESSAGE}</div>
 				<!-- EDP: page_message -->
+				
+				<h2 class="hosting_plans"><span>{TR_HOSTING_PLANS}</span></h2>
 
 				<!-- BDP: hp_table -->
 					<table>
