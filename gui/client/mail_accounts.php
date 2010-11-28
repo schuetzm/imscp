@@ -68,17 +68,26 @@ $tpl->assign(
  * @param string $mail_status mail status
  * @return array
  */
-function gen_user_mail_action($mail_id, $mail_status) {
+function gen_user_mail_action($mail_id, $mail_type, $mail_status) {
 
 	$cfg = iMSCP_Registry::get('Config');
 
 	if ($mail_status === $cfg->ITEM_OK_STATUS) {
-		return array(
-			tr('Delete'),
-			"mail_delete.php?id=$mail_id",
-			tr('Edit'),
-			"mail_edit.php?id=$mail_id"
-		);
+        if (strpos($mail_type, 'list') === false) {
+            return array(
+                tr('Delete'),
+                "mail_delete.php?id=$mail_id",
+                tr('Edit'),
+                "mail_edit.php?id=$mail_id"
+            );
+        } else {
+            return array(
+                tr('Delete'),
+                "mail_delete.php?id=$mail_id",
+                tr('Edit'),
+                "mail_list_edit.php?id=$mail_id"
+            );
+        }
 	} else {
 		return array(tr('N/A'), '#', tr('N/A'), '#');
 	}
@@ -99,7 +108,20 @@ function gen_user_mail_auto_respond(
 
 	$cfg = iMSCP_Registry::get('Config');
 
-	if ($mail_status === $cfg->ITEM_OK_STATUS) {
+    if ($mail_type === MT_NORMAL_LIST
+            || $mail_type === MT_ALIAS_LIST
+            || $mail_type === MT_SUBDOM_LIST
+            || $mail_type === MT_ALSSUB_LIST) {
+        $tpl->assign(
+			array(
+				'AUTO_RESPOND_DISABLE' => '',
+				'AUTO_RESPOND_DISABLE_SCRIPT' => '',
+				'AUTO_RESPOND_EDIT' => '',
+				'AUTO_RESPOND_EDIT_SCRIPT' => '',
+				'AUTO_RESPOND_VIS' => 'none'
+			)
+		);
+    } elseif ($mail_status === $cfg->ITEM_OK_STATUS) {
 		if ($mail_auto_respond == false) {
 			$tpl->assign(
 				array(
@@ -175,6 +197,8 @@ function gen_page_dmn_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 			(
 				`mail_type` LIKE '%".MT_NORMAL_MAIL."%'
 			OR
+			    `mail_type` LIKE '%".MT_NORMAL_LIST."%'
+			OR
 				`mail_type` LIKE '%".MT_NORMAL_FORWARD."%'
 			) ";
 
@@ -215,7 +239,7 @@ function gen_page_dmn_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 				$mail_edit,
 				$mail_edit_script
 			) = gen_user_mail_action(
-				$rs->fields['mail_id'], $rs->fields['status']
+				$rs->fields['mail_id'], $rs->fields['mail_type'], $rs->fields['status']
 			);
 
 			$mail_acc = decode_idna($rs->fields['mail_acc']);
@@ -300,6 +324,8 @@ function gen_page_sub_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 			(
 				t2.`mail_type` LIKE '%".MT_SUBDOM_MAIL."%'
 			OR
+			    t2.`mail_type` LIKE '%".MT_SUBDOM_LIST."%'
+			OR
 				t2.`mail_type` LIKE '%".MT_SUBDOM_FORWARD."%'
 			)
 		AND
@@ -340,7 +366,7 @@ function gen_page_sub_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 				$mail_delete, $mail_delete_script,
 				$mail_edit, $mail_edit_script
 			) = gen_user_mail_action(
-				$rs->fields['mail_id'], $rs->fields['status']
+				$rs->fields['mail_id'], $rs->fields['mail_type'], $rs->fields['status']
 			);
 
 			$mail_acc = decode_idna($rs->fields['mail_acc']);
@@ -437,6 +463,8 @@ function gen_page_als_sub_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 			(
 				t1.`mail_type` LIKE '%".MT_ALSSUB_MAIL."%'
 			OR
+				t1.`mail_type` LIKE '%".MT_ALSSUB_LIST."%'
+			OR
 				t1.`mail_type` LIKE '%".MT_ALSSUB_FORWARD."%'
 			)
 	";
@@ -474,7 +502,7 @@ function gen_page_als_sub_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 			list(
 				$mail_delete, $mail_delete_script, $mail_edit, $mail_edit_script
 			) = gen_user_mail_action(
-				$rs->fields['mail_id'], $rs->fields['status']
+				$rs->fields['mail_id'], $rs->fields['mail_type'], $rs->fields['status']
 			);
 
 			$mail_acc = decode_idna($rs->fields['mail_acc']);
@@ -558,6 +586,8 @@ function gen_page_als_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 			(
 				t2.`mail_type` LIKE '%".MT_ALIAS_MAIL."%'
 			OR
+				t2.`mail_type` LIKE '%".MT_ALIAS_LIST."%'
+			OR
 				t2.`mail_type` LIKE '%".MT_ALIAS_FORWARD."%'
 			)
 	";
@@ -595,7 +625,7 @@ function gen_page_als_mail_list($tpl, $sql, $dmn_id, $dmn_name) {
 			list(
 				$mail_delete, $mail_delete_script, $mail_edit, $mail_edit_script
 			) = gen_user_mail_action(
-				$rs->fields['mail_id'], $rs->fields['status']
+				$rs->fields['mail_id'], $rs->fields['mail_type'], $rs->fields['status']
 			);
 
 			$mail_acc = decode_idna($rs->fields['mail_acc']);

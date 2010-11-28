@@ -508,6 +508,7 @@ function gen_client_mainmenu(&$tpl, $menu_file) {
 			'TR_MENU_ADD_SUBDOMAIN' 		=> tr('Add subdomain'),
 			'TR_MENU_MANAGE_USERS' 			=> tr('Email and FTP accounts'),
 			'TR_MENU_ADD_MAIL_USER' 		=> tr('Add mail user'),
+            'TR_MENU_ADD_MAIL_LIST' 		=> tr('Add mailing list'),
 			'TR_MENU_ADD_FTP_USER' 			=> tr('Add FTP user'),
 			'TR_MENU_MANAGE_SQL' 			=> tr('Manage SQL'),
 			'TR_MENU_ERROR_PAGES' 			=> tr('Error pages'),
@@ -680,6 +681,7 @@ function gen_client_menu(&$tpl, $menu_file) {
 			'TR_MENU_ADD_SUBDOMAIN' 		=> tr('Add subdomain'),
 			'TR_MENU_MANAGE_USERS' 			=> tr('Email and FTP accounts'),
 			'TR_MENU_ADD_MAIL_USER' 		=> tr('Add mail user'),
+            'TR_MENU_ADD_MAIL_LIST' 		=> tr('Add mailing list'),
 			'TR_MENU_ADD_FTP_USER' 			=> tr('Add FTP user'),
 			'TR_MENU_MANAGE_SQL' 			=> tr('Manage SQL'),
 			'TR_MENU_ERROR_PAGES' 			=> tr('Error pages'),
@@ -910,18 +912,26 @@ function user_trans_mail_type($mail_type) {
 
 	if ($mail_type === MT_NORMAL_MAIL) {
 		return tr('Domain mail');
+    } else if ($mail_type === MT_NORMAL_LIST) {
+        return tr('Mailing list');
 	} else if ($mail_type === MT_NORMAL_FORWARD) {
 		return tr('Email forward');
 	} else if ($mail_type === MT_ALIAS_MAIL) {
 		return tr('Alias mail');
+    } else if ($mail_type === MT_ALIAS_LIST) {
+        return tr('Alias mailing list');
 	} else if ($mail_type === MT_ALIAS_FORWARD) {
 		return tr('Alias forward');
 	} else if ($mail_type === MT_SUBDOM_MAIL) {
 		return tr('Subdomain mail');
+    } else if ($mail_type === MT_SUBDOM_LIST) {
+        return tr('Subdomain mailing list');
 	} else if ($mail_type === MT_SUBDOM_FORWARD) {
 		return tr('Subdomain forward');
 	} else if ($mail_type === MT_ALSSUB_MAIL) {
 		return tr('Alias subdomain mail');
+    } else if ($mail_type === MT_ALSSUB_LIST) {
+        return tr('Alias subdomain mailing list');
 	} else if ($mail_type === MT_ALSSUB_FORWARD) {
 		return tr('Alias subdomain forward');
 	} else if ($mail_type === MT_NORMAL_CATCHALL) {

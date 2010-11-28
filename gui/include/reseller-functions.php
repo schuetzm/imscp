@@ -34,12 +34,16 @@
 
 // avaiable mail types
 define('MT_NORMAL_MAIL', 'normal_mail');
+define('MT_NORMAL_LIST', 'normal_list');
 define('MT_NORMAL_FORWARD', 'normal_forward');
 define('MT_ALIAS_MAIL', 'alias_mail');
+define('MT_ALIAS_LIST', 'alias_list');
 define('MT_ALIAS_FORWARD', 'alias_forward');
 define('MT_SUBDOM_MAIL', 'subdom_mail');
+define('MT_SUBDOM_LIST', 'subdom_list');
 define('MT_SUBDOM_FORWARD', 'subdom_forward');
 define('MT_ALSSUB_MAIL', 'alssub_mail');
+define('MT_ALSSUB_LIST', 'alssub_list');
 define('MT_ALSSUB_FORWARD', 'alssub_forward');
 define('MT_NORMAL_CATCHALL', 'normal_catchall');
 define('MT_SUBDOM_CATCHALL', 'subdom_catchall');
