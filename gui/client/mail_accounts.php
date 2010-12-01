@@ -73,21 +73,12 @@ function gen_user_mail_action($mail_id, $mail_type, $mail_status) {
 	$cfg = iMSCP_Registry::get('Config');
 
 	if ($mail_status === $cfg->ITEM_OK_STATUS) {
-        if (strpos($mail_type, 'list') === false) {
-            return array(
-                tr('Delete'),
-                "mail_delete.php?id=$mail_id",
-                tr('Edit'),
-                "mail_edit.php?id=$mail_id"
-            );
-        } else {
-            return array(
-                tr('Delete'),
-                "mail_delete.php?id=$mail_id",
-                tr('Edit'),
-                "mail_list_edit.php?id=$mail_id"
-            );
-        }
+        return array(
+            tr('Delete'),
+            "mail_delete.php?id=$mail_id",
+            tr('Edit'),
+            "mail_edit.php?id=$mail_id"
+        );
 	} else {
 		return array(tr('N/A'), '#', tr('N/A'), '#');
 	}
