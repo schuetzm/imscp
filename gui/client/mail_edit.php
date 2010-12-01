@@ -43,6 +43,7 @@ $tpl->define_dynamic('page', $cfg->CLIENT_TEMPLATE_PATH . '/mail_edit.tpl');
 $tpl->define_dynamic('page_message', 'page');
 $tpl->define_dynamic('logged_from', 'page');
 $tpl->define_dynamic('normal_mail', 'page');
+$tpl->define_dynamic('list_mail','page');
 $tpl->define_dynamic('forward_mail', 'page');
 
 // page functions
@@ -85,6 +86,7 @@ function edit_mail_account(&$tpl, &$sql) {
 		$mail_type_list = $rs->fields['mail_type'];
 		$mail_forward = $rs->fields['mail_forward'];
 		$sub_id = $rs->fields['sub_id'];
+		$is_list = false;
 
 		foreach (explode(',', $mail_type_list) as $mail_type) {
 			if ($mail_type == MT_NORMAL_MAIL) {
@@ -92,6 +94,12 @@ function edit_mail_account(&$tpl, &$sql) {
 				$res1 = exec_query($sql, "SELECT `domain_name` FROM `domain` WHERE `domain_id` = ?", $domain_id);
 				$tmp1 = $res1->fetchRow(0);
 				$maildomain = $tmp1['domain_name'];
+			} else if ($mail_type == MT_NORMAL_LIST) {
+				$mtype[] = 9;
+				$res1 = exec_query($sql, "SELECT `domain_name` FROM `domain` WHERE `domain_id` = ?", $domain_id);
+				$tmp1 = $res1->fetchRow(0);
+				$maildomain = $tmp1['domain_name'];
+				$is_list = true;
 			} else if ($mail_type == MT_NORMAL_FORWARD) {
 				$mtype[] = 4;
 				$res1 = exec_query($sql, "SELECT `domain_name` FROM `domain` WHERE `domain_id` = ?", $domain_id);
@@ -102,6 +110,12 @@ function edit_mail_account(&$tpl, &$sql) {
 				$res1 = exec_query($sql, "SELECT `alias_name` FROM `domain_aliasses` WHERE `alias_id` = ?", $sub_id);
 				$tmp1 = $res1->fetchRow(0);
 				$maildomain = $tmp1['alias_name'];
+			} else if ($mail_type == MT_ALIAS_LIST) {
+				$mtype[] = 10;
+ 				$res1 = exec_query($sql, "SELECT `alias_name` FROM `domain_aliasses` WHERE `alias_id` = ?", $sub_id);
+				$tmp1 = $res1->fetchRow(0);
+				$maildomain = $tmp1['alias_name'];
+				$is_list = true;
 			} else if ($mail_type == MT_ALIAS_FORWARD) {
 				$mtype[] = 5;
 				$res1 = exec_query($sql, "SELECT `alias_name` FROM `domain_aliasses` WHERE `alias_id` = ?", $sub_id);
@@ -115,6 +129,15 @@ function edit_mail_account(&$tpl, &$sql) {
 				$res1 = exec_query($sql, "SELECT `domain_name` FROM `domain` WHERE `domain_id` = ?", $domain_id);
 				$tmp1 = $res1->fetchRow(0);
 				$maildomain = $maildomain . "." . $tmp1['domain_name'];
+			} else if ($mail_type == MT_SUBDOM_LIST) {
+				$mtype[] = 12;
+				$res1 = exec_query($sql, "SELECT `subdomain_name` FROM `subdomain` WHERE `subdomain_id` = ?", $sub_id);
+				$tmp1 = $res1->fetchRow();
+				$maildomain = $tmp1['subdomain_name'];
+				$res1 = exec_query($sql, "SELECT `domain_name` FROM `domain` WHERE `domain_id` = ?", $domain_id);
+				$tmp1 = $res1->fetchRow(0);
+				$maildomain = $maildomain . "." . $tmp1['domain_name'];
+				$is_list = true;
 			} else if ($mail_type == MT_SUBDOM_FORWARD) {
 				$mtype[] = 6;
 				$res1 = exec_query($sql, "SELECT `subdomain_name` FROM `subdomain` WHERE `subdomain_id` = ?", $sub_id);
@@ -132,6 +155,16 @@ function edit_mail_account(&$tpl, &$sql) {
 				$res1 = exec_query($sql, "SELECT `alias_name` FROM `domain_aliasses` WHERE `alias_id` = ?", $alias_id);
 				$tmp1 = $res1->fetchRow(0);
 				$maildomain = $maildomain . "." . $tmp1['alias_name'];
+			} else if ($mail_type == MT_ALSUB_LIST) {
+				$mtype[] = 13;
+				$res1 = exec_query($sql, "SELECT `subdomain_alias_name`, `alias_id` FROM `subdomain_alias` WHERE `subdomain_alias_id` = ?", $sub_id);
+				$tmp1 = $res1->fetchRow();
+				$maildomain = $tmp1['subdomain_alias_name'];
+				$alias_id = $tmp1['alias_id'];
+				$res1 = exec_query($sql, "SELECT `alias_name` FROM `domain_aliasses` WHERE `alias_id` = ?", $alias_id);
+				$tmp1 = $res1->fetchRow(0);
+				$maildomain = $maildomain . "." . $tmp1['alias_name'];
+				$is_list = true;
 			} else if ($mail_type == MT_ALSSUB_FORWARD) {
 				$mtype[] = 8;
 				$res1 = exec_query($sql, "SELECT `subdomain_alias_name`, `alias_id` FROM `subdomain_alias` WHERE `subdomain_alias_id` = ?", $sub_id);
@@ -159,7 +192,16 @@ function edit_mail_account(&$tpl, &$sql) {
 			)
 		);
 
-		if (($mail_forward !== '_no_') && (count($mtype) > 1)) {
+		if ($is_list) {
+			$tpl->assign(
+				array(
+					'ACTION'                => 'update_pass',
+				)
+			);
+			$tpl->parse('LIST_MAIL', '.list_mail');
+			$tpl->assign('FORWARD_MAIL','');
+			$tpl->assign('NORMAL_MAIL','');
+		} else if (($mail_forward !== '_no_') && (count($mtype) > 1)) {
 			$tpl->assign(
 				array(
 					'ACTION'				=> 'update_pass,update_forward',
@@ -180,6 +222,7 @@ function edit_mail_account(&$tpl, &$sql) {
 				)
 			);
 			$tpl->parse('NORMAL_MAIL', '.normal_mail');
+			$tpl->assign('LIST_MAIL','');
 		} else {
 			$tpl->assign(
 				array(
@@ -189,6 +232,7 @@ function edit_mail_account(&$tpl, &$sql) {
 				)
 			);
 			$tpl->parse('FORWARD_MAIL', '.forward_mail');
+			$tpl->assign('LIST_MAIL','');
 		}
 	}
 }
@@ -345,6 +389,7 @@ $tpl->assign(
 		'TR_SAVE'				=> tr('Save'),
 		'TR_PASSWORD'			=> tr('Password'),
 		'TR_PASSWORD_REPEAT'	=> tr('Repeat password'),
+		'TR_MAILLIST_PASSWORD'  => tr('Mailing List Password'),
 		'TR_FORWARD_MAIL'		=> tr('Forward mail'),
 		'TR_FORWARD_TO'			=> tr('Forward to'),
 		'TR_FWD_HELP'			=> tr("Separate multiple email addresses with a line-break."),

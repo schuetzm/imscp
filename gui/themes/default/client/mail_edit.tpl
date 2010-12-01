@@ -107,6 +107,18 @@
 							</tr>
 						</table>
 					<!-- EDP: normal_mail -->
+					<!-- BDP: list_mail -->
+						<table>
+							<tr>
+								<td><label for="pass">{TR_MAILLIST_PASSWORD}</label></td>
+								<td><input type="password" name="pass" id="pass" value="" /></td>
+							</tr>
+							<tr>
+								<td><label for="pass_rep">{TR_PASSWORD_REPEAT}</label></td>
+								<td><input type="password" name="pass_rep" id="pass_rep" value="" /></td>
+							</tr>
+						</table>
+					<!-- EDP: list_mail -->
 					<!-- BDP: forward_mail -->
 						<table>
 							<tr>
