@@ -536,14 +536,7 @@ function get_error_mails($sql, $tpl) {
 					";
 					break;
 				default:
-					write_log(
-						sprintf(
-							'FIXME: %s:%d' . "\n" . 'Unknown mail type %s',
-							__FILE__, __LINE__, $mail_type
-						)
-					);
-
-					die('FIXME: ' . __FILE__ . ':' . __LINE__ . $mail_type);
+					throw new iMSCP_Exception('FIXME: ' . __FILE__ . ':' . __LINE__ . $mail_type);
 			}
 
 			$sr = exec_query($sql, $query, $searched_id);
@@ -815,7 +808,6 @@ if (isset($_GET['action'])) {
 			default:
 				set_page_message(tr('Unknown type!'));
 				user_goto('imscp_debugger.php');
-				break;
 		}
 
 		$rs = exec_query($sql, $query, $_GET['id']);

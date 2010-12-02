@@ -34,6 +34,9 @@
 
 require 'include/imscp-lib.php';
 
+/**
+ * @var $cfg iMSCP_Config_Handler_File
+ */
 $cfg = iMSCP_Registry::get('Config');
 
 if (isset($_GET['logout'])) {
@@ -41,24 +44,16 @@ if (isset($_GET['logout'])) {
 }
 
 do_session_timeout();
-
 init_login();
 
-if (isset($_POST['uname'])
-	&& isset($_POST['upass'])
-	&& !empty($_POST['uname'])
-	&& !empty($_POST['upass'])) {
-
+if (isset($_POST['uname']) && isset($_POST['upass']) && !empty($_POST['uname']) && !empty($_POST['upass'])) {
 	$uname = encode_idna($_POST['uname']);
 
 	check_input(trim($_POST['uname']));
 	check_input(trim($_POST['upass']));
 
-	if (register_user($uname, $_POST['upass'])) {
-		redirect_to_level_page();
-	}
-
-	user_goto('index.php');
+	register_user($uname, $_POST['upass']);
+	//user_goto('index.php');
 }
 
 if (check_user_login() && !redirect_to_level_page()) {
@@ -67,20 +62,18 @@ if (check_user_login() && !redirect_to_level_page()) {
 
 shall_user_wait();
 
-$theme_color = isset($_SESSION['user_theme'])
-	? $_SESSION['user_theme']
-	: $cfg->USER_INITIAL_THEME;
+$theme_color = isset($_SESSION['user_theme']) ? $_SESSION['user_theme'] : $cfg->USER_INITIAL_THEME;
 
 $tpl = new iMSCP_pTemplate();
+$tpl->define_dynamic('page_message', 'page');
+$tpl->define_dynamic('lostpwd', 'page');
 
-if (($cfg->MAINTENANCEMODE
-		|| iMSCP_Update_Database::getInstance()->checkUpdateExists())
-	&& !isset($_GET['admin'])) {
+if (($cfg->MAINTENANCEMODE || iMSCP_Update_Database::getInstance()->checkUpdateExists()) && !isset($_GET['admin'])) {
 
 	$tpl->define_dynamic('page', $cfg->LOGIN_TEMPLATE_PATH . '/maintenancemode.tpl');
 	$tpl->assign(
 		array(
-			'TR_PAGE_TITLE'		=> tr('i-MSCP a Virtual Hosting Control System'),
+			'TR_PAGE_TITLE'		=> tr('i-MSCP i-MSCP - Multi Server Control Panel'),
 			'THEME_COLOR_PATH'	=> $cfg->LOGIN_TEMPLATE_PATH,
 			'THEME_CHARSET'		=> tr('encoding'),
 			'TR_MESSAGE'		=> nl2br(tohtml($cfg->MAINTENANCEMODE_MESSAGE)),
@@ -89,45 +82,40 @@ if (($cfg->MAINTENANCEMODE
 	);
 
 } else {
-
 	$tpl->define_dynamic('page', $cfg->LOGIN_TEMPLATE_PATH . '/index.tpl');
 
 	$tpl->assign(
 		array(
-			'TR_MAIN_INDEX_PAGE_TITLE'	=> tr('i-MSCP a Virtual Hosting Control System'),
+			'TR_MAIN_INDEX_PAGE_TITLE'	=> tr('i-MSCP - Multi Server Control Panel'),
 			'THEME_COLOR_PATH'			=> $cfg->LOGIN_TEMPLATE_PATH,
 			'THEME_CHARSET'				=> tr('encoding'),
 			'TR_LOGIN'					=> tr('Login'),
 			'TR_USERNAME'				=> tr('Username'),
 			'TR_PASSWORD'				=> tr('Password'),
-			'TR_LOGIN_INFO'				=> tr('Please enter your login information'),
 			'TR_PHPMYADMIN'				=> tr('phpMyAdmin'),
-			'TR_FILEMANAGER'			=> tr('File Manager'),
+			'TR_FILEMANAGER'			=> tr('FileManager'),
 			'TR_WEBMAIL'				=> tr('Webmail'),
 			// @todo: make this configurable by i-mscp-lib
-			'TR_SSL_LINK'               => isset($_SERVER['HTTPS']) ? 'http://' . htmlentities($_SERVER['HTTP_HOST']) : 'https://' . htmlentities($_SERVER['HTTP_HOST']),
-			'TR_WEBMAIL_SSL_LINK'       => "webmail",
-			'TR_FTP_SSL_LINK'           => "ftp",
-			'TR_PMA_SSL_LINK'           => "pma",
+			'TR_SSL_LINK'               => isset($_SERVER['HTTPS'])
+				? 'http://' . htmlentities($_SERVER['HTTP_HOST']) : 'https://' . htmlentities($_SERVER['HTTP_HOST']),
+			'TR_WEBMAIL_LINK'       	=> 'webmail',
+			'TR_FTP_LINK'           	=> 'ftp',
+			'TR_PMA_LINK'           	=> 'pma',
 			'TR_SSL_IMAGE'              => isset($_SERVER['HTTPS']) ? 'lock.png' : 'unlock.png',
 			'TR_SSL_DESCRIPTION'		=> !isset($_SERVER['HTTPS']) ? tr('Secure Connection') : tr('Normal Connection')
 		)
 	);
-
 }
 
 if ($cfg->LOSTPASSWORD) {
 	$tpl->assign('TR_LOSTPW', tr('Lost password'));
 } else {
-	$tpl->assign('TR_LOSTPW', '');
+	$tpl->assign('LOSTPWD', '');
 }
 
-$tpl->define_dynamic('page_message', 'page');
 gen_page_message($tpl);
 
 $tpl->parse('PAGE', 'page');
 $tpl->prnt();
 
-if ($cfg->DUMP_GUI_DEBUG) {
-	dump_gui_debug();
-}
+if ($cfg->DUMP_GUI_DEBUG) dump_gui_debug();
