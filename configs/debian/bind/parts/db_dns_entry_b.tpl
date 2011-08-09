@@ -1,1 +1,1 @@
-; dns [{MANUAL_DNS_ID}] entry BEGIN.
+; dns manual entry BEGIN.

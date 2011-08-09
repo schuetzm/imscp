@@ -10,19 +10,19 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA02110-1301, USA.
  *
  * @category	iMSCP
  * @package	 iMSCP_Update
- * @subpackage  Database
- * @copyright   2010-2011 by i-MSCP team
- * @author	  Daniel Andreca <sci2tech@gmail.com>
- * @author	  Laurent Declercq <l.declercq@nuxwin.com>
+ * @subpackageDatabase
+ * @copyright 2010-2011 by i-MSCP team
+ * @author	Daniel Andreca <sci2tech@gmail.com>
+ * @author	Laurent Declercq <l.declercq@nuxwin.com>
  * @version	 SVN: $Id$
  * @link		http://www.i-mscp.net i-MSCP Home Site
  * @license	 http://www.gnu.org/licenses/gpl-2.0.txt GPL v2
@@ -38,9 +38,9 @@ require_once 'iMSCP/Update.php';
  *
  * @category	iMSCP
  * @package	 iMSCP_Update
- * @subpackage  Database
- * @author	  Daniel Andreca <sci2tech@gmail.com>
- * @author	  Laurent Declercq <l.declercq@nuxwin.com>
+ * @subpackageDatabase
+ * @author	Daniel Andreca <sci2tech@gmail.com>
+ * @author	Laurent Declercq <l.declercq@nuxwin.com>
  * @version	 0.0.1
  */
 class iMSCP_Update_Database extends iMSCP_Update
@@ -214,7 +214,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 *
 	 * Note: For performances reasons, the revision is retrieved once.
 	 *
-	 * @return int The  revision of the last available database update
+	 * @return int Therevision of the last available database update
 	 */
 	protected function getLastAvailableUpdateRevision()
 	{
@@ -267,8 +267,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @param string $query Query to create column
 	 * @return string Query to be executed
 	 */
-	protected function secureAddColumnTable($table, $column, $query)
-	{
+	protected function secureAddColumnTable($table, $column, $query){
 		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
 
 		return "
@@ -298,8 +297,8 @@ class iMSCP_Update_Database extends iMSCP_Update
 	/**
 	 * Catch any database update that were removed.
 	 *
-	 * @param  string $updateMethod Database method name
-	 * @param  array $param $parameter
+	 * @paramstring $updateMethod Database method name
+	 * @paramarray $param $parameter
 	 * @return void
 	 */
 	public function __call($updateMethod, $param)
@@ -334,7 +333,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * Adds table for software installer (ticket #14).
 	 *
 	 * @author Sascha Bay <worst.case@gmx.de>
-	 * @since  r3695
+	 * @sincer3695
 	 * @return array Stack of SQL statements to be executed
 	 */
 	protected function _databaseUpdate_48()
@@ -360,8 +359,8 @@ class iMSCP_Update_Database extends iMSCP_Update
 					`software_status` varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 					`rights_add_by` int(10) unsigned NOT NULL default '0',
 					`software_depot` varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL NOT NULL DEFAULT 'no',
-	  				PRIMARY KEY  (`software_id`)
-				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+					PRIMARY KEY(`software_id`)
+				) ENGINE=MyISAMDEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 			;
 		";
 
@@ -388,7 +387,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 					`install_email` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL default '0',
 					`software_status` varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 					`software_depot` varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL NOT NULL DEFAULT 'no',
-  					KEY `software_id` (`software_id`)
+					KEY `software_id` (`software_id`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 			;
 		";
@@ -466,7 +465,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * Adds new options for applications instller.
 	 *
 	 * @author Sascha Bay <worst.case@gmx.de>
-	 * @since  r4036
+	 * @sincer4036
 	 * @return array Stack of SQL statements to be executed
 	 */
 	protected function _databaseUpdate_52()
@@ -942,4 +941,192 @@ class iMSCP_Update_Database extends iMSCP_Update
 			UPDATE `mail_users` SET `quota` = '104857600' WHERE `quota` = '10485760';
 		";
 	}
+
+
+	/**
+	 * Create table to move user props to separate table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_77(){
+		return "
+			CREATE TABLE IF NOT EXISTS `user_system_props` (
+				`user_id` int(10) unsigned NOT NULL DEFAULT '0',
+				`user_mailacc_limit` int(11) DEFAULT NULL,
+				`user_ftpacc_limit` int(11) DEFAULT NULL,
+				`user_traffic_limit` bigint(20) DEFAULT NULL,
+				`user_sqld_limit` int(11) DEFAULT NULL,
+				`user_sqlu_limit` int(11) DEFAULT NULL,
+				`user_alias_limit` int(11) DEFAULT NULL,
+				`user_subd_limit` int(11) DEFAULT NULL,
+				`user_ip_ids` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_disk_limit` bigint(20) unsigned DEFAULT NULL,
+				`user_disk_usage` bigint(20) unsigned DEFAULT NULL,
+				`user_ssh` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_ssl` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_php` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_cgi` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_backups` enum('full','sql','domain','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_dns` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user__software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				UNIQUE KEY `user_id` (`user_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		";
+	}
+
+	/**
+	 * Migrate user props to user_system_prop table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_78(){
+		return "
+			REPLACE INTO
+				`user_system_props`
+			(
+				`user_id`, `user_mailacc_limit`, `user_ftpacc_limit`,
+				`user_traffic_limit`, `user_sqld_limit`, `user_sqlu_limit`,
+				`user_alias_limit`, `user_subd_limit`, `user_ip_ids`,
+				`user_disk_limit`, `user_disk_usage`, `user_php`, `user_cgi`,
+				`user_backups`, `user_dns`, `user__software_allowed`
+			)
+			SELECT
+				`domain_admin_id`, `domain_mailacc_limit`, `domain_ftpacc_limit`,
+				`domain_traffic_limit`, `domain_sqld_limit`, `domain_sqlu_limit`,
+				`domain_alias_limit`, `domain_subd_limit`, `domain_ip_id`,
+				`domain_disk_limit`, `domain_disk_usage`, `domain_php`,
+				`domain_cgi`, `allowbackup`, `domain_dns`, `domain_software_allowed`
+			FROM
+				`domain`
+		";
+	}
+
+	/**
+	 * Migrate user props to user_system_prop table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_79(){
+
+		$sqlUpd = array();
+
+		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+
+		$sql = "
+		DROP PROCEDURE IF EXISTS test;
+			CREATE PROCEDURE test()
+			BEGIN
+				IF EXISTS(
+					SELECT
+						*
+					FROM
+						information_schema.COLUMNS
+					WHERE
+						column_name='%s'
+					AND
+						table_name='domain'
+					AND
+						table_schema='$dbName'
+				) THEN
+					ALTER TABLE `domain` DROP `%s`;
+				END IF;
+			END;
+			CALL test();
+			DROP PROCEDURE IF EXISTS test;
+		";
+
+		foreach(array(
+			'domain_gid',
+			'domain_uid',
+			'domain_mailacc_limit',
+			'domain_ftpacc_limit',
+			'domain_traffic_limit',
+			'domain_sqld_limit',
+			'domain_sqlu_limit',
+			'domain_alias_limit',
+			'domain_subd_limit',
+			'domain_disk_limit',
+			'domain_disk_usage',
+			'domain_php',
+			'domain_cgi',
+			'allowbackup',
+			'domain_dns',
+			'domain_software_allowed'
+		) as $column){
+			$sqlUpd[] = sprintf($sql, $column, $column);
+		}
+		return $sqlUpd;
+	}
+
+	/**
+	 * Add user status column.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_80(){
+
+		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+
+		return "
+			DROP PROCEDURE IF EXISTS schema_change;
+				CREATE PROCEDURE schema_change()
+				BEGIN
+					IF NOT EXISTS (
+						SELECT
+							COLUMN_NAME
+						FROM
+							information_schema.COLUMNS
+						WHERE
+							TABLE_NAME = 'domain'
+						AND
+							COLUMN_NAME = 'domain_mount_point'
+						AND
+							table_schema='$dbName'
+					) THEN
+						ALTER TABLE `domain` ADD `domain_mount_point` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '/';
+					END IF;
+				END;
+				CALL schema_change();
+			DROP PROCEDURE IF EXITST schema_change;
+		";
+	}
+
+	/**
+	 * Add user status column.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_81(){
+		return "
+			DROP PROCEDURE IF EXISTS schema_change;
+				CREATE PROCEDURE schema_change()
+				BEGIN
+					IF NOT EXISTS (
+						SELECT
+							COLUMN_NAME
+						FROM
+							information_schema.COLUMNS
+						WHERE
+							TABLE_NAME = 'admin'
+						AND
+							COLUMN_NAME = 'admin_status'
+					) THEN
+						ALTER TABLE `admin` ADD `admin_status` VARCHAR( 15 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd';
+					END IF;
+				END;
+				CALL schema_change();
+			DROP PROCEDURE IF EXITST schema_change;
+		";
+	}
+
 }

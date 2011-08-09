@@ -29,6 +29,7 @@ package Servers::mta::postfix;
 use strict;
 use warnings;
 use iMSCP::Debug;
+use Data::Dumper;
 
 use vars qw/@ISA/;
 
@@ -38,7 +39,7 @@ use Common::SingletonClass;
 sub _init{
 	my $self	= shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	$self->{cfgDir} = "$main::imscpConfig{'CONF_DIR'}/postfix";
 	$self->{bkpDir} = "$self->{cfgDir}/backup";
@@ -51,46 +52,58 @@ sub _init{
 	tie %self::postfixConfig, 'iMSCP::Config','fileName' => "$self->{cfgDir}/postfix.data";
 	$self->{$_} = $self::postfixConfig{$_} foreach(keys %self::postfixConfig);
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub preinstall{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use Servers::mta::postfix::installer;
 
 	my $self	= shift;
-	my $rs		= 0;
+	my $rs		= Servers::mta::postfix::installer->preinstall();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub install{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use Servers::mta::postfix::installer;
 
 	my $self	= shift;
 	my $rs		= Servers::mta::postfix::installer->new()->install();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub postinst{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self	= shift;
 	my $rs		= $self->restart();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
+	$rs;
+}
+
+sub setEnginePermissions{
+	debug('Starting...');
+
+	use Servers::httpd::apache::installer;
+
+	my $self	= shift;
+	my $rs = Servers::mta::postfix::installer->new()->setEnginePermissions();
+
+	debug('Ending...');
 	$rs;
 }
 
 sub registerPreHook{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 	my $fname		= shift;
@@ -104,18 +117,18 @@ sub registerPreHook{
 	push (@{$self->{preCalls}->{fname}}, $callback)
 		if (ref $callback eq 'CODE' && $self->can($fname));
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub registerPostHook{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 	my $fname		= shift;
 	my $callback	= shift;
 
-	debug((caller(0))[3].": Attaching to $fname...");
+	debug("Attaching to $fname...");
 
 	my $installer	= Servers::mta::postfix::installer->new();
 
@@ -125,12 +138,12 @@ sub registerPostHook{
 	push (@{$self->{postCalls}->{$fname}}, $callback)
 		if (ref $callback eq 'CODE' && $self->can($fname));
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub restart{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self			= shift;
 	my ($rs, $stdout, $stderr);
@@ -139,11 +152,49 @@ sub restart{
 
 	# Reload config
 	$rs = execute("$self->{CMD_MTA} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
+	0;
+}
+
+sub addDomain{
+	debug('Starting...');
+
+	my $self = shift;
+	my $data = shift;
+
+	error(Dumper($data).'');
+
+	foreach(keys %{$errmsg}){
+		error("$errmsg->{$_}") unless $data->{$_};
+		return 1 unless $data->{$_};
+	}
+
+	my $entry = "$data->{DMN_NAME}\t\t\tvdmn_entry\n";
+
+	iMSCP::File->new(
+		filename => $self->{MTA_VIRTUAL_DMN_HASH}
+	)->copyFile( "$self->{bkpDir}/domains".time ) and return 1;
+
+	my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/domains");
+	my $content	= $file->get() || return 1;
+
+	$content .= $entry unless $content =~ /$entry/mg;
+
+	$file->set($content);
+	$file->save() and return 1;
+	$file->mode(0644) and return 1;
+	$file->owner(
+			$main::imscpConfig{'ROOT_USER'},
+			$main::imscpConfig{'ROOT_GROUP'}
+	) and return 1;
+	$file->copyFile( $self->{MTA_VIRTUAL_DMN_HASH} ) and return 1;
+
+
+	debug('Ending...');
 	0;
 }
 

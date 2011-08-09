@@ -24,7 +24,7 @@
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
-package Servers::ftp::proftpd;
+package Servers::ftpd::proftpd;
 
 use strict;
 use warnings;
@@ -38,7 +38,7 @@ use Common::SingletonClass;
 sub _init{
 	my $self	= shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	$self->{cfgDir} = "$main::imscpConfig{'CONF_DIR'}/proftpd";
 	$self->{bkpDir} = "$self->{cfgDir}/backup";
@@ -53,47 +53,47 @@ sub _init{
 }
 
 sub preinstall{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
-	use Servers::ftp::proftpd::installer;
+	use Servers::ftpd::proftpd::installer;
 
 	my $self	= shift;
 	my $rs		= 0;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub install{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
-	use Servers::ftp::proftpd::installer;
+	use Servers::ftpd::proftpd::installer;
 
 	my $self	= shift;
-	my $rs		= Servers::ftp::proftpd::installer->new()->install();
+	my $rs		= Servers::ftpd::proftpd::installer->new()->install();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub postinst{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self	= shift;
 	my $rs		= $self->restart();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub registerPreHook{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 	my $fname		= shift;
 	my $callback	= shift;
 
-	my $installer	= Servers::ftp::proftpd::installer->new();
+	my $installer	= Servers::ftpd::proftpd::installer->new();
 
 	push (@{$installer->{preCalls}->{fname}}, $callback)
 		if (ref $callback eq 'CODE' && $installer->can($fname));
@@ -101,20 +101,20 @@ sub registerPreHook{
 	push (@{$self->{preCalls}->{fname}}, $callback)
 		if (ref $callback eq 'CODE' && $self->can($fname));
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub registerPostHook{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 	my $fname		= shift;
 	my $callback	= shift;
 
-	debug((caller(0))[3].": Attaching to $fname...");
+	debug("Attaching to $fname...");
 
-	my $installer	= Servers::ftp::proftpd::installer->new();
+	my $installer	= Servers::ftpd::proftpd::installer->new();
 
 	push (@{$installer->{postCalls}->{$fname}}, $callback)
 		if (ref $callback eq 'CODE' && $installer->can($fname));
@@ -122,12 +122,12 @@ sub registerPostHook{
 	push (@{$self->{postCalls}->{$fname}}, $callback)
 		if (ref $callback eq 'CODE' && $self->can($fname));
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub restart{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self			= shift;
 	my ($rs, $stdout, $stderr);
@@ -136,11 +136,11 @@ sub restart{
 
 	# Reload config
 	$rs = execute("$self->{CMD_FTPD} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 

@@ -481,7 +481,7 @@ if (time() < $dmn_expires) {
 
 if($dmn_status == $cfg->ITEM_OK_STATUS) {
     $tpl->assign('DOMAIN_ALS_URL',
-                 "http://{$cfg->APACHE_SUEXEC_USER_PREF}$dmn_uid.{$_SERVER['SERVER_NAME']}");
+                 "http://{$cfg->SYSTEM_USER_PREFIX}$dmn_uid.{$_SERVER['SERVER_NAME']}");
 } else {
     $tpl->assign('ALTERNATIVE_DOMAIN_URL', '');
 }

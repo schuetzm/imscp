@@ -36,7 +36,7 @@ use Log::Message;
 use Carp;
 
 @ISA = ('Common::SingletonClass', 'Exporter');
-@EXPORT = qw/debug warning error fatal newDebug endDebug getMessage getLastError getMessageByType silent/;
+@EXPORT = qw/debug warning error fatal newDebug endDebug getMessage getLastError getMessageByType silent verbose/;
 
 BEGIN{
 
@@ -57,8 +57,9 @@ sub _init{
 	$self->{log}				= {};
 	$self->{logLevels}			= ();
 	$self->{lastLog}			= Log::Message->new( private => 1);
-	$self->{log}->{'default'}	= $self->{lastLog};
+	$self->{log}->{'discard'}	= $self->{lastLog};
 	$self->{silent}				= 0;
+	$self->{verbose}			= 1;
 }
 
 sub newDebug{
@@ -81,41 +82,48 @@ sub silent{
 	iMSCP::Debug->new()->{silent} = shift || 0;
 }
 
+sub verbose{
+	iMSCP::Debug->new()->{verbose} = shift || 0;
+}
+
 sub debug{
+	return unless iMSCP::Debug->new()->{verbose};
 	my $message		= shift || '';
-	iMSCP::Debug->new()->{lastLog}->store(message => $message, tag => 'DEBUG', level => 'log');
+	iMSCP::Debug->new()->{lastLog}->store(message => (caller(1))[3].": $message", tag => 'DEBUG', level => 'log');
 }
 
 sub warning{
 	my $message		= shift || '';
 	my $verbosity	= shift or 1;
 	my $self = iMSCP::Debug->new();
-	$self->{lastLog}->store(message => $message, tag => 'WARNING', level => $verbosity ? 'cluck' : 'log');
-	print STDERR output("$message", {mode=>'warning'}) unless $self->{silent};
+	$self->{lastLog}->store(message => (caller(1))[3].": $message", tag => 'WARNING', level => $verbosity ? 'cluck' : 'log');
+	print STDERR output((caller(1))[3].": $message", {mode=>'warning'}) unless $self->{silent};
 }
 
 sub error{
 	my $message		= shift || '';
 	my $verbosity	= shift or 1;
 	my $self = iMSCP::Debug->new();
-	$self->{lastLog}->store(message => $message, tag => 'ERROR', level => $verbosity ? 'cluck' : 'log');
-	print STDERR output("$message", {mode=>'error'}) unless $self->{silent};
+	$self->{lastLog}->store(message => (caller(1))[3].": $message", tag => 'ERROR', level => $verbosity ? 'cluck' : 'log');
+	print STDERR output((caller(1))[3].": $message", {mode=>'error'}) unless $self->{silent};
 }
 
 sub fatal{
 	my $message		= shift || '';
 	my $verbosity	= shift or 1;
 	my $self = iMSCP::Debug->new();
-	$self->{lastLog}->store(message => $message, tag => 'FATAL ERROR', level => $verbosity ? 'cluck' : 'log');
-	while(!$self->endDebug()){};
-	print STDERR output("$message", {mode=>'fatal'});
+
+	#while(!$self->endDebug()){};
+
+	$self->{lastLog}->store(message => (caller(1))[3].": $message", tag => 'FATAL ERROR', level => $verbosity ? 'cluck' : 'log');
+
+	print STDERR output((caller(1))[3].": $message", {mode=>'fatal'});
 	exit 1;
 }
 
 sub getLastError{
 	my $self = iMSCP::Debug->new();
 	my $last = getMessageByType('ERROR', {amount => 1, chrono => 0});
-	#error("\$last:$last");
 	return $last;
 }
 
@@ -125,7 +133,7 @@ sub getMessageByType{
 	my $opts	= shift;
 	$opts = {} unless ref $opts eq 'HASH';
 
-	$mode = 'ERROR' unless( defined($mode) && $mode =~ 'DEBUG|WARNING|ERROR');
+	$mode = 'ERROR' unless( defined($mode) && $mode =~ /DEBUG|WARNING|ERROR|FATAL ERROR/);
 
 	$opts->{amount}	= 0 unless (defined($opts->{amount}) && $opts->{amount} =~ /\d+/);
 	$opts->{chrono}	= 1 unless (defined($opts->{chrono}) && $opts->{chrono} =~ /0|1/);
@@ -149,13 +157,16 @@ sub getMessage{
 	my $line	= '';
 	my $self	= iMSCP::Debug->new();
 
-	return _getMessageLevel($log) if ( $log );
-	foreach my $key (keys %{$self->{log}}){
-		$line .= _getMessageLevel($key);
+	if ( $log ){
+		$line = _getMessageLevel($log);
+	} else {
+		foreach my $key (keys %{$self->{log}}){
+			$line .= _getMessageLevel($key);
+		}
 	}
 
 	if($file){
-		my $opened = open(DEBUG, '>:utf8', $file);
+		my $opened = open(DEBUG, '>', $file);
 		print STDERR 'Can\'t save file '.$file.'!' if(!$opened);
 		print DEBUG $line if($opened);
 		close(DEBUG) if($opened);
@@ -200,5 +211,24 @@ sub output{
 	}
 }
 
+END{
+	my @warnings	= getMessageByType('WARNING');
+	my @errors		= getMessageByType('ERROR');
+	my @fatals		= getMessageByType('FATAL ERROR');
+
+	my $msg	 = "\nWARNINGS:\n"		. join("\n", @warnings)	. "\n" if @warnings > 0;
+	$msg	.= "\nERRORS:\n"		. join("\n", @errors)	. "\n" if @errors > 0;
+	$msg	.= "\nFATAL ERRORS:\n"	. join("\n", @fatals)	. "\n" if @fatals > 0;
+
+	my $self	= iMSCP::Debug->new();
+	my $logdir	= $main::imscpConfig{LOG_DIR};
+
+	for (keys %{iMSCP::Debug->new()->{log}}) {
+			next if $_ eq 'discard';
+			getMessage($_, "$logdir/$_");
+	}
+	print STDERR '=====================' if $msg;
+	print STDERR $msg if $msg;
+}
 1;
 

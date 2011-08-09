@@ -37,41 +37,41 @@ use vars qw/@ISA/;
 use Common::SingletonClass;
 
 sub getSO{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = shift;
 	my ($rs, $stdout, $stderr);
 
-	fatal((caller(0))[3].': Not a Debian like system') if(execute('which apt-get', \$stdout, \$stderr));
+	fatal(': Not a Debian like system') if(execute('which apt-get', \$stdout, \$stderr));
 
 	if(execute("which lsb_release", \$stdout, \$stderr)){
 		$rs = execute('apt-get -y install lsb-release', \$stdout, \$stderr);
-		debug((caller(0))[3].": $stdout") if $stdout;
-		error((caller(0))[3].": a. $stderr") if $stderr;
+		debug("$stdout") if $stdout;
+		error("a. $stderr") if $stderr;
 		return $rs if $rs;
 	}
 
 	$rs = execute("lsb_release -si", \$stdout, \$stderr);
-	debug((caller(0))[3].": Distribution is $stdout") if $stdout;
-	error((caller(0))[3].": Can not guess operating system = $stderr") if $stderr;
+	debug("Distribution is $stdout") if $stdout;
+	error("Can not guess operating system = $stderr") if $stderr;
 	return $rs if $rs;
 	$self->{Distribution} = $stdout;
 
 	$rs = execute("lsb_release -sr", \$stdout, \$stderr);
-	debug((caller(0))[3].": Version is $stdout") if $stdout;
-	error((caller(0))[3].": Can not guess operating system = $stderr") if $stderr;
+	debug("Version is $stdout") if $stdout;
+	error("Can not guess operating system = $stderr") if $stderr;
 	return $rs if $rs;
 	$self->{Version} = $stdout;
 
 	$rs = execute("lsb_release -sc", \$stdout, \$stderr);
-	debug((caller(0))[3].": Codename is $stdout") if $stdout;
-	error((caller(0))[3].": Can not guess operating system = $stderr") if $stderr;
+	debug("Codename is $stdout") if $stdout;
+	error("Can not guess operating system = $stderr") if $stderr;
 	return $rs if $rs;
 	$self->{CodeName} = $stdout;
 
-	debug ((caller(0))[3].": Found $self->{Distribution} $self->{Version} $self->{CodeName}");
+	debug ("Found $self->{Distribution} $self->{Version} $self->{CodeName}");
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 

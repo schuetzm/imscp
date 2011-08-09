@@ -34,7 +34,7 @@
  */
 
 // GUI root directory absolute path
-$guiRootDir = '{GUI_ROOT_DIR}';
+$guiRootDir = '/var/www/imscp/gui';
 
 if(strpos($guiRootDir, 'GUI_ROOT_DIR') !== false) {
 	print 'The gui root directory is not defined in the ' . __FILE__ ." file.\n";

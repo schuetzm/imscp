@@ -702,6 +702,34 @@ CREATE TABLE IF NOT EXISTS `user_gui_props` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `user_system_prop`
+--
+
+CREATE TABLE IF NOT EXISTS `user_system_props` (
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `user_mailacc_limit` int(11) DEFAULT NULL,
+  `user_ftpacc_limit` int(11) DEFAULT NULL,
+  `user_traffic_limit` bigint(20) DEFAULT NULL,
+  `user_sqld_limit` int(11) DEFAULT NULL,
+  `user_sqlu_limit` int(11) DEFAULT NULL,
+  `user_alias_limit` int(11) DEFAULT NULL,
+  `user_subd_limit` int(11) DEFAULT NULL,
+  `user_ip_ids` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `user_disk_limit` bigint(20) unsigned DEFAULT NULL,
+  `user_disk_usage` bigint(20) unsigned DEFAULT NULL,
+  `user_ssh` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_ssl` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_php` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_cgi` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_backups` enum('full','sql','domain','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_dns` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user__software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  UNIQUE KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `web_software`
 --
 

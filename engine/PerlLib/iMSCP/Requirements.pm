@@ -73,7 +73,7 @@ sub test{
 	my $self = shift;
 	my $test = shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	if($self->can($test)){
 		$self->$test();
@@ -81,35 +81,35 @@ sub test{
 		fatal("Test $test is not available", 1);
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 }
 
 sub all{
 	my $self = shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	$self->user();
 	$self->_modules();
 	$self->_externalProgram();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 }
 
 sub user{
 	my $self = shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	fatal('Must run as root') if( $< != 0 );
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 }
 
 sub _modules{
 	my $self = shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my ($mod, $mod_missing) = (undef, undef);
 
@@ -131,7 +131,7 @@ sub _modules{
 		}
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	fatal("Modules [$mod_missing] WAS NOT FOUND in your system...") if ($mod_missing) ;
 }
@@ -140,7 +140,7 @@ sub _externalProgram{
 	my $self = shift;
 	my ($rv, $output, $error);
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 	fatal("Can't find which program") if(execute('which which', \$output, \$error));
 
 	for my $program (keys %{$self->{programs}}){
@@ -156,14 +156,14 @@ sub _externalProgram{
 		}
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 }
 
 sub _programVersions{
 	my ($self, $program, $regexp, $minversion) = @_;
 	my ($rv, $output, $error);
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	execute("$program", \$output, \$error) && fatal("Can't find $program");
 	if($regexp){
@@ -172,7 +172,7 @@ sub _programVersions{
 	}
 	my $result = $self->checkVersion($output, $minversion);
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$result;
 }
 

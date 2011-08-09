@@ -24,7 +24,7 @@
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
-package Servers::ftp::proftpd::installer;
+package Servers::ftpd::proftpd::installer;
 
 use strict;
 use warnings;
@@ -39,7 +39,7 @@ use vars qw/@ISA/;
 use Common::SingletonClass;
 
 sub _init{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 
@@ -53,12 +53,12 @@ sub _init{
 	tie %self::proftpdConfig, 'iMSCP::Config','fileName' => $conf;
 	tie %self::proftpdOldConfig, 'iMSCP::Config','fileName' => $oldConf, noerrors => 1 if -f $oldConf;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub install{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = shift;
 
@@ -75,15 +75,15 @@ sub install{
 
 	$self->logFiles() and return 1;
 
-	$self->oldEngineCompatibility() and return 1;
+	#$self->oldEngineCompatibility() and return 1;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 
 sub saveConf{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use iMSCP::File;
 
@@ -99,18 +99,18 @@ sub saveConf{
 	$file->mode(0640) and return 1;
 	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub logFiles{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 
 	## To fill ftp_traff.log file with something
 	if (! -d "$main::imscpConfig{'TRAFF_LOG_DIR'}/proftpd") {
-		debug((caller(0))[3].": Create dir $main::imscpConfig{'TRAFF_LOG_DIR'}/proftpd");
+		debug("Create dir $main::imscpConfig{'TRAFF_LOG_DIR'}/proftpd");
 		iMSCP::Dir->new(
 			dirname => "$main::imscpConfig{'TRAFF_LOG_DIR'}/proftpd"
 		)->make({
@@ -132,12 +132,12 @@ sub logFiles{
 			$main::imscpConfig{'ROOT_GROUP'}
 		) and return 1;
 	}
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub buildConf{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 
@@ -148,8 +148,8 @@ sub buildConf{
 		DATABASE_PORT	=> $main::imscpConfig{'DATABASE_PORT'},
 		DATABASE_USER	=> $self::proftpdConfig{'DATABASE_USER'},
 		DATABASE_PASS	=> $self::proftpdConfig{'DATABASE_PASSWORD'},
-		FTPD_MIN_UID	=> $main::imscpConfig{'APACHE_SUEXEC_MIN_UID'},
-		FTPD_MIN_GID	=> $main::imscpConfig{'APACHE_SUEXEC_MIN_GID'},
+		FTPD_MIN_UID	=> $self::proftpdConfig{'MIN_UID'},
+		FTPD_MIN_GID	=> $self::proftpdConfig{'MIN_GID'},
 		GUI_CERT_DIR	=> $main::imscpConfig{'GUI_CERT_DIR'},
 		SSL				=> ($main::imscpConfig{'SSL_ENABLED'} eq 'yes' ? '' : '#')
 	};
@@ -166,12 +166,12 @@ sub buildConf{
 	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
 	$file->copyFile($self::proftpdConfig{'FTPD_CONF_FILE'}) and return 1;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub setupDB{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 	my $connData;
@@ -218,7 +218,7 @@ sub setupDB{
 			$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
 	);
 	if ($err){
-		error((caller(0))[3].": $err");
+		error("$err");
 		return 1;
 	}
 
@@ -275,13 +275,13 @@ sub setupDB{
 		}
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub check_sql_connection{
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use iMSCP::Database;
 
@@ -290,12 +290,12 @@ sub check_sql_connection{
 	$database->set('DATABASE_USER',		$dbUser);
 	$database->set('DATABASE_PASSWORD',	$dbPass);
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	return $database->connect();
 }
 
 sub bkpConfFile{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use File::Basename;
 
@@ -313,12 +313,12 @@ sub bkpConfFile{
 		}
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub oldEngineCompatibility{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	for((
 		'CMD_FTPD',
@@ -329,7 +329,7 @@ sub oldEngineCompatibility{
 		$main::imscpConfig{$_} = $self::proftpdConfig{$_} if !$main::imscpConfig{$_} || $main::imscpConfig{$_} ne $self::proftpdConfig{$_};
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 

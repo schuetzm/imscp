@@ -37,26 +37,26 @@ use iMSCP::Debug;
 
 use vars qw/@ISA $AUTOLOAD/;
 
-@ISA = ('Common::SimpleClass', 'Common::SetterClass');
+@ISA = ('Common::SimpleClass');
 use Common::SimpleClass;
-use Common::SetterClass;
 
 
 sub _init{
 	my $self = shift;
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 	for my $conf (keys %{$self->{args}}){
 		$self->{$conf} = $self->{args}->{$conf};
 	}
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 }
 
 sub getFiles{
 	my $self = shift;
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 	if(! $self->{files}) {
 		$self->{files} = ();
 		$self->get();
+		$self->{fileType} = '' unless $self->{fileType};
 		foreach (@{$self->{dirContent}}){
 			push(
 				@{$self->{files}},
@@ -64,14 +64,15 @@ sub getFiles{
 			) if( -f "$self->{dirname}/$_" && $_ =~ m!$self->{fileType}$!);
 		}
 	}
-	debug((caller(0))[3].': Ending...');
-	return (wantarray ? @{$self->{files}} : join(' ', @{$self->{files}}));
+	debug('Ending...');
+	my @files = ($self->{files} ? @{$self->{files}} : ());
+	return (wantarray ? @files : join(' ', @files));
 }
 
 
 sub getDirs{
 	my $self = shift;
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 	if(! $self->{dirs}) {
 		$self->{dirs} = ();
 		$self->get();
@@ -80,7 +81,7 @@ sub getDirs{
 			push(@{$self->{dirs}}, $_) if( -d "$self->{dirname}/$_");
 		}
 	}
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	return (wantarray ? @{$self->{dirs}} : join(' ', @{$self->{dirs}}));
 }
 
@@ -88,20 +89,20 @@ sub get{
 
 	my $self = shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	if(! $self->{dirContent}) {
-		debug((caller(0))[3].": open directory $self->{dirname}");
+		debug("open directory $self->{dirname}");
 		$self->{dirContent} = ();
 		unless (opendir(DIRH, $self->{dirname})){
-			error((caller(0))[3].": Cannot open directory $self->{dirname}");
+			error("Cannot open directory $self->{dirname}");
 			return 1;
 		}
 		@{$self->{dirContent}} = readdir(DIRH);
 		closedir(DIRH);
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	return (wantarray ? $self->{dirContent} : join(" ", @{$self->{dirContent}}));
 }
@@ -112,15 +113,15 @@ sub mode{
 	my $mode	= shift;
 	my $dir		= shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
-	debug((caller(0))[3]. sprintf ": Change mode mode: %o for '".( $dir || $self->{dirname}) ."'", $mode);
+	debug( sprintf ": Change mode mode: %o for '".( $dir || $self->{dirname}) ."'", $mode);
 	unless (chmod($mode, $dir || $self->{dirname})){
-		error((caller(0))[3].": Cannot change permissions of file '".( $dir || $self->{dirname}) ."': $!");
+		error("Cannot change permissions of file '".( $dir || $self->{dirname}) ."': $!");
 		return 1;
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
@@ -131,7 +132,7 @@ sub owner{
 	my $group	= shift;
 	my $dir	= shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $uid = ($owner =~ /^\d+$/) ? $owner : getpwnam($owner);
 	$uid = -1 unless (defined $uid);
@@ -139,14 +140,14 @@ sub owner{
 	my $gid = ($group =~ /^\d+$/) ? $group : getgrnam($group);
 	$gid = -1 unless (defined $gid);
 
-	debug((caller(0))[3].": Change owner uid:$uid, gid:$gid for '".( $dir || $self->{dirname}) ."'");
+	debug("Change owner uid:$uid, gid:$gid for '".( $dir || $self->{dirname}) ."'");
 
 	unless (chown($uid, $gid,  $dir || $self->{dirname})){
-		error((caller(0))[3].": Cannot change owner of file '".( $dir || $self->{dirname}) ."': $!");
+		error("Cannot change owner of file '".( $dir || $self->{dirname}) ."': $!");
 		return 1;
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
@@ -157,18 +158,18 @@ sub make{
 
 	$option = {} if (ref $option ne 'HASH');
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	if (-e  $self->{dirname} && ! -d  $self->{dirname}) {
-		warning((caller(0))[3].": ' $self->{dirname}' exists as file ! removing file first...");
+		warning("' $self->{dirname}' exists as file ! removing file first...");
 		if(! unlink  $self->{dirname}){
-			error((caller(0))[3].": Could not unlink $self->{dirname}: $!");
+			error("Could not unlink $self->{dirname}: $!");
 			return 1;
 		 }
 	}
 
 	if (!(-e  $self->{dirname} && -d  $self->{dirname})) {
-		debug((caller(0))[3].": '$self->{dirname}' doesn't exists as directory! creating...");
+		debug("'$self->{dirname}' doesn't exists as directory! creating...");
 		my $err;
 
 		use File::Path;
@@ -178,10 +179,10 @@ sub make{
 			for my $diag (@$err) {
 				my ($dir, $message) = %$diag;
 				if ($dir eq '') {
-					error((caller(0))[3].": General error: $message");
+					error("General error: $message");
 				}
 				else {
-					error((caller(0))[3].": Problem creating $dir: $message");
+					error("Problem creating $dir: $message");
 				}
 			}
 			return 1;
@@ -201,7 +202,7 @@ sub make{
 		}
 
 	} else {
-		debug((caller(0))[3].": '$self->{dirname}' exists ! Setting its permissions...");
+		debug("'$self->{dirname}' exists ! Setting its permissions...");
 
 		if($option->{mode}){
 			return 1 if $self->mode( $option->{mode}, $self->{dirname});
@@ -216,7 +217,7 @@ sub make{
 
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	0;
 }
@@ -226,9 +227,9 @@ sub remove{
 	my $self	= shift;
 	my $err;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
-	debug((caller(0))[3].": $self->{dirname}");
+	debug("$self->{dirname}");
 
 	use File::Path 'remove_tree';
 
@@ -241,10 +242,10 @@ sub remove{
 			for my $diag (@$err) {
 				my ($dir, $message) = %$diag;
 				if ($dir eq '') {
-					error((caller(0))[3].": General error: $message");
+					error("General error: $message");
 				}
 				else {
-					error((caller(0))[3].": Problem deleting $dir: $message");
+					error("Problem deleting $dir: $message");
 				}
 			}
 			return 1;
@@ -252,7 +253,7 @@ sub remove{
 
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	0;
 }
@@ -264,13 +265,13 @@ sub rcopy{
 
 	$option = {} if(ref $option ne 'HASH');
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 	use iMSCP::File;
 
 	my $dh;
 
 	unless(opendir $dh, $self->{dirname}){
-		error((caller(0))[3].": Could not open dir '$self->{dirname}': $!");
+		error("Could not open dir '$self->{dirname}': $!");
 		return 1;
 	}
 
@@ -287,7 +288,7 @@ sub rcopy{
 				my $group	= (stat($source))[5];
 				$opts	= {user =>$user, mode =>$mode, group =>$group}
 			}
-			debug((caller(0))[3].": Copy directory $source to $destination");
+			debug("Copy directory $source to $destination");
 			my $dir=iMSCP::Dir->new();
 			$dir->{dirname} = $destination;
 			$dir->make($opts) and return 1;
@@ -296,7 +297,7 @@ sub rcopy{
 		} else {
 			if($option->{excludeFile}){error"$option->{excludeFile}";}
 			next if($option->{excludeFile} && ($source =~ /$option->{excludeFile}/));
-			debug((caller(0))[3]."Copy file $self->{dirname}/$entry to $destDir/$entry");
+			debug("Copy file $self->{dirname}/$entry to $destDir/$entry");
 			my $file=iMSCP::File->new();
 			$file->{filename} = $source;
 			$file->copyFile($destination, $option) and return 1;
@@ -304,7 +305,7 @@ sub rcopy{
 	}
 	closedir $dh;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 1;

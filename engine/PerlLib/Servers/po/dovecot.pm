@@ -36,7 +36,7 @@ use vars qw/@ISA/;
 use Common::SingletonClass;
 
 sub _init{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/dovecot";
@@ -47,46 +47,46 @@ sub _init{
 
 	tie %self::dovecotConfig, 'iMSCP::Config','fileName' => $conf;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub preinstall{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use Servers::po::dovecot::installer;
 
 	my $self	= shift;
 	my $rs		= Servers::po::dovecot::installer->new()->registerHooks();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub install{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use Servers::po::dovecot::installer;
 
 	my $self	= shift;
 	my $rs		= Servers::po::dovecot::installer->new()->install();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub postinst{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self	= shift;
 	my $rs		= $self->restart();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub restart{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = shift;
 	my ($rs, $stdout, $stderr);
@@ -95,11 +95,11 @@ sub restart{
 
 	# Reload config
 	$rs = execute("$self::dovecotConfig{'CMD_DOVECOT'} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 

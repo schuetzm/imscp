@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # i-MSCP - internet Multi Server Control Panel
 # Copyright (C) 2010 - 2011 by internet Multi Server Control Panel
 #
@@ -24,23 +22,14 @@
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
-package Common::SetterClass;
+BIND_MODE =
 
-use strict;
-use warnings;
+BIND_CONF_FILE = /etc/bind/named.conf
 
-sub prop{
-	my ($self, $var) = (shift, undef);
-	if (@_) {
-		$var = shift;
-		if(ref $var eq 'HASH'){
-			for (keys %{$var}){
-				$self->prop($_, $var->{$_});
-			}
-		}elsif (@_) { $self->{$var} = shift; }
-	}
-	return ( defined( $var ) && defined( $self->{$var} ) ) ? $self->{$var} : undef;
-}
+BIND_DB_DIR = /var/cache/bind
 
+CMD_NAMED = /etc/init.d/bind9
 
-1;
+PRIMARY_DNS =
+
+SECONDARY_DNS =

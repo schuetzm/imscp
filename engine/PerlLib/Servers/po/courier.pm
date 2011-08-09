@@ -36,31 +36,34 @@ use vars qw/@ISA/;
 use Common::SingletonClass;
 
 sub _init{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self		= shift;
 	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/courier";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
-	debug((caller(0))[3].': Ending...');
+	my $conf		= "$self->{cfgDir}/courier.data";
+	tie %self::courierConfig, 'iMSCP::Config','fileName' => $conf;
+
+	debug('Ending...');
 	0;
 }
 
 sub preinstall{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use Servers::po::courier::installer;
 
 	my $self	= shift;
 	my $rs		= Servers::po::courier::installer->new()->registerHooks();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub install{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use Servers::po::courier::installer;
 
@@ -68,12 +71,12 @@ sub install{
 	my $rs			= Servers::po::courier::installer->new()->install();
 	$self->restart();
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	$rs;
 }
 
 sub restart{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = shift;
 	my ($rs, $stdout, $stderr);
@@ -81,32 +84,32 @@ sub restart{
 	use iMSCP::Execute;
 
 	# Reload config
-	$rs = execute("$main::imscpConfig{'CMD_AUTHD'} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	$rs = execute("$self::courierConfig{'CMD_AUTHD'} restart", \$stdout, \$stderr);
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	$rs = execute("$main::imscpConfig{'CMD_POP'} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	$rs = execute("$self::courierConfig{'CMD_POP'} restart", \$stdout, \$stderr);
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	$rs = execute("$main::imscpConfig{'CMD_IMAP'} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	$rs = execute("$self::courierConfig{'CMD_IMAP'} restart", \$stdout, \$stderr);
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	$rs = execute("$main::imscpConfig{'CMD_POP_SSL'} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	$rs = execute("$self::courierConfig{'CMD_POP_SSL'} restart", \$stdout, \$stderr);
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	$rs = execute("$main::imscpConfig{'CMD_IMAP_SSL'} restart", \$stdout, \$stderr);
-	debug((caller(0))[3].": $stdout") if $stdout;
-	error((caller(0))[3].": $stderr") if $stderr;
+	$rs = execute("$self::courierConfig{'CMD_IMAP_SSL'} restart", \$stdout, \$stderr);
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 

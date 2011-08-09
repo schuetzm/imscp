@@ -40,7 +40,7 @@ use Common::SingletonClass;
 
 sub _init{
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = iMSCP::Stepper->new();
 
@@ -48,37 +48,37 @@ sub _init{
 	$self->{all}	= [];
 	$self->{last}	= '';
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	0;
 }
 
 sub startDetail{
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = iMSCP::Stepper->new();
 
 	push (@{$self->{all}}, $self->{last});
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub endDetail{
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = iMSCP::Stepper->new();
 
 	$self->{last} = pop (@{$self->{all}});
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 
 sub step{
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	my $self = iMSCP::Stepper->new();
 
@@ -117,7 +117,7 @@ sub step{
 		return $rs;
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 	0;
 }
 

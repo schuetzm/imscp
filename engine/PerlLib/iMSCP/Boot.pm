@@ -44,12 +44,13 @@ sub init{
 
 	$option = {} if ref $option ne 'HASH';
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	unless($self->{'loaded'}) {
-		debug((caller(0))[3].': Booting...');
+		debug('Booting...');
 
-		tie %main::imscpConfig, 'iMSCP::Config','fileName' => (($^O =~ /bsd$/ ? '/usr/local/etc/' : '/etc/').'imscp/imscp.conf');
+		tie %main::imscpConfig, 'iMSCP::Config','fileName' => (($^O =~ /bsd$/ ? '/usr/local/etc/' : '/etc/').'imscp/imscp.conf'), noerrors => 1;
+		verbose($main::imscpConfig{'DEBUG'});
 
 		iMSCP::Requirements->new()->test($self->{args}->{mode} && $self->{args}->{mode} eq 'setup' ? 'all' : 'user');
 
@@ -70,13 +71,13 @@ sub init{
 				$database->set('DATABASE_USER', $main::imscpConfig{'DATABASE_USER'});
 				$database->set('DATABASE_PASSWORD', $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}));
 				my $rs = $database->connect();
-				fatal((caller(0))[3].": $rs") if $rs;
+				fatal(": $rs") if $rs;
 		}
 
 		$self->{'loaded'} = 1;
 	}
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	0;
 }
@@ -85,14 +86,14 @@ sub lock{
 	my $self	= shift;
 	my $lock	= shift || $main::imscpConfig{MR_LOCK_FILE};
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	fatal('Unable to open lock file!') if(!open($self->{lock}, '>', $lock));
 
 	use Fcntl ":flock";
 	fatal('Unable to acquire global lock!') if(!flock($self->{lock}, LOCK_EX));
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	0;
 }
@@ -101,19 +102,19 @@ sub unlock{
 	my $self	= shift;
 	my $lock	= shift;
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use Fcntl ":flock";
 	fatal('Unable to release global lock!') if(!flock($self->{lock}, LOCK_UN));
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 	0;
 }
 
 sub genKey{
 
-	debug((caller(0))[3].': Starting...');
+	debug('Starting...');
 
 	use iMSCP::File;
 
@@ -144,7 +145,7 @@ sub genKey{
 	iMSCP::Crypt->new()->set('key', $main::imscpDBKey);
 	iMSCP::Crypt->new()->set('iv', $main::imscpDBiv);
 
-	debug((caller(0))[3].': Ending...');
+	debug('Ending...');
 
 }
 
