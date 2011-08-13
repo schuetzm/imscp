@@ -70,14 +70,14 @@ sub install{
 	$rs;
 }
 
-sub postinst{
+sub postinstall{
 	debug('Starting...');
 
 	my $self	= shift;
-	my $rs		= $self->restart();
+	$self->{restart} = 'yes';
 
 	debug('Ending...');
-	$rs;
+	0;
 }
 
 sub setGuiPermissions{
@@ -247,7 +247,13 @@ sub buildConf($ $ $){
 	$self->{tplValues}->{$_} = $self->{data}->{$_} foreach(keys %{$self->{data}});
 	warning('Nothing to do...') unless keys %{$self->{tplValues}} > 0;
 
-	foreach(@{$self->{preCalls}->{buildConf}}){
+	my @calls = exists $self->{preCalls}->{buildConf}
+				?
+				(@{$self->{preCalls}->{buildConf}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl, $filename);};
 		error("$@") if ($@);
 		return undef if $@;
@@ -259,7 +265,13 @@ sub buildConf($ $ $){
 	return undef if (!$cfgTpl);
 
 	#avoid running same hook again
-	foreach (@{$self->{postCalls}->{buildConf}}){
+	@calls = exists $self->{postCalls}->{buildConf}
+				?
+				(@{$self->{postCalls}->{buildConf}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl, $filename);};
 		error("$@") if ($@);
 		return undef if $@;
@@ -283,7 +295,6 @@ sub buildConfFile{
 	$option = {} if ref $option ne 'HASH';
 
 	my ($filename, $directories, $suffix) = fileparse($file);
-	debug("file:$file|filename:$filename|directories:$directories|suffix:$suffix");
 
 	$file = "$self->{cfgDir}/$file" unless -d $directories && $directories ne './';
 
@@ -292,7 +303,13 @@ sub buildConfFile{
 	error("Empty config template $file...") unless $cfgTpl;
 	return 1 unless $cfgTpl;
 
-	foreach(@{$self->{preCalls}->{buildConfFile}}){
+	my @calls = exists $self->{preCalls}->{buildConfFile}
+				?
+				(@{$self->{preCalls}->{buildConfFile}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl, "$filename$suffix");};
 		error("$@") if ($@);
 		return 1 if $@;
@@ -302,7 +319,13 @@ sub buildConfFile{
 	$cfgTpl = $self->buildConf($cfgTpl, "$filename$suffix");
 	return 1 if (!$cfgTpl);
 
-	foreach (@{$self->{postCalls}->{buildConfFile}}){
+	@calls = exists $self->{postCalls}->{buildConfFile}
+				?
+				(@{$self->{postCalls}->{buildConfFile}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl, "$filename$suffix");};
 		error("$@") if ($@);
 		return 1 if $@;
@@ -400,7 +423,6 @@ sub addDomain{
 		error("$errmsg->{$_}") unless $data->{$_};
 		return 1 unless $data->{$_};
 	}
-
 
 	my $rs = $self->addDomainCfg($data);
 	return $rs if $rs;
@@ -678,6 +700,52 @@ sub removeSection{
 
 	debug('Ending...');
 	$data;
+}
+
+sub delDomain{
+	debug('Starting...');
+
+	my $self	= shift;
+	my $data = shift;
+
+	error('You must supply domain name!') unless $data->{DMN_NAME};
+	return 1 unless $data->{DMN_NAME};
+
+	my $rs = 0;
+
+	$rs |= $self->disableSite("$data->{DMN_NAME}.conf");
+
+	for(
+		"$self::apacheConfig{APACHE_SITES_DIR}/$data->{DMN_NAME}.conf",
+		"$self::apacheConfig{APACHE_CUSTOM_SITES_CONFIG_DIR}/$data->{DMN_NAME}.conf",
+		"$self->{wrkDir}/$data->{DMN_NAME}.conf",
+	){
+		$rs |= iMSCP::File->new(filename => $_)->delFile() if -f $_;
+	}
+
+	my $hDir		= "$data->{WWW_DIR}/$data->{MOUNT_POINT}/$data->{DMN_NAME}";
+	$hDir			=~ s~/+~/~g;
+
+	for(
+		"$self::apacheConfig{PHP_STARTER_DIR}/$data->{DMN_NAME}",
+		"$hDir",
+	){
+		$rs |= iMSCP::Dir->new(dirname => $_)->remove() if -d $_;
+	}
+
+	debug('Ending...');
+	$rs;
+}
+
+sub postDelDmn{
+	debug('Starting...');
+
+	my $self			= shift;
+	$self->{restart}	= 'yes';
+	delete $self->{data};
+
+	debug('Ending...');
+	0;
 }
 
 sub DESTROY{

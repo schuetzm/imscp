@@ -290,6 +290,7 @@ sub fastcgiConf {
 			SYSTEM_USER_MIN_UID	=> $main::imscpConfig{'SYSTEM_USER_MIN_UID'},
 			PHP_VERSION => $main::imscpConfig{'PHP_VERSION'}
 		});
+
 		$httpd->buildConfFile("$self->{cfgDir}/${_}_imscp.conf");
 		my $file = iMSCP::File->new(filename => "$self->{wrkDir}/${_}_imscp.conf");
 		$file->copyFile($self::apacheConfig{'APACHE_MODS_DIR'}) and return 1;

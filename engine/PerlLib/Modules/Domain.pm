@@ -20,7 +20,7 @@
 # @category		i-MSCP
 # @copyright	2010 - 2011 by i-MSCP | http://i-mscp.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id: SystemGroup.pm 5083 2011-08-04 07:05:23Z sci2tech $
+# @version		SVN: $Id$
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
@@ -53,6 +53,8 @@ sub loadData{
 	my $self	= shift;
 	my $data	= shift;
 
+	return 1 if !$data->{$self->{dmnId}};
+
 	$self->{$_} = $data->{$self->{dmnId}}->{$_} for keys %{$data->{$self->{dmnId}}};
 
 	debug('Ending...');
@@ -66,11 +68,12 @@ sub process{
 	$self->{dmnId}	= shift;
 	my $data		= shift;
 
-	my $rs = $self->loadData($data);
-	return $rs if $rs;
+	#use Data::Dumper;
+	#error(Dumper($self->{dmnId}));
 
-	use Data::Dumper;
-	warning(Dumper($self));
+	my $rs = $self->loadData($data);
+	#return $rs if $rs;
+	#error(Dumper($self));
 
 	my @sql;
 
@@ -93,16 +96,11 @@ sub process{
 		return $rs if $rs;
 
 		@sql = ("DELETE FROM `domain` WHERE `domain_id` = ?", $self->{domain_id});
-		@sql = (
-			"UPDATE `domain` SET `domain_status` = ? WHERE `domain_id` = ?",
-			'toadd',
-			$self->{domain_id}
-		);
 	}
 
-	my $database = iMSCP::Database->factory();
-	my $rdata = $database->doQuery('update', @sql);
-	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
+	#my $database = iMSCP::Database->factory();
+	#my $rdata = $database->doQuery('update', @sql);
+	#error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	debug('Ending...');
 	0;
@@ -115,7 +113,7 @@ sub add{
 	$self->{mode}	= 'add';
 	my $rs;
 
-	$rs = $self->process();
+	$rs = $self->prepareAdd();
 
 	debug('Ending...');
 	0;
@@ -128,19 +126,32 @@ sub delete{
 	$self->{mode}	= 'delete';
 	my $rs;
 
-	$rs = $self->process();
+	for(qw/buildDNSData buildHTTPData buildMTAData/){
+		$rs = eval "\$self->$_();";
+		error("$@") if($@);
+		return $rs if $rs;
+	}
+
+	@{$self->{Servers}}	= iMSCP::Dir->new(dirname => "$FindBin::Bin/PerlLib/Servers")->getFiles();
+	@{$self->{Addons}}	= iMSCP::Dir->new(dirname => "$FindBin::Bin/PerlLib/Addons")->getFiles();
+
+	$rs |= $self->runStep('preDelDmn',	'Servers');
+	$rs |= $self->runStep('preDelDmn',	'Addons');
+	$rs |= $self->runStep('delDomain', 	'Servers');
+	$rs |= $self->runStep('delDomain',	'Addons');
+	$rs |= $self->runStep('postDelDmn',	'Servers');
+	$rs |= $self->runStep('postDelDmn',	'Addons');
 
 	debug('Ending...');
 	0;
 }
 
-sub prepare{
+sub prepareAdd{
 	debug('Starting...');
 
 	use  iMSCP::Dir;
 
 	my $self		= shift;
-
 	my $rs;
 
 	for(qw/buildDNSData buildHTTPData buildMTAData/){
@@ -224,16 +235,22 @@ sub buildMTAData{
 	debug('Starting...');
 
 	my $self	= shift;
-	#my $groupName	=
-	#my $userName	=
-			#$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			#($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
-	if( $self->{mail_on_domain} > 0 || $self->{mail_limit} >=0 ){
+	if(
+		$self->{mode} ne 'add'
+		||
+		defined $self->{mail_on_domain} && $self->{mail_on_domain} > 0
+		||
+		defined $self->{mail_limit} && $self->{mail_limit} >=0
+	){
 		$self->{mta} = {
 			DMN_NAME	=> $self->{domain_name},
-			DMN_ID		=> $self->{domain_id}
 		};
+	} else {
+		use Data::Dumper;
+		error(Dumper($self->{mode} ne 'add').'a');
+		error(Dumper(defined $self->{mail_on_domain} && $self->{mail_on_domain} > 0).'a');
+		fatal(Dumper(defined $self->{mail_limit} && $self->{mail_limit} >=0 ).'a');
 	}
 
 	debug('Ending...');
@@ -246,29 +263,29 @@ sub buildDNSData{
 	use iMSCP::Database;
 
 	my $self	= shift;
-	my $sql = "
-		SELECT
-			*
-		FROM
-			`domain_dns`
-		WHERE
-			`domain_dns`.`alias_id` = ?
-		AND
-			`domain_dns`.`domain_id` = ?
-		ORDER BY
-			`domain_dns_id`
-	";
+	if($self->{mode} eq 'add'){
+		my $sql = "
+			SELECT
+				*
+			FROM
+				`domain_dns`
+			WHERE
+				`domain_dns`.`alias_id` = ?
+			AND
+				`domain_dns`.`domain_id` = ?
+			ORDER BY
+				`domain_dns_id`
+		";
 
-	my $database = iMSCP::Database->factory();
-	my $rdata = $database->doQuery('domain_dns_id', $sql, 0, $self->{domain_id});
-	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
+		my $database = iMSCP::Database->factory();
+		my $rdata = $database->doQuery('domain_dns_id', $sql, 0, $self->{domain_id});
+		error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
-	$self->{named} = {
-		DMN_NAME	=> $self->{domain_name},
-		DMN_IP		=> $self->{ip_number},
-	};
+		$self->{named}->{DMN_CUSTOM}->{$_} = $rdata->{$_} for keys %$rdata;
+	}
 
-	$self->{named}->{DMN_CUSTOM}->{$_} = $rdata->{$_} for keys %$rdata;
+	$self->{named}->{DMN_NAME}	= $self->{domain_name};
+	$self->{named}->{DMN_IP}	= $self->{ip_number};
 
 	debug('Ending...');
 	0;

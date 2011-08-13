@@ -309,7 +309,13 @@ sub buildMaster{
 	my $cfgTpl	= $file->get();
 	return 1 if (!$cfgTpl);
 
-	foreach(@{$self->{preCalls}->{buildConf}}){
+	my @calls = exists $self->{preCalls}->{buildConf}
+				?
+				(@{$self->{preCalls}->{buildConf}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl);};
 		error("$@") if ($@);
 		return 1 if $@;
@@ -327,7 +333,13 @@ sub buildMaster{
 	);
 	return 1 if (!$cfgTpl);
 
-	foreach(@{$self->{postCalls}->{buildConf}}){
+	@calls = exists $self->{postCalls}->{buildConf}
+				?
+				(@{$self->{postCalls}->{buildConf}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl);};
 		error("$@") if ($@);
 		return 1 if $@;
@@ -361,25 +373,24 @@ sub buildMain{
 	my $cfgTpl	= $file->get();
 	return 1 if (!$cfgTpl);
 
-	foreach(@{$self->{preCalls}->{buildConf}}){
-		eval {$cfgTpl = &$_($cfgTpl);};
-		error("$@") if ($@);
-		return 1 if $@;
-	}
-
 	# Building the file
 	my $hostname = $main::imscpConfig{'SERVER_HOSTNAME'};
 	my $gid	= getgrnam($self::postfixConfig{'MTA_MAILBOX_GID_NAME'});
 	my $uid	= getpwnam($self::postfixConfig{'MTA_MAILBOX_UID_NAME'});
 
-	foreach(@{$self->{preCalls}->{buildConf}}){
+	my @calls = exists $self->{preCalls}->{buildConf}
+				?
+				(@{$self->{preCalls}->{buildConf}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl);};
 		error("$@") if ($@);
 		return 1 if $@;
 	}
 	#avoid running same hook again
 	delete $self->{preCalls}->{buildConf};
-
 
 	$cfgTpl = iMSCP::Templator::process(
 		{
@@ -404,7 +415,13 @@ sub buildMain{
 	);
 	return 1 if (!$cfgTpl);
 
-	foreach(@{$self->{postCalls}->{buildConf}}){
+	@calls = exists $self->{postCalls}->{buildConf}
+				?
+				(@{$self->{postCalls}->{buildConf}})
+				:
+				()
+	; # is a reason for this!!! Simplify code and you have infinite loop
+	foreach(@calls){
 		eval {$cfgTpl = &$_($cfgTpl);};
 		error("$@") if ($@);
 		return 1 if $@;

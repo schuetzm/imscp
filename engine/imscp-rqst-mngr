@@ -86,6 +86,7 @@ sub mngr_engine_process{
 
 	my $i = 1;
 	my $time = time;
+	my $total = scalar keys %$rdata;
 
 	foreach (keys %$rdata) {
 		my $id		= $rdata->{$_}->{id};
@@ -93,7 +94,8 @@ sub mngr_engine_process{
 		my $status	= $rdata->{$_}->{status};
 
 		debug("processing $id, $name, $status.");
-		print("processing $id, $name, $status.\n");
+		print("processing $id, $name, $status. ($i of $total: remaining ".($total -$i).")\n");
+		$i++;
 
 		newDebug("${type}_mngr_$name.log");
 
@@ -128,9 +130,9 @@ sub engine {
 		WHERE
 			`admin_status`
 		IN (
-			'add',
-			'enable',
-			'disable',
+			'toadd',
+			'toenable',
+			'todisable',
 			'delete'
 		)
 		AND
@@ -176,10 +178,11 @@ sub engine {
 		WHERE
 			`domain_status`
 		IN (
-			'add',
+			'toadd',
+			'change',
 			'restore',
-			'enable',
-			'disable',
+			'toenable',
+			'todisable',
 			'delete'
 		)
 	";

@@ -166,18 +166,14 @@ sub addDomain{
 	my $self = shift;
 	my $data = shift;
 
-	error(Dumper($data).'');
-
-	foreach(keys %{$errmsg}){
-		error("$errmsg->{$_}") unless $data->{$_};
-		return 1 unless $data->{$_};
-	}
+	error('You must supply domain name!') unless $data->{DMN_NAME};
+	return 1 unless $data->{DMN_NAME};
 
 	my $entry = "$data->{DMN_NAME}\t\t\tvdmn_entry\n";
 
 	iMSCP::File->new(
 		filename => $self->{MTA_VIRTUAL_DMN_HASH}
-	)->copyFile( "$self->{bkpDir}/domains".time ) and return 1;
+	)->copyFile( "$self->{bkpDir}/domains.".time ) and return 1;
 
 	my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/domains");
 	my $content	= $file->get() || return 1;
@@ -198,4 +194,37 @@ sub addDomain{
 	0;
 }
 
+sub delDomain{
+	debug('Starting...');
+
+	my $self = shift;
+	my $data = shift;
+
+	error('You must supply domain name!') unless $data->{DMN_NAME};
+	return 1 unless $data->{DMN_NAME};
+
+	my $entry = "$data->{DMN_NAME}\t\t\tvdmn_entry\n";
+
+	iMSCP::File->new(
+		filename => $self->{MTA_VIRTUAL_DMN_HASH}
+	)->copyFile( "$self->{bkpDir}/domains.".time ) and return 1;
+
+	my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/domains");
+	my $content	= $file->get() || return 1;
+
+	$content =~ s/$entry//mg;
+
+	$file->set($content);
+	$file->save() and return 1;
+	$file->mode(0644) and return 1;
+	$file->owner(
+			$main::imscpConfig{'ROOT_USER'},
+			$main::imscpConfig{'ROOT_GROUP'}
+	) and return 1;
+	$file->copyFile( $self->{MTA_VIRTUAL_DMN_HASH} ) and return 1;
+
+
+	debug('Ending...');
+	0;
+}
 1;

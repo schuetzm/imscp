@@ -295,6 +295,43 @@ class iMSCP_Update_Database extends iMSCP_Update
 	}
 
 	/**
+	 * Checks if a column exists in a database table and if not, execute a query to
+	 * add that column.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since r4509
+	 * @param string $table Database table name
+	 * @param string $column Column to be added in the database table
+	 * @param string $query Query to create column
+	 * @return string Query to be executed
+	 */
+	protected function dropColumn($table, $column){
+		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+		return "
+			DROP PROCEDURE IF EXISTS test;
+			CREATE PROCEDURE test()
+			BEGIN
+				IF EXISTS (
+					SELECT
+						COLUMN_NAME
+					FROM
+						information_schema.COLUMNS
+					WHERE
+						TABLE_NAME = '$table'
+					AND
+						COLUMN_NAME = '$column'
+					AND
+						table_schema = '$dbName'
+				) THEN
+					ALTER TABLE `$table` DROP column `$column`;
+				END IF;
+			END;
+			CALL test();
+			DROP PROCEDURE IF EXISTS test;
+		";
+	}
+
+	/**
 	 * Catch any database update that were removed.
 	 *
 	 * @paramstring $updateMethod Database method name
@@ -942,6 +979,35 @@ class iMSCP_Update_Database extends iMSCP_Update
 		";
 	}
 
+	/**
+	 * Add user status column.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_76(){
+		return "
+			DROP PROCEDURE IF EXISTS schema_change;
+				CREATE PROCEDURE schema_change()
+				BEGIN
+					IF NOT EXISTS (
+						SELECT
+							COLUMN_NAME
+						FROM
+							information_schema.COLUMNS
+						WHERE
+							TABLE_NAME = 'admin'
+						AND
+							COLUMN_NAME = 'admin_status'
+					) THEN
+						ALTER TABLE `admin` ADD `admin_status` VARCHAR( 15 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd';
+					END IF;
+				END;
+				CALL schema_change();
+			DROP PROCEDURE IF EXITST schema_change;
+		";
+	}
 
 	/**
 	 * Create table to move user props to separate table.
@@ -959,7 +1025,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 				`user_traffic_limit` bigint(20) DEFAULT NULL,
 				`user_sqld_limit` int(11) DEFAULT NULL,
 				`user_sqlu_limit` int(11) DEFAULT NULL,
-				`user_alias_limit` int(11) DEFAULT NULL,
+				`user_domain_limit` int(11) DEFAULT NULL,
 				`user_subd_limit` int(11) DEFAULT NULL,
 				`user_ip_ids` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
 				`user_disk_limit` bigint(20) unsigned DEFAULT NULL,
@@ -990,7 +1056,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 			(
 				`user_id`, `user_mailacc_limit`, `user_ftpacc_limit`,
 				`user_traffic_limit`, `user_sqld_limit`, `user_sqlu_limit`,
-				`user_alias_limit`, `user_subd_limit`, `user_ip_ids`,
+				`user_domain_limit`, `user_subd_limit`, `user_ip_ids`,
 				`user_disk_limit`, `user_disk_usage`, `user_php`, `user_cgi`,
 				`user_backups`, `user_dns`, `user__software_allowed`
 			)
@@ -1013,53 +1079,28 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @return string SQL Statement
 	 */
 	protected function _databaseUpdate_79(){
-
 		$sqlUpd = array();
-
 		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
-
-		$sql = "
-		DROP PROCEDURE IF EXISTS test;
-			CREATE PROCEDURE test()
-			BEGIN
-				IF EXISTS(
-					SELECT
-						*
-					FROM
-						information_schema.COLUMNS
-					WHERE
-						column_name='%s'
-					AND
-						table_name='domain'
-					AND
-						table_schema='$dbName'
-				) THEN
-					ALTER TABLE `domain` DROP `%s`;
-				END IF;
-			END;
-			CALL test();
-			DROP PROCEDURE IF EXISTS test;
-		";
-
-		foreach(array(
-			'domain_gid',
-			'domain_uid',
-			'domain_mailacc_limit',
-			'domain_ftpacc_limit',
-			'domain_traffic_limit',
-			'domain_sqld_limit',
-			'domain_sqlu_limit',
-			'domain_alias_limit',
-			'domain_subd_limit',
-			'domain_disk_limit',
-			'domain_disk_usage',
-			'domain_php',
-			'domain_cgi',
-			'allowbackup',
-			'domain_dns',
-			'domain_software_allowed'
-		) as $column){
-			$sqlUpd[] = sprintf($sql, $column, $column);
+		$columns = array(
+			'domain_gid'				=> 'domain',
+			'domain_uid'				=> 'domain',
+			'domain_mailacc_limit'		=> 'domain',
+			'domain_ftpacc_limit'		=> 'domain',
+			'domain_traffic_limit'		=> 'domain',
+			'domain_sqld_limit'			=> 'domain',
+			'domain_sqlu_limit'			=> 'domain',
+			'domain_alias_limit'		=> 'domain',
+			'domain_subd_limit'			=> 'domain',
+			'domain_disk_limit'			=> 'domain',
+			'domain_disk_usage'			=> 'domain',
+			'domain_php'				=> 'domain',
+			'domain_cgi'				=> 'domain',
+			'allowbackup'				=> 'domain',
+			'domain_dns'				=> 'domain',
+			'domain_software_allowed'	=> 'domain'
+		);
+		foreach($columns as $column => $table){
+			$sqlUpd[] = self::secureDropColumnTable($table, $column);
 		}
 		return $sqlUpd;
 	}
@@ -1072,6 +1113,20 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @return string SQL Statement
 	 */
 	protected function _databaseUpdate_80(){
+		$query = "
+			ALTER TABLE `domain` ADD `domain_mount_point` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '/';
+		";
+		return self::secureAddColumnTable('domain', 'domain_mount_point', $query);
+	}
+
+	/**
+	 * Add user status column.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_81(){
 
 		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
 
@@ -1087,46 +1142,63 @@ class iMSCP_Update_Database extends iMSCP_Update
 						WHERE
 							TABLE_NAME = 'domain'
 						AND
-							COLUMN_NAME = 'domain_mount_point'
+							COLUMN_NAME = 'url_forward'
 						AND
 							table_schema='$dbName'
 					) THEN
-						ALTER TABLE `domain` ADD `domain_mount_point` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '/';
+						ALTER TABLE `domain` ADD  `url_forward` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no';
 					END IF;
 				END;
 				CALL schema_change();
 			DROP PROCEDURE IF EXITST schema_change;
 		";
 	}
-
 	/**
-	 * Add user status column.
+	 * Move alias to domain table.
 	 *
 	 * @author Daniel Andreca <sci2tech@gmail.com>
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_81(){
-		return "
-			DROP PROCEDURE IF EXISTS schema_change;
-				CREATE PROCEDURE schema_change()
-				BEGIN
-					IF NOT EXISTS (
-						SELECT
-							COLUMN_NAME
-						FROM
-							information_schema.COLUMNS
-						WHERE
-							TABLE_NAME = 'admin'
-						AND
-							COLUMN_NAME = 'admin_status'
-					) THEN
-						ALTER TABLE `admin` ADD `admin_status` VARCHAR( 15 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd';
-					END IF;
-				END;
-				CALL schema_change();
-			DROP PROCEDURE IF EXITST schema_change;
-		";
+	protected function _databaseUpdate_82(){
+		return;
+		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+
+		return array("
+			REPLACE INTO
+				`domain`
+			(
+				`domain_name`,
+				`domain_created`,
+				`domain_expires`,
+				`domain_last_modified`,
+				`domain_status`,
+				`domain_mount_point`,
+				`domain_admin_id`,
+				`domain_created_id`,
+				`domain_ip_id`,
+				`url_forward`
+			)
+			SELECT
+				`t1`.`alias_name` AS `domain_name`,
+				'0' AS `domain_created`,
+				'0' AS `domain_expires`,
+				'0' AS `domain_last_modified`,
+				'toadd' AS `domain_status`,
+				`t1`.`alias_mount` AS `domain_mount_point`,
+				`t2`.`domain_admin_id`,
+				`t2`.`domain_created_id`,
+				`t2`.`domain_ip_id`,
+				`t1`.`url_forward`
+			FROM
+				`domain_aliasses` AS `t1`
+			LEFT JOIN
+				`domain` AS `t2`
+			ON
+				`t1`.`domain_id` = `t2`.`domain_id`
+		", "UPDATE DOMAIN SET `url_forward` = 'no' WHERE `url_forward` IS NULL",
+		"DROP TABLE IF EXISTS `domain_aliasses`"
+		);
 	}
 
 }

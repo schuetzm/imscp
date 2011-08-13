@@ -37,7 +37,7 @@ sub start_dmn_mngr{
 
 	my $domain = Modules::Domain->new();
 
-	my $rs = $domain->process($dmnId, shift);
+	my $rs = $domain->process($dmnId, @_);
 	return $rs if $rs;
 
 	debug('Ending...');

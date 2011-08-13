@@ -1,73 +1,112 @@
-#!/bin/sh
+#!/usr/bin/perl
 
-# i-MSCP a internet Multi Server Control Panel
+# i-MSCP - internet Multi Server Control Panel
+# Copyright (C) 2010 by internet Multi Server Control Panel
 #
-# Copyright (C) 2001-2006 by moleSoftware GmbH - http://www.molesoftware.com
-# Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
-# Copyright (C) 2010 by internet Multi Server Control Panel - http://i-mscp.net
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
 #
-# Version: $Id$
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-# The contents of this file are subject to the Mozilla Public License
-# Version 1.1 (the "License"); you may not use this file except in
-# compliance with the License. You may obtain a copy of the License at
-# http://www.mozilla.org/MPL/
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# Software distributed under the License is distributed on an "AS IS"
-# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-# License for the specific language governing rights and limitations
-# under the License.
-#
-# The Original Code is "VHCS - Virtual Hosting Control System".
-#
-# The Initial Developer of the Original Code is moleSoftware GmbH.
-# Portions created by Initial Developer are Copyright (C) 2001-2006
-# by moleSoftware GmbH. All Rights Reserved.
-#
-# Portions created by the ispCP Team are Copyright (C) 2006-2010 by
-# isp Control Panel. All Rights Reserved.
-#
-# Portions created by the i-MSCP Team are Copyright (C) 2010 by
-# internet Multi Server Control Panel. All Rights Reserved.
-#
-# The i-MSCP Home Page is:
-#
-#    http://i-mscp.net
-#
+# @category		i-MSCP
+# @copyright	2010 - 2011 by i-MSCP | http://i-mscp.net
+# @author		Daniel Andreca <sci2tech@gmail.com>
+# @version		SVN: $Id$
+# @link			http://i-mscp.net i-MSCP Home Site
+# @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
-SELFDIR=$(dirname "$0")
-. $SELFDIR/imscp-permission-functions.sh
+use strict;
+use warnings;
 
-echo -n "	Setting Engine Permissions: ";
-if [ $DEBUG -eq 1 ]; then
-    echo	"";
-fi
+use FindBin;
+use lib "$FindBin::Bin/..";
+use lib "$FindBin::Bin/../PerlLib";
+use lib "$FindBin::Bin/../PerlVendor";
 
-# imscp.conf must be world readable because user "vmail" needs to access it.
-if [ -f /usr/local/etc/imscp/imscp.conf ]; then
-	set_permissions "/usr/local/etc/imscp/imscp.conf" \
-		$ROOT_USER $ROOT_GROUP 0644
-else
-	set_permissions "/etc/imscp/imscp.conf" $ROOT_USER $ROOT_GROUP 0644
-fi
+use iMSCP::Debug;
+use iMSCP::Boot;
 
-set_permissions "$CONF_DIR/imscp-db-keys" $ROOT_USER $MASTER_GROUP 0640
 
-# Only root can run engine scripts
-recursive_set_permissions "$ROOT_DIR/engine" $ROOT_USER $ROOT_GROUP 0700 0700
+iMSCP::Debug->newDebug('imscp-set-engine-permissions.log');
 
-# Engine folder must be world-readable because "vmail" user must be able
-# to access its "messenger" subfolder.
-set_permissions "$ROOT_DIR/engine" $ROOT_USER $ROOT_GROUP 0755
+sub start_up {
 
-# Messenger script is run by user "vmail".
-recursive_set_permissions "$ROOT_DIR/engine/messenger" \
-	$MTA_MAILBOX_UID_NAME $MTA_MAILBOX_GID_NAME 0750 0550
-recursive_set_permissions "$LOG_DIR/imscp-arpl-msgr" \
-	$MTA_MAILBOX_UID_NAME $MTA_MAILBOX_GID_NAME 0750 0640
+	debug('Starting...');
 
-# TODO: Fixing fcgid permisions set before 1.0.5
+	umask(027);
+	iMSCP::Boot->new()->init({nolock => 'yes', nodatabase => 'yes'});
 
-echo " done";
+	debug('Ending...');
+	0;
+}
 
-exit 0
+sub shut_down {
+
+	debug('Starting...');
+	use iMSCP::Mail;
+
+	my @warnings	= getMessageByType('WARNING');
+	my @errors		= getMessageByType('ERROR');
+
+	my $msg	 = "\nWARNINGS:\n"		. join("\n", @warnings)	. "\n" if @warnings > 0;
+	$msg	.= "\nERRORS:\n"		. join("\n", @errors)	. "\n" if @errors > 0;
+	iMSCP::Mail->new()->errmsg($msg) if ($msg);
+
+	debug('Ending...');
+	0;
+}
+
+sub set_permissions {
+	debug('Starting...');
+
+	use iMSCP::Rights;
+
+	my ($rs, $server, $file, $class);
+	my $rootUName	= $main::imscpConfig{'ROOT_USER'};
+	my $rootGName	= $main::imscpConfig{'ROOT_GROUP'};
+	my $masterUName	= $main::imscpConfig{'MASTER_GROUP'};
+	my $CONF_DIR	= $main::imscpConfig{'CONF_DIR'};
+	my $ROOT_DIR	= $main::imscpConfig{'ROOT_DIR'};
+
+	$rs |= setRights("$CONF_DIR/imscp.conf", {user => $rootUName, group => $rootGName, mode => '0644'});
+	$rs |= setRights("$CONF_DIR/imscp-db-keys", {user => $rootUName, group => $masterUName, mode => '0640'});
+	$rs |= setRights("$ROOT_DIR/engine", {user => $rootUName, group => $rootGName, mode => '0700', recursive => 'yes'});
+	$rs |= setRights("$ROOT_DIR/engine", {user => $rootUName, group => $rootGName, mode => '0755'});
+
+	for(qw/named ftpd mta po httpd/){
+		$file	= "Servers/$_.pm";
+		$class	= "Servers::$_";
+		require $file;
+		$server	= $class->factory();
+		$rs |= $server->setEnginePermissions() if($server->can('setEnginePermissions'));
+	}
+
+	debug('Ending...');
+	$rs;
+}
+
+exit 1 if start_up();
+
+exit 1 if set_permissions();
+
+exit 1 if shut_down();
+
+exit 0;
+
+END{
+	my $message = getMessage();
+	if($main::imscpConfig{LOG_DIR} && -d $main::imscpConfig{LOG_DIR}){
+		open(F, '>', "$main::imscpConfig{'LOG_DIR'}/imscp-set-engine-permissions.log") or fatal("Error: Can't open file '$main::imscpConfig{'LOG_DIR'}/imscp-set-engine-permissions.log' for writing: $!");
+		print F $message;
+		close F;
+	}
+}

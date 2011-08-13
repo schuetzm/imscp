@@ -445,6 +445,112 @@ sub addDmnConfig{
 	0;
 }
 
+sub delDomain{
+	debug('Starting...');
+
+	my $self	= shift;
+	my $option	= shift;
+	my $rs;
+
+	$option = {} if ref $option ne 'HASH';
+
+	error('You must supply domain name!') unless $option->{DMN_NAME};
+	return 1 unless $option->{DMN_NAME};
+
+	$rs |= $self->delDmnConfig($option);
+
+	my $zoneFile = "$self::bindConfig{BIND_DB_DIR}/$option->{DMN_NAME}.db";
+
+	$rs |= iMSCP::File->new(filename => $zoneFile)->delFile() if -f $zoneFile;
+
+	$rs |= iMSCP::File->new(
+		filename => "$self->{wrkDir}/$option->{DMN_NAME}.db"
+	)->delFile() if -f "$self->{wrkDir}/$option->{DMN_NAME}.db";
+
+	$zoneFile = "$self->{wrkDir}/$main::imscpConfig{BASE_SERVER_VHOST}.db";
+	$zoneFile = "$self::bindConfig{BIND_DB_DIR}/$main::imscpConfig{BASE_SERVER_VHOST}.db" unless -f $zoneFile;
+
+	unless(-f $zoneFile) {
+		error("$main::imscpConfig{BASE_SERVER_VHOST}.db do not exists");
+		return 1;
+	}
+
+	my $zContent = iMSCP::File->new( filename => $zoneFile )->get();
+	unless($zContent) {
+		error("$main::imscpConfig{BASE_SERVER_VHOST}.db is empty");
+		return 1;
+	}
+
+	$zContent =~ s/$option->{DMN_NAME}\s[^\n]*\n//gmi;
+
+	# Store the new builded file in the working directory
+	my $file = iMSCP::File->new(filename => "$self->{wrkDir}/$main::imscpConfig{BASE_SERVER_VHOST}.db");
+	$file->set($zContent) and return 1;
+	$file->save() and return 1;
+	$file->mode(0644) and return 1;
+	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+
+	# Install the new file in the production directory
+	$file->copyFile($self::bindConfig{BIND_DB_DIR}) and return 1;
+
+	debug('Ending...');
+	$rs;
+}
+
+sub delDmnConfig{
+	debug('Starting...');
+
+	use iMSCP::File;
+	use iMSCP::Templator;
+	use File::Basename;
+
+	my $self	= shift;
+	my $option	= shift;
+	my ($rs, $rdata, $cfg, $file);
+
+	##backup config file
+	if(-f "$self->{wrkDir}/named.conf"){
+		my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/named.conf" );
+		$file->copyFile("$self->{bkpDir}/named.conf.".time) and return 1;
+	} else {
+		error("$self->{wrkDir}/named.conf not found. Run setup again to fix this");
+		return 1;
+	}
+
+	# Loading all needed templates from /etc/imscp/bind/parts
+	my ($bTag, $eTag);
+	$bTag	= iMSCP::File->new(filename => "$self->{tplDir}/cfg_entry_b.tpl")->get();
+	$eTag	= iMSCP::File->new(filename => "$self->{tplDir}/cfg_entry_e.tpl")->get();
+	return 1 unless( $bTag && $eTag);
+
+	# Preparation tags
+	my $tags_hash	= { DMN_NAME => $option->{DMN_NAME} };
+
+	$bTag	= process($tags_hash, $bTag);
+	$eTag	= process($tags_hash, $eTag);
+
+	# Loading working file from /etc/imscp/bind/working/named.conf
+	$file	= iMSCP::File->new(filename => "$self->{wrkDir}/named.conf");
+	$cfg	= $file->get();
+	return 1 if (!$cfg);
+
+	#delete
+	$cfg = replaceBloc($bTag, $eTag, '', $cfg, undef);
+
+	# Store the new builded file in the working directory
+	$file = iMSCP::File->new(filename => "$self->{wrkDir}/named.conf");
+	$file->set($cfg) and return 1;
+	$file->save() and return 1;
+	$file->mode(0644) and return 1;
+	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+
+	# Install the new file in the production directory
+	$file->copyFile($self::bindConfig{BIND_CONF_FILE}) and return 1;
+
+	debug('Ending...');
+	0;
+}
+
 sub DESTROY{
 	debug('Starting...');
 

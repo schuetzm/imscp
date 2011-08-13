@@ -49,6 +49,7 @@
 	<copy_config>${SYSTEM_CONF}/apache/00_master.conf</copy_config>
 	<copy_config>${SYSTEM_CONF}/apache/00_master_ssl.conf</copy_config>
 	<copy_config>${SYSTEM_CONF}/apache/01_awstats.conf</copy_config>
+	<copy_config>${SYSTEM_CONF}/apache/logrotate.conf</copy_config>
 	<copy_config>${SYSTEM_CONF}/apache/parts</copy_config>
 	<copy_config>${SYSTEM_CONF}/apache/parts/imscp_base.tpl/httpd.conf</copy_config>
 	<copy_config>${SYSTEM_CONF}/apache/fastcgi_imscp.conf</copy_config>
