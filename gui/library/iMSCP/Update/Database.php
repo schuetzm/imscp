@@ -332,15 +332,51 @@ class iMSCP_Update_Database extends iMSCP_Update
 	}
 
 	/**
+	 * Checks if a column exists in a database table and if not, execute a query to
+	 * add that column.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since r4509
+	 * @param string $table Database table name
+	 * @param string $column Column to be added in the database table
+	 * @param string $query Query to create column
+	 * @return string Query to be executed
+	 */
+	protected function addColumn($table, $column, $structure){
+		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+
+		return ("
+			DROP PROCEDURE IF EXISTS test;
+			CREATE PROCEDURE test()
+			BEGIN
+				IF NOT EXISTS (
+					SELECT
+						COLUMN_NAME
+					FROM
+						information_schema.COLUMNS
+					WHERE
+						COLUMN_NAME = '$column'
+					AND
+						TABLE_NAME = '$table'
+					AND
+						TABLE_SCHEMA = '$dbName'
+				) THEN
+					ALTER TABLE `$dbName`.`$table` ADD `$column` $structure;
+				END IF;
+			END;
+			CALL test();
+			DROP PROCEDURE IF EXISTS test;
+		");
+	}
+
+	/**
 	 * Catch any database update that were removed.
 	 *
 	 * @paramstring $updateMethod Database method name
 	 * @paramarray $param $parameter
 	 * @return void
 	 */
-	public function __call($updateMethod, $param)
-	{
-	}
+	public function __call($updateMethod, $param){}
 
 	/**
 	 * Fixes some CSRF issues in admin log.
@@ -349,8 +385,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since r3695
 	 * @return array SQL Statement
 	 */
-	protected function _databaseUpdate_46()
-	{
+	protected function _databaseUpdate_46(){
 		return 'TRUNCATE TABLE `log`;';
 	}
 
@@ -361,8 +396,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since r3709
 	 * @return array SQL Statement
 	 */
-	protected function _databaseUpdate_47()
-	{
+	protected function _databaseUpdate_47(){
 		return 'DROP TABLE IF EXISTS `suexec_props`;';
 	}
 
@@ -373,8 +407,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @sincer3695
 	 * @return array Stack of SQL statements to be executed
 	 */
-	protected function _databaseUpdate_48()
-	{
+	protected function _databaseUpdate_48(){
 		$sqlUpd = array();
 		$sqlUpd[] = "
 	 		CREATE TABLE IF NOT EXISTS
@@ -471,8 +504,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since r4004
 	 * @return void
 	 */
-	protected function _databaseUpdate_50()
-	{
+	protected function _databaseUpdate_50(){
 		/** @var $dbConfig iMSCP_Config_Handler_Db */
 		$dbConfig = iMSCP_Registry::get('dbConfig');
 		$dbConfig->PORT_IMSCP_DAEMON = "9876;tcp;i-MSCP-Daemon;1;0;127.0.0.1";
@@ -484,8 +516,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @author William Lightning <kassah@gmail.com>
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_51()
-	{
+	protected function _databaseUpdate_51(){
 		$query = "
 			ALTER IGNORE TABLE
 				`ftp_users`
@@ -688,8 +719,9 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since r4592
 	 * @return array Stack of SQL statements to be executed
 	 */
-	protected function _databaseUpdate_56()
-	{
+	protected function _databaseUpdate_56(){
+		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+
 		$sqlUpd = array();
 
 		$sqlUpd[] = "
@@ -705,15 +737,17 @@ class iMSCP_Update_Database extends iMSCP_Update
 							TABLE_NAME = 'user_gui_props'
 						AND
 							CONSTRAINT_NAME = 'user_id'
+						AND
+							TABLE_SCHEMA = '$dbName'
 					) THEN
-						ALTER IGNORE TABLE `user_gui_props` DROP INDEX `user_id`;
+						ALTER IGNORE TABLE `$dbName`.`user_gui_props` DROP INDEX `user_id`;
 					END IF;
 				END;
 				CALL schema_change();
 			DROP PROCEDURE IF EXITST schema_change;
 		";
 
-		$sqlUpd[] = 'ALTER TABLE `user_gui_props` ADD UNIQUE (`user_id`)';
+		$sqlUpd[] = 'ALTER TABLE `$dbName`.`user_gui_props` ADD UNIQUE (`user_id`)';
 
 		return $sqlUpd;
 	}
@@ -725,8 +759,10 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since r4644
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_59()
-	{
+	protected function _databaseUpdate_59(){
+
+		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+
 		return "
 			DROP PROCEDURE IF EXISTS schema_change;
 				CREATE PROCEDURE schema_change()
@@ -740,8 +776,10 @@ class iMSCP_Update_Database extends iMSCP_Update
 							TABLE_NAME = 'user_gui_props'
 						AND
 							COLUMN_NAME = 'id'
+						AND
+							TABLE_SCHEMA = '$dbName'
 					) THEN
-						ALTER TABLE `user_gui_props` DROP column `id`;
+						ALTER TABLE `$dbName`.`user_gui_props` DROP column `id`;
 					END IF;
 				END;
 				CALL schema_change();
@@ -987,25 +1025,90 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @return string SQL Statement
 	 */
 	protected function _databaseUpdate_76(){
+		$sqlUpd = array();
+		$columns = array(
+			array('admin',		'admin_status',			"VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd'"),
+			array('domain',		'domain_mount_point',	"VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '/'"),
+			array('domain',		'url_forward',			"VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no'"),
+			array('ftp_group',	'admin_id',				"INT(10) unsigned NOT NULL DEFAULT '0' FIRST"),
+			array('ftp_users',	'admin_id',				"INT(10) unsigned NOT NULL DEFAULT '0' FIRST"),
+			array('web_software_inst', 'id',			"INT(10) NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`id`)"),
+		);
+		foreach($columns as $column){
+			$sqlUpd[] = self::addColumn($column[0], $column[1], $column[2]);
+		}
+		return $sqlUpd;
+	}
+
+	/**
+	 * Rename subdomains as full name.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_77(){
+
 		return "
-			DROP PROCEDURE IF EXISTS schema_change;
-				CREATE PROCEDURE schema_change()
-				BEGIN
-					IF NOT EXISTS (
-						SELECT
-							COLUMN_NAME
-						FROM
-							information_schema.COLUMNS
-						WHERE
-							TABLE_NAME = 'admin'
-						AND
-							COLUMN_NAME = 'admin_status'
-					) THEN
-						ALTER TABLE `admin` ADD `admin_status` VARCHAR( 15 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd';
-					END IF;
-				END;
-				CALL schema_change();
-			DROP PROCEDURE IF EXITST schema_change;
+			REPLACE INTO
+				`subdomain`
+			(
+				`subdomain_id`,
+				`domain_id`,
+				`subdomain_name`,
+				`subdomain_mount`,
+				`subdomain_url_forward`,
+				`subdomain_status`
+			)
+			SELECT
+				`t1`.`subdomain_id`,
+				`t1`.`domain_id`,
+				CONCAT(`t1`.`subdomain_name`, '.', `t2`.`domain_name`) AS `subdomain_name`,
+				`t1`.`subdomain_mount`,
+				`t1`.`subdomain_url_forward`,
+				`t1`.`subdomain_status`
+			FROM
+				`subdomain` as `t1`
+			LEFT JOIN
+				`domain` AS `t2`
+			ON
+				`t1`.`domain_id` = `t2`.`domain_id`
+		";
+	}
+
+	/**
+	 * Rename aliasses subdomains as full name.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_78(){
+
+		return "
+			REPLACE INTO
+				`subdomain_alias`
+			(
+				`subdomain_alias_id`,
+				`alias_id`,
+				`subdomain_alias_name`,
+				`subdomain_alias_mount`,
+				`subdomain_alias_url_forward`,
+				`subdomain_alias_status`
+			)
+			SELECT
+				`t1`.`subdomain_alias_id`,
+				`t1`.`alias_id`,
+				CONCAT(`t1`.`subdomain_alias_name`, '.', `t2`.`alias_name`) AS `subdomain_alias_name`,
+				`t1`.`subdomain_alias_mount`,
+				`t1`.`subdomain_alias_url_forward`,
+				`t1`.`subdomain_alias_status`
+			FROM
+				`subdomain_alias` as `t1`
+			LEFT JOIN
+				`domain_aliasses` AS `t2`
+			ON
+				`t1`.`alias_id` = `t2`.`alias_id`
 		";
 	}
 
@@ -1016,27 +1119,28 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_77(){
+	protected function _databaseUpdate_79(){
 		return "
 			CREATE TABLE IF NOT EXISTS `user_system_props` (
 				`user_id` int(10) unsigned NOT NULL DEFAULT '0',
-				`user_mailacc_limit` int(11) DEFAULT NULL,
-				`user_ftpacc_limit` int(11) DEFAULT NULL,
-				`user_traffic_limit` bigint(20) DEFAULT NULL,
-				`user_sqld_limit` int(11) DEFAULT NULL,
-				`user_sqlu_limit` int(11) DEFAULT NULL,
-				`user_domain_limit` int(11) DEFAULT NULL,
-				`user_subd_limit` int(11) DEFAULT NULL,
-				`user_ip_ids` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-				`user_disk_limit` bigint(20) unsigned DEFAULT NULL,
-				`user_disk_usage` bigint(20) unsigned DEFAULT NULL,
+				`user_mailacc_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_ftpacc_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_traffic_limit` bigint(20) NOT NULL DEFAULT '-1',
+				`user_sqld_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_sqlu_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_domain_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_alias_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_subd_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_ip_ids` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_disk_limit` bigint(20) NOT NULL DEFAULT '-1',
+				`user_disk_usage` bigint(20) unsigned DEFAULT '0',
 				`user_ssh` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
 				`user_ssl` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
 				`user_php` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
 				`user_cgi` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
 				`user_backups` enum('full','sql','domain','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
 				`user_dns` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				`user__software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
 				UNIQUE KEY `user_id` (`user_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 		";
@@ -1049,7 +1153,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_78(){
+	protected function _databaseUpdate_80(){
 		return "
 			REPLACE INTO
 				`user_system_props`
@@ -1058,7 +1162,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 				`user_traffic_limit`, `user_sqld_limit`, `user_sqlu_limit`,
 				`user_domain_limit`, `user_subd_limit`, `user_ip_ids`,
 				`user_disk_limit`, `user_disk_usage`, `user_php`, `user_cgi`,
-				`user_backups`, `user_dns`, `user__software_allowed`
+				`user_backups`, `user_dns`, `user_software_allowed`
 			)
 			SELECT
 				`domain_admin_id`, `domain_mailacc_limit`, `domain_ftpacc_limit`,
@@ -1072,97 +1176,13 @@ class iMSCP_Update_Database extends iMSCP_Update
 	}
 
 	/**
-	 * Migrate user props to user_system_prop table.
-	 *
-	 * @author Daniel Andreca <sci2tech@gmail.com>
-	 * @since $Id$
-	 * @return string SQL Statement
-	 */
-	protected function _databaseUpdate_79(){
-		$sqlUpd = array();
-		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
-		$columns = array(
-			'domain_gid'				=> 'domain',
-			'domain_uid'				=> 'domain',
-			'domain_mailacc_limit'		=> 'domain',
-			'domain_ftpacc_limit'		=> 'domain',
-			'domain_traffic_limit'		=> 'domain',
-			'domain_sqld_limit'			=> 'domain',
-			'domain_sqlu_limit'			=> 'domain',
-			'domain_alias_limit'		=> 'domain',
-			'domain_subd_limit'			=> 'domain',
-			'domain_disk_limit'			=> 'domain',
-			'domain_disk_usage'			=> 'domain',
-			'domain_php'				=> 'domain',
-			'domain_cgi'				=> 'domain',
-			'allowbackup'				=> 'domain',
-			'domain_dns'				=> 'domain',
-			'domain_software_allowed'	=> 'domain'
-		);
-		foreach($columns as $column => $table){
-			$sqlUpd[] = self::secureDropColumnTable($table, $column);
-		}
-		return $sqlUpd;
-	}
-
-	/**
-	 * Add user status column.
-	 *
-	 * @author Daniel Andreca <sci2tech@gmail.com>
-	 * @since $Id$
-	 * @return string SQL Statement
-	 */
-	protected function _databaseUpdate_80(){
-		$query = "
-			ALTER TABLE `domain` ADD `domain_mount_point` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '/';
-		";
-		return self::secureAddColumnTable('domain', 'domain_mount_point', $query);
-	}
-
-	/**
-	 * Add user status column.
-	 *
-	 * @author Daniel Andreca <sci2tech@gmail.com>
-	 * @since $Id$
-	 * @return string SQL Statement
-	 */
-	protected function _databaseUpdate_81(){
-
-		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
-
-		return "
-			DROP PROCEDURE IF EXISTS schema_change;
-				CREATE PROCEDURE schema_change()
-				BEGIN
-					IF NOT EXISTS (
-						SELECT
-							COLUMN_NAME
-						FROM
-							information_schema.COLUMNS
-						WHERE
-							TABLE_NAME = 'domain'
-						AND
-							COLUMN_NAME = 'url_forward'
-						AND
-							table_schema='$dbName'
-					) THEN
-						ALTER TABLE `domain` ADD  `url_forward` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no';
-					END IF;
-				END;
-				CALL schema_change();
-			DROP PROCEDURE IF EXITST schema_change;
-		";
-	}
-	/**
 	 * Move alias to domain table.
 	 *
 	 * @author Daniel Andreca <sci2tech@gmail.com>
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_82(){
-		return;
-		$dbName = iMSCP_Registry::get('config')->DATABASE_NAME;
+	protected function _databaseUpdate_81(){
 
 		return array("
 			REPLACE INTO
@@ -1196,9 +1216,551 @@ class iMSCP_Update_Database extends iMSCP_Update
 				`domain` AS `t2`
 			ON
 				`t1`.`domain_id` = `t2`.`domain_id`
-		", "UPDATE DOMAIN SET `url_forward` = 'no' WHERE `url_forward` IS NULL",
-		"DROP TABLE IF EXISTS `domain_aliasses`"
+		",
+		"UPDATE `domain` SET `url_forward` = 'no' WHERE `url_forward` IS NULL",
 		);
 	}
 
+	/**
+	 * Update alias in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_82(){
+
+		return "
+			REPLACE INTO
+				`domain_dns`
+			(
+				`domain_dns_id`,
+				`domain_id`,
+				`alias_id`,
+				`domain_dns`,
+				`domain_class`,
+				`domain_type`,
+				`domain_text`,
+				`protected`
+			)
+			SELECT
+				`t1`.`domain_dns_id`,
+				`t3`.`domain_id`,
+				'0' AS `alias_id`,
+				`t1`.`domain_dns`,
+				`t1`.`domain_class`,
+				`t1`.`domain_type`,
+				`t1`.`domain_text`,
+				`t1`.`protected`
+			FROM
+				`domain_dns` as `t1`
+			LEFT JOIN
+				`domain_aliasses` AS `t2`
+			ON
+				`t1`.`alias_id` = `t2`.`alias_id`
+			LEFT JOIN
+				`domain` AS `t3`
+			ON
+				`t2`.`alias_name` = `t3`.`domain_name`
+			WHERE
+				`t3`.`domain_id` IS NOT NULL
+		";
+	}
+
+	/**
+	 * Update alias in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_83(){
+
+		return array("
+			REPLACE INTO
+				`ftp_group`
+			(
+				`admin_id`,
+				`groupname`,
+				`gid`,
+				`members`
+			)
+			SELECT
+				`t2`.`domain_admin_id`,
+				`t1`.`groupname`,
+				`t1`.`gid`,
+				`t1`.`members`
+			FROM
+				`ftp_group` as `t1`
+			LEFT JOIN
+				`domain` AS `t2`
+			ON
+				`t1`.`gid` = `t2`.`domain_gid`
+		", "DELETE FROM `ftp_group` WHERE `admin_id` = 0"
+		);
+	}
+
+	/**
+	 * Update alias in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_84(){
+
+		return array("
+			REPLACE INTO
+				`ftp_users`
+			(
+				`admin_id`,
+				`userid`,
+				`passwd`,
+				`rawpasswd`,
+				`uid`,
+				`gid`,
+				`shell`,
+				`homedir`
+			)
+			SELECT
+				`t2`.`domain_admin_id`,
+				`t1`.`userid`,
+				`t1`.`passwd`,
+				`t1`.`rawpasswd`,
+				`t1`.`uid`,
+				`t1`.`gid`,
+				`t1`.`shell`,
+				`t1`.`homedir`
+			FROM
+				`ftp_users` as `t1`
+			LEFT JOIN
+				`domain` AS `t2`
+			ON
+				`t1`.`uid` = `t2`.`domain_uid`
+		", "DELETE FROM `ftp_users` WHERE `admin_id` = 0"
+		);
+	}
+
+	/**
+	 * Update alias in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_85(){
+
+		return array("
+			REPLACE INTO
+				`sql_database`
+			(
+				`sqld_id`,
+				`domain_id`,
+				`sqld_name`
+			)
+			SELECT
+				`t1`.`sqld_id`,
+				`t2`.`domain_admin_id`,
+				`t1`.`sqld_name`
+			FROM
+				`sql_database` as `t1`
+			LEFT JOIN
+				`domain` AS `t2`
+			ON
+				`t1`.`domain_id` = `t2`.`domain_id`
+		", "ALTER TABLE `sql_database` CHANGE `domain_id` `admin_id` INT( 10 ) UNSIGNED NULL DEFAULT '0'"
+		);
+	}
+
+	/**
+	 * Update subdomain alias in subdomain table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_86(){
+
+		return "
+			INSERT INTO
+				`subdomain`
+			(
+				`domain_id`,
+				`subdomain_name`,
+				`subdomain_mount`,
+				`subdomain_url_forward`,
+				`subdomain_status`
+			)
+			SELECT
+				`t3`.`domain_id`,
+				`subdomain_alias_name` AS `subdomain_name`,
+				`subdomain_alias_mount` AS `subdomain_mount`,
+				`subdomain_alias_url_forward` AS `subdomain_url_forward`,
+				'toadd' AS `subdomain_status`
+			FROM
+				`subdomain_alias` as `t1`
+			LEFT JOIN
+				`domain_aliasses` AS `t2`
+			ON
+				`t1`.`alias_id` = `t2`.`alias_id`
+			LEFT JOIN
+				`domain` AS `t3`
+			ON
+				`t2`.`alias_name` = `t3`.`domain_name`
+		";
+	}
+	/**
+	 * Update mail in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_87(){
+		$sqlUpd = array();
+
+		$columns = array(
+			'alias_mail'				=> 'normal_mail',
+			'alias_forward'				=> 'normal_forward',
+			'alias_mail,alias_forward'	=> 'normal_mail,normal_forward',
+		);
+
+		foreach($columns as $oldValue => $newValue){
+			$sqlUpd[] = "
+				REPLACE INTO
+					`mail_users`
+				(
+					`mail_id`, `mail_acc`, `mail_pass`, `mail_forward`, `domain_id`,
+					`mail_type`, `sub_id`, `status`, `mail_auto_respond`,
+					`mail_auto_respond_text`, `quota`, `mail_addr`
+				)
+				SELECT
+					`t1`.`mail_id`, `t1`.`mail_acc`, `t1`.`mail_pass`,
+					`t1`.`mail_forward`, `t3`.`domain_id`, '$newValue' AS `mail_type`,
+					'0' AS `sub_id`, `t1`.`status`, `t1`.`mail_auto_respond`,
+					`t1`.`mail_auto_respond_text`, `t1`.`quota`, `t1`.`mail_addr`
+				FROM
+					`mail_users` as `t1`
+				LEFT JOIN
+					`domain_aliasses` AS `t2`
+				ON
+					`t1`.`sub_id` = `t2`.`alias_id`
+				LEFT JOIN
+					`domain` AS `t3`
+				ON
+					`t2`.`alias_name` = `t3`.`domain_name`
+				WHERE
+					`t1`.`mail_type` = '$oldValue'
+			";
+		}
+		return $sqlUpd;
+	}
+	/**
+	 * Update catchall for alias.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_88(){
+
+		return "
+			REPLACE INTO
+				`mail_users`
+			(
+				`mail_id`, `mail_acc`, `mail_pass`, `mail_forward`, `domain_id`,
+				`mail_type`, `sub_id`, `status`, `mail_auto_respond`,
+				`mail_auto_respond_text`, `quota`, `mail_addr`
+			)
+			SELECT
+				`t1`.`mail_id`, `t1`.`mail_acc`, `t1`.`mail_pass`,
+				`t1`.`mail_forward`, `t3`.`domain_id`, 'normal_catchall' AS `mail_type`,
+				'0' AS `sub_id`, `t1`.`status`, `t1`.`mail_auto_respond`,
+				`t1`.`mail_auto_respond_text`, `t1`.`quota`, `t1`.`mail_addr`
+			FROM
+				`mail_users` as `t1`
+			LEFT JOIN
+				`domain_aliasses` AS `t2`
+			ON
+				`t1`.`sub_id` = `t2`.`alias_id`
+			LEFT JOIN
+				`domain` AS `t3`
+			ON
+				`t2`.`alias_name` = `t3`.`domain_name`
+			WHERE
+				`t1`.`mail_type` = 'alias_catchall'
+		";
+	}
+
+	/**
+	 * Update mail in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_89(){
+		$sqlUpd = array();
+
+		$columns = array(
+			'alssub_mail'					=> 'subdom_mail',
+			'alssub_forward'				=> 'subdom_forward',
+			'alssub_mail,alssub_forward'	=> 'subdom_mail,subdom_forward',
+		);
+
+		foreach($columns as $oldValue => $newValue){
+			$sqlUpd[] = "
+				REPLACE INTO
+					`mail_users`
+				(
+					`mail_id`, `mail_acc`, `mail_pass`, `mail_forward`, `domain_id`,
+					`mail_type`, `sub_id`, `status`, `mail_auto_respond`,
+					`mail_auto_respond_text`, `quota`, `mail_addr`
+				)
+				SELECT
+					`t1`.`mail_id`, `t1`.`mail_acc`, `t1`.`mail_pass`, `t1`.`mail_forward`,
+					`t3`.`domain_id` AS `domain_id`, '$newValue' AS `mail_type`, `t3`.`subdomain_id` AS `sub_id`,
+					`t1`.`status`, `t1`.`mail_auto_respond`, `t1`.`mail_auto_respond_text`,
+					`t1`.`quota`, `t1`.`mail_addr`
+				FROM
+					`mail_users` as `t1`
+				LEFT JOIN
+					`subdomain_alias` AS `t2`
+				ON
+					`t1`.`sub_id` = `t2`.`subdomain_alias_id`
+				LEFT JOIN
+					`subdomain` AS `t3`
+				ON
+					`t2`.`subdomain_alias_name` = `t3`.`subdomain_name`
+				WHERE
+					`t1`.`mail_type` = '$oldValue'
+			";
+		}
+		return $sqlUpd;
+	}
+	/**
+	 * Update catchall for alias.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+
+	protected function _databaseUpdate_90(){
+
+		return "
+			REPLACE INTO
+				`mail_users`
+			(
+				`mail_id`, `mail_acc`, `mail_pass`, `mail_forward`, `domain_id`,
+				`mail_type`, `sub_id`, `status`, `mail_auto_respond`,
+				`mail_auto_respond_text`, `quota`, `mail_addr`
+			)
+			SELECT
+				`t1`.`mail_id`, `t1`.`mail_acc`, `t1`.`mail_pass`, `t1`.`mail_forward`,
+				`t3`.`domain_id` AS `domain_id`, 'subdom_catchall' AS `mail_type`, `t3`.`subdomain_id` AS `sub_id`,
+				`t1`.`status`, `t1`.`mail_auto_respond`, `t1`.`mail_auto_respond_text`,
+				`t1`.`quota`, `t1`.`mail_addr`
+			FROM
+				`mail_users` as `t1`
+			LEFT JOIN
+				`subdomain_alias` AS `t2`
+			ON
+				`t1`.`sub_id` = `t2`.`subdomain_alias_id`
+			LEFT JOIN
+				`subdomain` AS `t3`
+			ON
+				`t2`.`subdomain_alias_name` = `t3`.`subdomain_name`
+			WHERE
+				`t1`.`mail_type` = 'alssub_catchall'
+		";
+	}
+
+	/**
+	 * Update mail in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_91(){
+		return "
+			REPLACE INTO
+				`mail_users`
+			(
+				`mail_id`, `mail_acc`, `mail_pass`, `mail_forward`, `domain_id`,
+				`mail_type`, `sub_id`, `status`, `mail_auto_respond`,
+				`mail_auto_respond_text`, `quota`, `mail_addr`
+			)
+			SELECT
+				`t1`.`mail_id`, `t1`.`mail_acc`, `t1`.`mail_pass`, `t1`.`mail_forward`,
+				`t1`.`domain_id`, `t1`.`mail_type`, `t1`.`sub_id`, `t1`.`status`,
+				`t1`.`mail_auto_respond`, `t1`.`mail_auto_respond_text`,
+				`t1`.`quota`,
+			CONCAT(
+				`t1`.`mail_acc`,
+				'@',
+				IF(
+					`t3`.`subdomain_name` IS NULL,
+					`t2`.`domain_name`,
+					`t3`.`subdomain_name`
+				)
+			) AS `mail_addr`
+			FROM
+				`mail_users` AS `t1`
+			LEFT JOIN
+				`domain` as `t2`
+			ON
+				`t1`.`domain_id` = `t2`.`domain_id`
+			LEFT JOIN
+				`subdomain` as `t3`
+			ON
+				`t3`.`subdomain_id` = `t1`.`sub_id`
+			WHERE
+				`mail_addr` = ''
+		";
+	}
+	/**
+	 * Update mail in domain_dns table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_92(){
+
+		return
+			"REPLACE INTO
+				`web_software_inst`
+			(
+				`id`, `domain_id`, `alias_id`, `subdomain_id`, `subdomain_alias_id`,
+				`software_id`, `software_master_id`, `software_res_del`,
+				`software_name`, `software_version`, `software_language`, `path`,
+				`software_prefix`, `db`, `database_user`, `database_tmp_pwd`,
+				`install_username`, `install_password`, `install_email`,
+				`software_status`, `software_depot`
+			)
+			SELECT
+				`t1`.`id`,
+				IF(`t3`.`domain_id` IS NULL, '0', `t3`.`domain_id`) AS `domain_id`,
+				'0' AS `alias_id`,
+				IF(`t5`.`subdomain_id` IS NULL, '0', `t5`.`subdomain_id`) AS `subdomain_id`,
+				'0' AS `subdomain_alias_id`,
+				`t1`.`software_id`,
+				`t1`.`software_master_id`,
+				`t1`.`software_res_del`,
+				`t1`.`software_name`,
+				`t1`.`software_version`,
+				`t1`.`software_language`,
+				`t1`.`path`,
+				`t1`.`software_prefix`,
+				`t1`.`db`,
+				`t1`.`database_user`,
+				`t1`.`database_tmp_pwd`,
+				`t1`.`install_username`,
+				`t1`.`install_password`,
+				`t1`.`install_email`,
+				`t1`.`software_status`,
+				`t1`.`software_depot`
+			FROM `web_software_inst` as `t1`
+			LEFT JOIN `domain_aliasses` AS `t2` ON `t1`.`alias_id` = `t2`.`alias_id`
+			LEFT JOIN `domain` AS `t3` ON `t2`.`alias_name` = `t3`.`domain_name`
+			LEFT JOIN `subdomain_alias` as `t4` ON
+				`t1`.`subdomain_alias_id` = `t4`.`subdomain_alias_id`
+			LEFT JOIN `subdomain` as `t5` ON
+				`t4`.`subdomain_alias_name` = `t5`.`subdomain_name`
+			WHERE `t1`.`alias_id` != '0' OR `t1`.`subdomain_alias_id` != '0'
+		";
+	}
+	/**
+	 * Drop not used columns.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_93(){
+
+		$sqlUpd = array();
+
+		$columns = array(
+
+			'domain_gid'				=> 'domain',
+			'domain_uid'				=> 'domain',
+			'domain_mailacc_limit'		=> 'domain',
+			'domain_ftpacc_limit'		=> 'domain',
+			'domain_traffic_limit'		=> 'domain',
+			'domain_sqld_limit'			=> 'domain',
+			'domain_sqlu_limit'			=> 'domain',
+			'domain_alias_limit'		=> 'domain',
+			'domain_subd_limit'			=> 'domain',
+			'domain_disk_limit'			=> 'domain',
+			'domain_disk_usage'			=> 'domain',
+			'domain_php'				=> 'domain',
+			'domain_cgi'				=> 'domain',
+			'allowbackup'				=> 'domain',
+			'domain_dns'				=> 'domain',
+			'domain_software_allowed'	=> 'domain',
+
+			'alias_id'					=> 'domain_dns',
+
+			'alias_mount'				=> 'domain_aliasses',
+			'alias_ip_id'				=> 'domain_aliasses',
+			'url_forward'				=> 'domain_aliasses',
+
+			'alias_id'					=> 'domain_dns',
+
+			'max_als_cnt'				=> 'reseller_props',
+
+			'subdomain_alias_id'		=> 'web_software_inst',
+			'alias_id'					=> 'web_software_inst'
+
+		);
+		foreach($columns as $column => $table){
+			$sqlUpd[] = self::dropColumn($table, $column);
+		}
+		return $sqlUpd;
+	}
+
+	/**
+	 * Drop not used table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_94(){
+		return array(
+			"DROP TABLE IF EXISTS `auto_num`",
+			"DROP TABLE IF EXISTS `subdomain_alias`"
+		);
+	}
+
+	/**
+	 * Empty table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_95(){
+		return "TRUNCATE TABLE `domain_aliasses`";
+	}
+
+	/**
+	 * Empty table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_96(){
+		return "ALTER TABLE `admin` CHANGE `domain_created` `admin_created`
+				INT(10) UNSIGNED NOT NULL default '0'";
+	}
+
+	protected function _databaseUpdate_97(){
+		return "UPDATE `domain` SET `domain_mount_point` = CONCAT('/', `domain_name`)
+				WHERE `domain_mount_point` = '/'";
+	}
 }

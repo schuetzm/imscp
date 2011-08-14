@@ -40,32 +40,32 @@
 --
 
 CREATE TABLE IF NOT EXISTS `admin` (
-  `admin_id` int(10) unsigned NOT NULL auto_increment,
-  `admin_name` varchar(200) collate utf8_unicode_ci default NULL,
-  `admin_pass` varchar(200) collate utf8_unicode_ci default NULL,
-  `admin_type` varchar(10) collate utf8_unicode_ci default NULL,
-  `domain_created` int(10) unsigned NOT NULL default '0',
-  `customer_id` varchar(200) collate utf8_unicode_ci default '0',
-  `created_by` int(10) unsigned default '0',
-  `fname` varchar(200) collate utf8_unicode_ci default NULL,
-  `lname` varchar(200) collate utf8_unicode_ci default NULL,
-  `gender` varchar(1) collate utf8_unicode_ci default NULL,
-  `firm` varchar(200) collate utf8_unicode_ci default NULL,
-  `zip` varchar(10) collate utf8_unicode_ci default NULL,
-  `city` varchar(200) collate utf8_unicode_ci default NULL,
-  `state` varchar(200) collate utf8_unicode_ci default NULL,
-  `country` varchar(200) collate utf8_unicode_ci default NULL,
-  `email` varchar(200) collate utf8_unicode_ci default NULL,
-  `phone` varchar(200) collate utf8_unicode_ci default NULL,
-  `fax` varchar(200) collate utf8_unicode_ci default NULL,
-  `street1` varchar(200) collate utf8_unicode_ci default NULL,
-  `street2` varchar(200) collate utf8_unicode_ci default NULL,
-  `uniqkey` varchar(255) collate utf8_unicode_ci default NULL,
-  `uniqkey_time` timestamp NULL default NULL,
+  `admin_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `admin_name` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `admin_pass` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `admin_type` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `admin_created` int(10) unsigned NOT NULL DEFAULT '0',
+  `customer_id` varchar(200) COLLATE utf8_unicode_ci DEFAULT '0',
+  `created_by` int(10) unsigned DEFAULT '0',
+  `fname` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `lname` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `gender` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `firm` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `zip` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `city` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `state` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `country` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `email` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `phone` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `fax` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `street1` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `street2` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `uniqkey` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `uniqkey_time` timestamp NULL DEFAULT NULL,
+  `admin_status` varchar(15) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd',
   UNIQUE KEY `admin_id` (`admin_id`),
   UNIQUE KEY `admin_name` (`admin_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 -- --------------------------------------------------------
 
 --
@@ -73,23 +73,11 @@ CREATE TABLE IF NOT EXISTS `admin` (
 --
 
 CREATE TABLE IF NOT EXISTS `autoreplies_log` (
-  `time` DATETIME NOT NULL COMMENT 'Date and time of the sent autoreply',
-  `from` VARCHAR( 255 ) NOT NULL COMMENT 'autoreply message sender',
-  `to` VARCHAR( 255 ) NOT NULL COMMENT 'autoreply message recipient',
-  INDEX ( `time` )
-) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_unicode_ci COMMENT = 'Sent autoreplies log table';
-
--- --------------------------------------------------------
-
---
--- Table structure for table `auto_num`
---
-
-CREATE TABLE IF NOT EXISTS `auto_num` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `msg` varchar(255) collate utf8_unicode_ci default NULL,
-  UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `time` datetime NOT NULL COMMENT 'Date and time of the sent autoreply',
+  `from` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'autoreply message sender',
+  `to` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'autoreply message recipient',
+  KEY `time` (`time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Sent autoreplies log table';
 
 -- --------------------------------------------------------
 
@@ -98,9 +86,9 @@ CREATE TABLE IF NOT EXISTS `auto_num` (
 --
 
 CREATE TABLE IF NOT EXISTS `config` (
-  `name` varchar(255) collate utf8_unicode_ci NOT NULL default '',
-  `value` longtext collate utf8_unicode_ci NOT NULL,
-  PRIMARY KEY  (`name`)
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `value` longtext COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -138,12 +126,12 @@ INSERT IGNORE INTO `config` (`name`, `value`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `custom_menus` (
-  `menu_id` int(10) unsigned NOT NULL auto_increment,
-  `menu_level` varchar(10) collate utf8_unicode_ci default NULL,
-  `menu_name` varchar(255) collate utf8_unicode_ci default NULL,
-  `menu_link` varchar(200) collate utf8_unicode_ci default NULL,
-  `menu_target` varchar(200) collate utf8_unicode_ci NOT NULL default '',
-  PRIMARY KEY  (`menu_id`)
+  `menu_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `menu_level` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `menu_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `menu_link` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `menu_target` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`menu_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -153,35 +141,21 @@ CREATE TABLE IF NOT EXISTS `custom_menus` (
 --
 
 CREATE TABLE IF NOT EXISTS `domain` (
-  `domain_id` int(10) unsigned NOT NULL auto_increment,
-  `domain_name` varchar(200) collate utf8_unicode_ci default NULL,
-  `domain_gid` int(10) unsigned NOT NULL default '0',
-  `domain_uid` int(10) unsigned NOT NULL default '0',
-  `domain_admin_id` int(10) unsigned NOT NULL default '0',
-  `domain_created_id` int(10) unsigned NOT NULL default '0',
-  `domain_created` int(10) unsigned NOT NULL default '0',
-  `domain_expires` int(10) unsigned NOT NULL default '0',
-  `domain_last_modified` int(10) unsigned NOT NULL default '0',
-  `domain_mailacc_limit` int(11) default NULL,
-  `domain_ftpacc_limit` int(11) default NULL,
-  `domain_traffic_limit` bigint(20) default NULL,
-  `domain_sqld_limit` int(11) default NULL,
-  `domain_sqlu_limit` int(11) default NULL,
-  `domain_status` varchar(255) collate utf8_unicode_ci default NULL,
-  `domain_alias_limit` int(11) default NULL,
-  `domain_subd_limit` int(11) default NULL,
-  `domain_ip_id` int(10) unsigned default NULL,
-  `domain_disk_limit` bigint(20) unsigned default NULL,
-  `domain_disk_usage` bigint(20) unsigned default NULL,
-  `domain_php` varchar(15) collate utf8_unicode_ci default NULL,
-  `domain_cgi` varchar(15) collate utf8_unicode_ci default NULL,
-  `allowbackup` varchar(8) collate utf8_unicode_ci NOT NULL default 'full',
-  `domain_dns` varchar(15) collate utf8_unicode_ci NOT NULL default 'no',
-  `domain_software_allowed` varchar(15) collate utf8_unicode_ci NOT NULL default 'no',
+  `domain_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `domain_name` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `domain_admin_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `domain_created_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `domain_created` int(10) unsigned NOT NULL DEFAULT '0',
+  `domain_expires` int(10) unsigned NOT NULL DEFAULT '0',
+  `domain_last_modified` int(10) unsigned NOT NULL DEFAULT '0',
+  `domain_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `domain_ip_id` int(10) unsigned DEFAULT NULL,
+  `domain_mount_point` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '/',
+  `url_forward` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
   UNIQUE KEY `domain_id` (`domain_id`),
   UNIQUE KEY `domain_name` (`domain_name`),
   KEY `i_domain_admin_id` (`domain_admin_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -190,14 +164,11 @@ CREATE TABLE IF NOT EXISTS `domain` (
 --
 
 CREATE TABLE IF NOT EXISTS `domain_aliasses` (
-  `alias_id` int(10) unsigned NOT NULL auto_increment,
-  `domain_id` int(10) unsigned default NULL,
-  `alias_name` varchar(200) collate utf8_unicode_ci default NULL,
-  `alias_status` varchar(255) collate utf8_unicode_ci default NULL,
-  `alias_mount` varchar(200) collate utf8_unicode_ci default NULL,
-  `alias_ip_id` int(10) unsigned default NULL,
-  `url_forward` varchar(200) collate utf8_unicode_ci default NULL,
-  PRIMARY KEY  (`alias_id`)
+  `alias_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `domain_id` int(10) unsigned DEFAULT NULL,
+  `alias_name` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `alias_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`alias_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -207,17 +178,16 @@ CREATE TABLE IF NOT EXISTS `domain_aliasses` (
 --
 
 CREATE TABLE IF NOT EXISTS `domain_dns` (
-  `domain_dns_id` int(11) NOT NULL auto_increment,
+  `domain_dns_id` int(11) NOT NULL AUTO_INCREMENT,
   `domain_id` int(11) NOT NULL,
-  `alias_id` int(11) NOT NULL,
-  `domain_dns` varchar(50) collate utf8_unicode_ci NOT NULL,
-  `domain_class` enum('IN','CH','HS') collate utf8_unicode_ci NOT NULL default 'IN',
-  `domain_type` enum('A','AAAA','CERT','CNAME','DNAME','GPOS','KEY','KX','MX','NAPTR','NSAP','NS','NXT','PTR','PX','SIG','SRV','TXT') collate utf8_unicode_ci NOT NULL default 'A',
-  `domain_text` varchar(128) collate utf8_unicode_ci NOT NULL,
+  `domain_dns` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `domain_class` enum('IN','CH','HS') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'IN',
+  `domain_type` enum('A','AAAA','CERT','CNAME','DNAME','GPOS','KEY','KX','MX','NAPTR','NSAP','NS','NXT','PTR','PX','SIG','SRV','TXT') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'A',
+  `domain_text` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   `protected` varchar(3) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-  PRIMARY KEY  (`domain_dns_id`),
-  UNIQUE KEY `domain_id` (`domain_id`,`alias_id`,`domain_dns`,`domain_class`,`domain_type`,`domain_text`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY (`domain_dns_id`),
+  UNIQUE KEY `domain_id` (`domain_id`,`domain_dns`,`domain_class`,`domain_type`,`domain_text`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -226,14 +196,14 @@ CREATE TABLE IF NOT EXISTS `domain_dns` (
 --
 
 CREATE TABLE IF NOT EXISTS `domain_traffic` (
-  `dtraff_id` int(10) unsigned NOT NULL auto_increment,
-  `domain_id` int(10) unsigned default NULL,
-  `dtraff_time` bigint(20) unsigned default NULL,
-  `dtraff_web` bigint(20) unsigned default NULL,
-  `dtraff_ftp` bigint(20) unsigned default NULL,
-  `dtraff_mail` bigint(20) unsigned default NULL,
-  `dtraff_pop` bigint(20) unsigned default NULL,
-  PRIMARY KEY  (`dtraff_id`),
+  `dtraff_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `domain_id` int(10) unsigned DEFAULT NULL,
+  `dtraff_time` bigint(20) unsigned DEFAULT NULL,
+  `dtraff_web` bigint(20) unsigned DEFAULT NULL,
+  `dtraff_ftp` bigint(20) unsigned DEFAULT NULL,
+  `dtraff_mail` bigint(20) unsigned DEFAULT NULL,
+  `dtraff_pop` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`dtraff_id`),
   KEY `i_domain_id` (`domain_id`),
   KEY `i_dtraff_time` (`dtraff_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -245,11 +215,11 @@ CREATE TABLE IF NOT EXISTS `domain_traffic` (
 --
 
 CREATE TABLE IF NOT EXISTS `email_tpls` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `owner_id` int(10) unsigned NOT NULL default '0',
-  `name` varchar(200) collate utf8_unicode_ci default NULL,
-  `subject` varchar(200) collate utf8_unicode_ci default NULL,
-  `message` text collate utf8_unicode_ci,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `owner_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `name` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `subject` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `message` text COLLATE utf8_unicode_ci,
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -260,13 +230,13 @@ CREATE TABLE IF NOT EXISTS `email_tpls` (
 --
 
 CREATE TABLE IF NOT EXISTS `error_pages` (
-  `ep_id` int(10) unsigned NOT NULL auto_increment,
-  `user_id` int(10) unsigned NOT NULL default '0',
-  `error_401` text collate utf8_unicode_ci NOT NULL,
-  `error_403` text collate utf8_unicode_ci NOT NULL,
-  `error_404` text collate utf8_unicode_ci NOT NULL,
-  `error_500` text collate utf8_unicode_ci NOT NULL,
-  PRIMARY KEY  (`ep_id`)
+  `ep_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `error_401` text COLLATE utf8_unicode_ci NOT NULL,
+  `error_403` text COLLATE utf8_unicode_ci NOT NULL,
+  `error_404` text COLLATE utf8_unicode_ci NOT NULL,
+  `error_500` text COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`ep_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -276,11 +246,12 @@ CREATE TABLE IF NOT EXISTS `error_pages` (
 --
 
 CREATE TABLE IF NOT EXISTS `ftp_group` (
-  `groupname` varchar(255) collate utf8_unicode_ci default NULL,
-  `gid` int(10) unsigned NOT NULL default '0',
-  `members` text collate utf8_unicode_ci,
+  `admin_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `groupname` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `gid` int(10) unsigned NOT NULL DEFAULT '0',
+  `members` text COLLATE utf8_unicode_ci,
   UNIQUE KEY `groupname` (`groupname`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;;
 
 -- --------------------------------------------------------
 
@@ -289,13 +260,14 @@ CREATE TABLE IF NOT EXISTS `ftp_group` (
 --
 
 CREATE TABLE IF NOT EXISTS `ftp_users` (
-  `userid` varchar(255) collate utf8_unicode_ci default NULL,
-  `passwd` varchar(255) collate utf8_unicode_ci default NULL,
-  `rawpasswd` varchar(255) collate utf8_unicode_ci default NULL,
-  `uid` int(10) unsigned NOT NULL default '0',
-  `gid` int(10) unsigned NOT NULL default '0',
-  `shell` varchar(255) collate utf8_unicode_ci default NULL,
-  `homedir` varchar(255) collate utf8_unicode_ci default NULL,
+  `admin_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `userid` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `passwd` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `rawpasswd` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `uid` int(10) unsigned NOT NULL DEFAULT '0',
+  `gid` int(10) unsigned NOT NULL DEFAULT '0',
+  `shell` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `homedir` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   UNIQUE KEY `userid` (`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -306,17 +278,17 @@ CREATE TABLE IF NOT EXISTS `ftp_users` (
 --
 
 CREATE TABLE IF NOT EXISTS `hosting_plans` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `reseller_id` int(10) unsigned NOT NULL default '0',
-  `name` varchar(255) collate utf8_unicode_ci default NULL,
-  `props` text collate utf8_unicode_ci,
-  `description` text collate utf8_unicode_ci,
-  `price` decimal(10,2) NOT NULL default '0.00',
-  `setup_fee` decimal(10,2) NOT NULL default '0.00',
-  `value` varchar(255) collate utf8_unicode_ci default NULL,
-  `payment` varchar(255) collate utf8_unicode_ci default NULL,
-  `status` int(10) unsigned NOT NULL default '0',
-  `tos`	BLOB NOT NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `reseller_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `props` text COLLATE utf8_unicode_ci,
+  `description` text COLLATE utf8_unicode_ci,
+  `price` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `setup_fee` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `value` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `payment` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `status` int(10) unsigned NOT NULL DEFAULT '0',
+  `tos` blob NOT NULL,
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -327,16 +299,16 @@ CREATE TABLE IF NOT EXISTS `hosting_plans` (
 --
 
 CREATE TABLE IF NOT EXISTS `htaccess` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `dmn_id` int(10) unsigned NOT NULL default '0',
-  `user_id` varchar(255) collate utf8_unicode_ci default NULL,
-  `group_id` varchar(255) collate utf8_unicode_ci default NULL,
-  `auth_type` varchar(255) collate utf8_unicode_ci default NULL,
-  `auth_name` varchar(255) collate utf8_unicode_ci default NULL,
-  `path` varchar(255) collate utf8_unicode_ci default NULL,
-  `status` varchar(255) collate utf8_unicode_ci default NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `dmn_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `user_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `group_id` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `auth_type` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `auth_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `path` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -345,13 +317,13 @@ CREATE TABLE IF NOT EXISTS `htaccess` (
 --
 
 CREATE TABLE IF NOT EXISTS `htaccess_groups` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `dmn_id` int(10) unsigned NOT NULL default '0',
-  `ugroup` varchar(255) collate utf8_unicode_ci default NULL,
-  `members` text collate utf8_unicode_ci,
-  `status` varchar(255) collate utf8_unicode_ci default NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `dmn_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `ugroup` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `members` text COLLATE utf8_unicode_ci,
+  `status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -360,13 +332,13 @@ CREATE TABLE IF NOT EXISTS `htaccess_groups` (
 --
 
 CREATE TABLE IF NOT EXISTS `htaccess_users` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `dmn_id` int(10) unsigned NOT NULL default '0',
-  `uname` varchar(255) collate utf8_unicode_ci default NULL,
-  `upass` varchar(255) collate utf8_unicode_ci default NULL,
-  `status` varchar(255) collate utf8_unicode_ci default NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `dmn_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `uname` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `upass` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -375,11 +347,11 @@ CREATE TABLE IF NOT EXISTS `htaccess_users` (
 --
 
 CREATE TABLE IF NOT EXISTS `log` (
-  `log_id` int(10) unsigned NOT NULL auto_increment,
-  `log_time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `log_message` text collate utf8_unicode_ci,
-  PRIMARY KEY  (`log_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `log_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `log_message` text COLLATE utf8_unicode_ci,
+  PRIMARY KEY (`log_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -388,13 +360,13 @@ CREATE TABLE IF NOT EXISTS `log` (
 --
 
 CREATE TABLE IF NOT EXISTS `login` (
-  `session_id` varchar(200) collate utf8_unicode_ci NOT NULL default '',
-  `ipaddr` varchar(40) collate utf8_unicode_ci default NULL,
-  `lastaccess` int(10) unsigned default NULL,
-  `login_count` tinyint(1) default '0',
-  `captcha_count` tinyint(1) default '0',
-  `user_name` varchar(255) collate utf8_unicode_ci default NULL,
-  PRIMARY KEY  (`session_id`)
+  `session_id` varchar(200) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `ipaddr` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `lastaccess` int(10) unsigned DEFAULT NULL,
+  `login_count` tinyint(1) DEFAULT '0',
+  `captcha_count` tinyint(1) DEFAULT '0',
+  `user_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -404,20 +376,20 @@ CREATE TABLE IF NOT EXISTS `login` (
 --
 
 CREATE TABLE IF NOT EXISTS `mail_users` (
-  `mail_id` int(10) unsigned NOT NULL auto_increment,
-  `mail_acc` varchar(200) collate utf8_unicode_ci default NULL,
-  `mail_pass` varchar(150) collate utf8_unicode_ci default NULL,
-  `mail_forward` text collate utf8_unicode_ci,
-  `domain_id` int(10) unsigned default NULL,
-  `mail_type` varchar(30) collate utf8_unicode_ci default NULL,
-  `sub_id` int(10) unsigned default NULL,
-  `status` varchar(255) collate utf8_unicode_ci default NULL,
-  `mail_auto_respond` tinyint(1) NOT NULL default '0',
-  `mail_auto_respond_text` text collate utf8_unicode_ci,
-  `quota` int(10) default '104857600',
-  `mail_addr` varchar(200) collate utf8_unicode_ci default NULL,
-  PRIMARY KEY  (`mail_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `mail_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `mail_acc` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `mail_pass` varchar(150) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `mail_forward` text COLLATE utf8_unicode_ci,
+  `domain_id` int(10) unsigned DEFAULT NULL,
+  `mail_type` varchar(30) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `sub_id` int(10) unsigned DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `mail_auto_respond` tinyint(1) NOT NULL DEFAULT '0',
+  `mail_auto_respond_text` text COLLATE utf8_unicode_ci,
+  `quota` int(10) DEFAULT '104857600',
+  `mail_addr` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`mail_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -426,27 +398,27 @@ CREATE TABLE IF NOT EXISTS `mail_users` (
 --
 
 CREATE TABLE IF NOT EXISTS `orders` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `user_id` int(10) unsigned NOT NULL default '0',
-  `plan_id` int(10) unsigned NOT NULL default '0',
-  `date` int(10) unsigned NOT NULL default '0',
-  `domain_name` varchar(200) collate utf8_unicode_ci default NULL,
-  `customer_id` varchar(200) collate utf8_unicode_ci default NULL,
-  `fname` varchar(200) collate utf8_unicode_ci default NULL,
-  `lname` varchar(200) collate utf8_unicode_ci default NULL,
-  `gender` varchar(1) collate utf8_unicode_ci default NULL,
-  `firm` varchar(200) collate utf8_unicode_ci default NULL,
-  `zip` varchar(10) collate utf8_unicode_ci default NULL,
-  `city` varchar(200) collate utf8_unicode_ci default NULL,
-  `state` varchar(200) collate utf8_unicode_ci default NULL,
-  `country` varchar(200) collate utf8_unicode_ci default NULL,
-  `email` varchar(200) collate utf8_unicode_ci default NULL,
-  `phone` varchar(200) collate utf8_unicode_ci default NULL,
-  `fax` varchar(200) collate utf8_unicode_ci default NULL,
-  `street1` varchar(200) collate utf8_unicode_ci default NULL,
-  `street2` varchar(200) collate utf8_unicode_ci default NULL,
-  `status` varchar(255) collate utf8_unicode_ci default NULL,
-  PRIMARY KEY  (`id`)
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `plan_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `date` int(10) unsigned NOT NULL DEFAULT '0',
+  `domain_name` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `customer_id` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `fname` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `lname` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `gender` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `firm` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `zip` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `city` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `state` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `country` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `email` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `phone` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `fax` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `street1` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `street2` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -456,11 +428,11 @@ CREATE TABLE IF NOT EXISTS `orders` (
 --
 
 CREATE TABLE IF NOT EXISTS `orders_settings` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `user_id` int(10) unsigned NOT NULL default '0',
-  `header` text collate utf8_unicode_ci,
-  `footer` text collate utf8_unicode_ci,
-  PRIMARY KEY  (`id`)
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `header` text COLLATE utf8_unicode_ci,
+  `footer` text COLLATE utf8_unicode_ci,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -470,17 +442,17 @@ CREATE TABLE IF NOT EXISTS `orders_settings` (
 --
 
 CREATE TABLE IF NOT EXISTS `quotalimits` (
-  `name` varchar(30) collate utf8_unicode_ci NOT NULL default '',
-  `quota_type` enum('user','group','class','all') collate utf8_unicode_ci NOT NULL default 'user',
-  `per_session` enum('false','true') collate utf8_unicode_ci NOT NULL default 'false',
-  `limit_type` enum('soft','hard') collate utf8_unicode_ci NOT NULL default 'soft',
-  `bytes_in_avail` float NOT NULL default '0',
-  `bytes_out_avail` float NOT NULL default '0',
-  `bytes_xfer_avail` float NOT NULL default '0',
-  `files_in_avail` int(10) unsigned NOT NULL default '0',
-  `files_out_avail` int(10) unsigned NOT NULL default '0',
-  `files_xfer_avail` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`name`)
+  `name` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `quota_type` enum('user','group','class','all') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'user',
+  `per_session` enum('false','true') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'false',
+  `limit_type` enum('soft','hard') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'soft',
+  `bytes_in_avail` float NOT NULL DEFAULT '0',
+  `bytes_out_avail` float NOT NULL DEFAULT '0',
+  `bytes_xfer_avail` float NOT NULL DEFAULT '0',
+  `files_in_avail` int(10) unsigned NOT NULL DEFAULT '0',
+  `files_out_avail` int(10) unsigned NOT NULL DEFAULT '0',
+  `files_xfer_avail` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -490,15 +462,15 @@ CREATE TABLE IF NOT EXISTS `quotalimits` (
 --
 
 CREATE TABLE IF NOT EXISTS `quotatallies` (
-  `name` varchar(30) collate utf8_unicode_ci NOT NULL default '',
-  `quota_type` enum('user','group','class','all') collate utf8_unicode_ci NOT NULL default 'user',
-  `bytes_in_used` float NOT NULL default '0',
-  `bytes_out_used` float NOT NULL default '0',
-  `bytes_xfer_used` float NOT NULL default '0',
-  `files_in_used` int(10) unsigned NOT NULL default '0',
-  `files_out_used` int(10) unsigned NOT NULL default '0',
-  `files_xfer_used` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`name`)
+  `name` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `quota_type` enum('user','group','class','all') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'user',
+  `bytes_in_used` float NOT NULL DEFAULT '0',
+  `bytes_out_used` float NOT NULL DEFAULT '0',
+  `bytes_xfer_used` float NOT NULL DEFAULT '0',
+  `files_in_used` int(10) unsigned NOT NULL DEFAULT '0',
+  `files_out_used` int(10) unsigned NOT NULL DEFAULT '0',
+  `files_xfer_used` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -557,15 +529,15 @@ CREATE TABLE IF NOT EXISTS `reseller_props` (
 --
 
 CREATE TABLE IF NOT EXISTS `server_ips` (
-  `ip_id` int(10) unsigned NOT NULL auto_increment,
-  `ip_number` varchar(40) collate utf8_unicode_ci default NULL,
-  `ip_domain` varchar(200) collate utf8_unicode_ci default NULL,
-  `ip_alias` varchar(200) collate utf8_unicode_ci default NULL,
-  `ip_card` varchar(255) collate utf8_unicode_ci default NULL,
-  `ip_ssl_domain_id` int(10) default NULL,
-  `ip_status` varchar(255) collate utf8_unicode_ci default NULL,
+  `ip_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ip_number` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `ip_domain` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `ip_alias` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `ip_card` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `ip_ssl_domain_id` int(10) DEFAULT NULL,
+  `ip_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   UNIQUE KEY `ip_id` (`ip_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -574,19 +546,19 @@ CREATE TABLE IF NOT EXISTS `server_ips` (
 --
 
 CREATE TABLE IF NOT EXISTS `server_traffic` (
-  `straff_id` int(10) unsigned NOT NULL auto_increment,
-  `traff_time` int(10) unsigned default NULL,
-  `bytes_in` bigint(20) unsigned default NULL,
-  `bytes_out` bigint(20) unsigned default NULL,
-  `bytes_mail_in` bigint(20) unsigned default NULL,
-  `bytes_mail_out` bigint(20) unsigned default NULL,
-  `bytes_pop_in` bigint(20) unsigned default NULL,
-  `bytes_pop_out` bigint(20) unsigned default NULL,
-  `bytes_web_in` bigint(20) unsigned default NULL,
-  `bytes_web_out` bigint(20) unsigned default NULL,
-  PRIMARY KEY  (`straff_id`),
+  `straff_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `traff_time` int(10) unsigned DEFAULT NULL,
+  `bytes_in` bigint(20) unsigned DEFAULT NULL,
+  `bytes_out` bigint(20) unsigned DEFAULT NULL,
+  `bytes_mail_in` bigint(20) unsigned DEFAULT NULL,
+  `bytes_mail_out` bigint(20) unsigned DEFAULT NULL,
+  `bytes_pop_in` bigint(20) unsigned DEFAULT NULL,
+  `bytes_pop_out` bigint(20) unsigned DEFAULT NULL,
+  `bytes_web_in` bigint(20) unsigned DEFAULT NULL,
+  `bytes_web_out` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`straff_id`),
   KEY `traff_time` (`traff_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -595,11 +567,11 @@ CREATE TABLE IF NOT EXISTS `server_traffic` (
 --
 
 CREATE TABLE IF NOT EXISTS `sql_database` (
-  `sqld_id` int(10) unsigned NOT NULL auto_increment,
-  `domain_id` int(10) unsigned default '0',
-  `sqld_name` varchar(64) character set utf8 collate utf8_bin default 'n/a',
+  `sqld_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `admin_id` int(10) unsigned DEFAULT '0',
+  `sqld_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT 'n/a',
   UNIQUE KEY `sqld_id` (`sqld_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -608,12 +580,12 @@ CREATE TABLE IF NOT EXISTS `sql_database` (
 --
 
 CREATE TABLE IF NOT EXISTS `sql_user` (
-  `sqlu_id` int(10) unsigned NOT NULL auto_increment,
-  `sqld_id` int(10) unsigned default '0',
-  `sqlu_name` varchar(64) collate utf8_unicode_ci default 'n/a',
-  `sqlu_pass` varchar(64) collate utf8_unicode_ci default 'n/a',
+  `sqlu_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sqld_id` int(10) unsigned DEFAULT '0',
+  `sqlu_name` varchar(64) COLLATE utf8_unicode_ci DEFAULT 'n/a',
+  `sqlu_pass` varchar(64) COLLATE utf8_unicode_ci DEFAULT 'n/a',
   UNIQUE KEY `sqlu_id` (`sqlu_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -622,9 +594,9 @@ CREATE TABLE IF NOT EXISTS `sql_user` (
 --
 
 CREATE TABLE IF NOT EXISTS `straff_settings` (
-  `straff_max` int(10) unsigned default NULL,
-  `straff_warn` int(10) unsigned default NULL,
-  `straff_email` int(10) unsigned default NULL
+  `straff_max` int(10) unsigned DEFAULT NULL,
+  `straff_warn` int(10) unsigned DEFAULT NULL,
+  `straff_email` int(10) unsigned DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -640,30 +612,14 @@ INSERT IGNORE INTO `straff_settings` (`straff_max`, `straff_warn`, `straff_email
 --
 
 CREATE TABLE IF NOT EXISTS `subdomain` (
-  `subdomain_id` int(10) unsigned NOT NULL auto_increment,
-  `domain_id` int(10) unsigned default NULL,
-  `subdomain_name` varchar(200) collate utf8_unicode_ci default NULL,
-  `subdomain_mount` varchar(200) collate utf8_unicode_ci default NULL,
+  `subdomain_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `domain_id` int(10) unsigned DEFAULT NULL,
+  `subdomain_name` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `subdomain_mount` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
   `subdomain_url_forward` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `subdomain_status` varchar(255) collate utf8_unicode_ci default NULL,
-  PRIMARY KEY  (`subdomain_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `subdomain_alias`
---
-
-CREATE TABLE IF NOT EXISTS `subdomain_alias` (
-  `subdomain_alias_id` int(10) unsigned NOT NULL auto_increment,
-  `alias_id` int(10) unsigned default NULL,
-  `subdomain_alias_name` varchar(200) collate utf8_unicode_ci default NULL,
-  `subdomain_alias_mount` varchar(200) collate utf8_unicode_ci default NULL,
-  `subdomain_alias_url_forward` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `subdomain_alias_status` varchar(255) collate utf8_unicode_ci default NULL,
-  PRIMARY KEY  (`subdomain_alias_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `subdomain_status` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`subdomain_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -672,17 +628,17 @@ CREATE TABLE IF NOT EXISTS `subdomain_alias` (
 --
 
 CREATE TABLE IF NOT EXISTS `tickets` (
-  `ticket_id` int(10) unsigned NOT NULL auto_increment,
-  `ticket_level` int(10) default NULL,
-  `ticket_from` int(10) unsigned default NULL,
-  `ticket_to` int(10) unsigned default NULL,
-  `ticket_status` int(10) unsigned default NULL,
-  `ticket_reply` int(10) unsigned default NULL,
-  `ticket_urgency` int(10) unsigned default NULL,
-  `ticket_date` int(10) unsigned default NULL,
-  `ticket_subject` varchar(255) collate utf8_unicode_ci default NULL,
-  `ticket_message` text collate utf8_unicode_ci,
-  PRIMARY KEY  (`ticket_id`)
+  `ticket_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_level` int(10) DEFAULT NULL,
+  `ticket_from` int(10) unsigned DEFAULT NULL,
+  `ticket_to` int(10) unsigned DEFAULT NULL,
+  `ticket_status` int(10) unsigned DEFAULT NULL,
+  `ticket_reply` int(10) unsigned DEFAULT NULL,
+  `ticket_urgency` int(10) unsigned DEFAULT NULL,
+  `ticket_date` int(10) unsigned DEFAULT NULL,
+  `ticket_subject` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `ticket_message` text COLLATE utf8_unicode_ci,
+  PRIMARY KEY (`ticket_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -693,97 +649,66 @@ CREATE TABLE IF NOT EXISTS `tickets` (
 
 CREATE TABLE IF NOT EXISTS `user_gui_props` (
   `user_id` int(10) unsigned NOT NULL,
-  `lang` varchar(5) collate utf8_unicode_ci default '',
-  `layout` varchar(100) collate utf8_unicode_ci default '',
-  `logo` varchar(255) collate utf8_unicode_ci NOT NULL default '',
-  UNIQUE `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_system_prop`
---
-
-CREATE TABLE IF NOT EXISTS `user_system_props` (
-  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
-  `user_mailacc_limit` int(11) DEFAULT NULL,
-  `user_ftpacc_limit` int(11) DEFAULT NULL,
-  `user_traffic_limit` bigint(20) DEFAULT NULL,
-  `user_sqld_limit` int(11) DEFAULT NULL,
-  `user_sqlu_limit` int(11) DEFAULT NULL,
-  `user_alias_limit` int(11) DEFAULT NULL,
-  `user_subd_limit` int(11) DEFAULT NULL,
-  `user_ip_ids` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `user_disk_limit` bigint(20) unsigned DEFAULT NULL,
-  `user_disk_usage` bigint(20) unsigned DEFAULT NULL,
-  `user_ssh` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-  `user_ssl` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-  `user_php` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-  `user_cgi` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-  `user_backups` enum('full','sql','domain','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-  `user_dns` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-  `user__software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `lang` varchar(5) COLLATE utf8_unicode_ci DEFAULT '',
+  `layout` varchar(100) COLLATE utf8_unicode_ci DEFAULT '',
+  `logo` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   UNIQUE KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `user_gui_props`
+--
+
+CREATE TABLE IF NOT EXISTS `user_system_props` (
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `user_mailacc_limit` int(11) NOT NULL DEFAULT '-1',
+  `user_ftpacc_limit` int(11) NOT NULL DEFAULT '-1',
+  `user_traffic_limit` bigint(20) NOT NULL DEFAULT '-1',
+  `user_sqld_limit` int(11) NOT NULL DEFAULT '-1',
+  `user_sqlu_limit` int(11) NOT NULL DEFAULT '-1',
+  `user_domain_limit` int(11) NOT NULL DEFAULT '-1',
+  `user_alias_limit` int(11) NOT NULL DEFAULT '-1',
+  `user_subd_limit` int(11) NOT NULL DEFAULT '-1',
+  `user_ip_ids` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `user_disk_limit` bigint(20) NOT NULL DEFAULT '-1',
+  `user_disk_usage` bigint(20) unsigned DEFAULT '0',
+  `user_ssh` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_ssl` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_php` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_cgi` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_backups` enum('full','sql','domain','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_dns` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  `user_software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  UNIQUE KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
 -- Table structure for table `web_software`
 --
 
 CREATE TABLE IF NOT EXISTS `web_software` (
-  `software_id` int(10) unsigned NOT NULL auto_increment,
-  `software_master_id` int(10) unsigned NOT NULL default '0',
-  `reseller_id` int(10) unsigned NOT NULL default '0',
-  `software_installtype` varchar(15) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_name` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_version` varchar(20) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_language` varchar(15) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_type` varchar(20) character set utf8 collate utf8_unicode_ci NOT NULL,
+  `software_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `software_master_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `reseller_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `software_installtype` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
+  `software_name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `software_version` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+  `software_language` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
+  `software_type` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `software_db` tinyint(1) NOT NULL,
-  `software_archive` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_installfile` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_prefix` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_link` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_desc` mediumtext character set utf8 collate utf8_unicode_ci NOT NULL,
+  `software_archive` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `software_installfile` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `software_prefix` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `software_link` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `software_desc` mediumtext COLLATE utf8_unicode_ci NOT NULL,
   `software_active` int(1) NOT NULL,
-  `software_status` varchar(15) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `rights_add_by` int(10) unsigned NOT NULL default '0',
-  `software_depot` varchar(15) character set utf8 collate utf8_unicode_ci NOT NULL NOT NULL DEFAULT 'no',
-  PRIMARY KEY  (`software_id`)
+  `software_status` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
+  `rights_add_by` int(10) unsigned NOT NULL DEFAULT '0',
+  `software_depot` varchar(15) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  PRIMARY KEY (`software_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `web_software_inst`
---
-
-CREATE TABLE IF NOT EXISTS `web_software_inst` (
-  `domain_id` int(10) unsigned NOT NULL,
-  `alias_id` int(10) unsigned NOT NULL default '0',
-  `subdomain_id` int(10) unsigned NOT NULL default '0',
-  `subdomain_alias_id` int(10) unsigned NOT NULL default '0',
-  `software_id` int(10) NOT NULL,
-  `software_master_id` int(10) unsigned NOT NULL default '0',
-  `software_res_del` int(1) NOT NULL default '0',
-  `software_name` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_version` varchar(20) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_language` varchar(15) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `path` varchar(255) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `software_prefix` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `db` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `database_user` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `database_tmp_pwd` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `install_username` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `install_password` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `install_email` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL default '0',
-  `software_status` varchar(15) character set utf8 collate utf8_unicode_ci NOT NULL,
-  `software_depot` varchar(15) character set utf8 collate utf8_unicode_ci NOT NULL NOT NULL DEFAULT 'no',
-  KEY `software_id` (`software_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -798,12 +723,42 @@ CREATE TABLE IF NOT EXISTS `web_software_depot` (
   `package_version` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `package_language` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
   `package_type` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-  `package_description` mediumtext character set utf8 collate utf8_unicode_ci NOT NULL,
+  `package_description` mediumtext COLLATE utf8_unicode_ci NOT NULL,
   `package_vendor_hp` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `package_download_link` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `package_signature_link` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`package_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `web_software_inst`
+--
+
+CREATE TABLE IF NOT EXISTS `web_software_inst` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `domain_id` int(10) unsigned NOT NULL,
+  `subdomain_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `software_id` int(10) NOT NULL,
+  `software_master_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `software_res_del` int(1) NOT NULL DEFAULT '0',
+  `software_name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `software_version` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+  `software_language` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
+  `path` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `software_prefix` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `db` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `database_user` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `database_tmp_pwd` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `install_username` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `install_password` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `install_email` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  `software_status` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
+  `software_depot` varchar(15) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+  PRIMARY KEY (`id`),
+  KEY `software_id` (`software_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 

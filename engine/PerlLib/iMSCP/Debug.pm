@@ -221,7 +221,7 @@ END{
 	$msg	.= "\nFATAL ERRORS:\n"	. join("\n", @fatals)	. "\n" if @fatals > 0;
 
 	my $self	= iMSCP::Debug->new();
-	my $logdir	= $main::imscpConfig{LOG_DIR};
+	my $logdir	= $main::imscpConfig{LOG_DIR} || '/tmp';
 
 	for (keys %{iMSCP::Debug->new()->{log}}) {
 			next if $_ eq 'discard';
