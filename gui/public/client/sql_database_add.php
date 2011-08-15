@@ -165,9 +165,9 @@ function add_sql_database($user_id) {
 
 	$query = "
 		INSERT INTO `sql_database` (
-		    `domain_id`, `sqld_name`
+			`domain_id`, `sqld_name`
 		) VALUES (
-		    ?, ?
+			?, ?
 		)
 	";
 	exec_query($query, array($dmn_id, $db_name));
@@ -262,6 +262,6 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(
-    iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
+	iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();

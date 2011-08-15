@@ -56,47 +56,52 @@
 		</div>
 
 		<div class="body">
-            			<h2 class="domains"><span>{TR_DOMAIN_ALIASES}</span></h2>
+			<h2 class="domains"><span>{TR_DOMAINS}</span></h2>
 			<!-- BDP: page_message -->
 				<div class="{MESSAGE_CLS}">{MESSAGE}</div>
 			<!-- EDP: page_message -->
 
+			<!-- BDP: dmn_message -->
+				<div class="info">{DMN_MSG}</div>
+			<!-- EDP: dmn_message -->
 
-			<!-- BDP: als_message -->
-				<div class="info">{ALS_MSG}</div>
-			<!-- EDP: als_message -->
-			<!-- BDP: als_list -->
+			<!-- BDP: dmn_list -->
 				<table>
 					<thead>
 						<tr>
-							<th>{TR_ALS_NAME}</th>
-							<th>{TR_ALS_MOUNT}</th>
-							<th>{TR_ALS_FORWARD}</th>
-							<th>{TR_ALS_STATUS}</th>
-							<th>{TR_ALS_ACTION}</th>
+							<th>{TR_NAME}</th>
+							<th>{TR_MOUNT}</th>
+							<th>{TR_FORWARD}</th>
+							<th>{TR_STATUS}</th>
+							<th>{TR_ACTION}</th>
 						</tr>
 					</thead>
 					<tbody>
-						<!-- BDP: als_item -->
+						<!-- BDP: dmn_item -->
 							<tr>
-                                <!-- BDP: als_status_reload_true -->
-								<td><a href="http://{ALS_NAME}/" class="icon i_domain_icon" title="{ALS_NAME}">{ALS_NAME}</a></td>
-                                <!-- EDP: als_status_reload_true -->
-                                <!-- BDP: als_status_reload_false -->
-                                <td><span class="icon i_domain_icon" title="{ALS_NAME}">{ALS_NAME}</span></td>
-                                <!-- EDP: als_status_reload_false -->
-								<td>{ALS_MOUNT}</td>
-								<td>{ALS_FORWARD}</td>
-								<td>{ALS_STATUS}</td>
+								<!-- BDP: dmn_status_reload_true -->
 								<td>
-									<a href="#" class="icon i_delete" onclick="action_delete('{ALS_ACTION_SCRIPT}', '{ALS_NAME}')" title="{ALS_ACTION}">{ALS_ACTION}</a>
-									<a href="{ALS_EDIT_LINK}" class="icon i_edit" title="{ALS_EDIT}">{ALS_EDIT}</a>
+									<a href="http://{DMN_NAME}/" class="icon i_domain_icon" title="{DMN_NAME}">
+										{DMN_NAME}
+									</a><br />
+									{TR_ALTERNATIVE_URL}: <a href="{ALTERNATIVE_URL}">{ALTERNATIVE_URL}</a>
+								</td>
+								<!-- EDP: dmn_status_reload_true -->
+								<!-- BDP: dmn_status_reload_false -->
+								<td><span class="icon i_domain_icon" title="{DMN_NAME}">{DMN_NAME}</span></td>
+								<!-- EDP: dmn_status_reload_false -->
+								<td>{DMN_MOUNT}</td>
+								<td>{DMN_FORWARD}</td>
+								<td>{DMN_STATUS}</td>
+								<td>
+									<a href="#" class="icon i_delete" onclick="action_delete('{DMN_ACTION_SCRIPT}', '{DMN_NAME}')" title="{DMN_ACTION}">{DMN_ACTION}</a>
+									<a href="{DMN_EDIT_LINK}" class="icon i_edit" title="{DMN_EDIT}">{DMN_EDIT}</a>
 								</td>
 							</tr>
-						<!-- EDP: als_item -->
+						<!-- EDP: dmn_item -->
 					</tbody>
 				</table>
-			<!-- EDP: als_list -->
+			<!-- EDP: dmn_list -->
 
 			<h2 class="doc"><span>{TR_SUBDOMAINS}</span></h2>
 			<!-- BDP: sub_message -->
@@ -107,21 +112,21 @@
 				<table>
 					<thead>
 						<tr>
-							<th>{TR_SUB_NAME}</th>
-							<th>{TR_SUB_MOUNT}</th>
-							<th>{TR_SUB_STATUS}</th>
-							<th>{TR_SUB_ACTION}</th>
+							<th>{TR_NAME}</th>
+							<th>{TR_MOUNT}</th>
+							<th>{TR_STATUS}</th>
+							<th>{TR_ACTION}</th>
 						</tr>
 					</thead>
 					<tbody>
 						<!-- BDP: sub_item -->
 							<tr>
-                                <!-- BDP: status_reload_true -->
-								<td><a href="http://{SUB_NAME}.{SUB_ALIAS_NAME}/" class="icon i_domain_icon" title="{SUB_NAME}.{SUB_ALIAS_NAME}">{SUB_NAME}.{SUB_ALIAS_NAME}</a></td>
-                                <!-- EDP: status_reload_true -->
-                                <!-- BDP: status_reload_false -->
-                                <td><span class="icon i_domain_icon" title="{SUB_NAME}.{SUB_ALIAS_NAME}">{SUB_NAME}.{SUB_ALIAS_NAME}</span></td>
-                                <!-- EDP: status_reload_false -->
+								<!-- BDP: status_reload_true -->
+								<td><a href="http://{SUB_NAME}" class="icon i_domain_icon" title="{SUB_NAME}">{SUB_NAME}</a></td>
+								<!-- EDP: status_reload_true -->
+								<!-- BDP: status_reload_false -->
+								<td><span class="icon i_domain_icon" title="{SUB_NAME}">{SUB_NAME}</span></td>
+								<!-- EDP: status_reload_false -->
 								<td>{SUB_MOUNT}</td>
 								<td>{SUB_STATUS}</td>
 								<td><a href="#" class="icon i_delete" onclick="action_delete('{SUB_ACTION_SCRIPT}', '{SUB_NAME}')">{SUB_ACTION}</a></td>
@@ -130,6 +135,42 @@
 					</tbody>
 				</table>
 			<!-- EDP: sub_list -->
+
+			<h2 class="doc"><span>{TR_DOMAIN_ALIASES}</span></h2>
+			<!-- BDP: als_message -->
+				<div class="info">{ALS_MSG}</div>
+			<!-- EDP: als_message -->
+
+			<!-- BDP: als_list -->
+				<table>
+					<thead>
+						<tr>
+							<th>{TR_NAME}</th>
+							<th>{TR_ALIAS_OF}</th>
+							<th>{TR_STATUS}</th>
+							<th>{TR_ACTION}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- BDP: als_item -->
+							<tr>
+								<!-- BDP: als_status_reload_true -->
+								<td><a href="http://{ALS_NAME}/" class="icon i_domain_icon" title="{ALS_NAME}">{ALS_NAME}</a></td>
+								<!-- EDP: als_status_reload_true -->
+								<!-- BDP: als_status_reload_false -->
+								<td><span class="icon i_domain_icon" title="{ALS_NAME}">{ALS_NAME}</span></td>
+								<!-- EDP: als_status_reload_false -->
+								<td>{ALS_ALIAS_OF}</td>
+								<td>{ALS_STATUS}</td>
+								<td>
+									<a href="#" class="icon i_delete" onclick="action_delete('{ALS_ACTION_SCRIPT}', '{ALS_NAME}')" title="{ALS_ACTION}">{ALS_ACTION}</a>
+									<a href="{ALS_EDIT_LINK}" class="icon i_edit" title="{ALS_EDIT}">{ALS_EDIT}</a>
+								</td>
+							</tr>
+						<!-- EDP: als_item -->
+					</tbody>
+				</table>
+			<!-- EDP: als_list -->
 
 			<!-- BDP: isactive_dns -->
 				<h2 class="domains"><span>{TR_DNS}</span></h2>
@@ -142,11 +183,11 @@
 						<thead>
 							<tr>
 								<th>{TR_DOMAIN_NAME}</th>
-								<th>{TR_DNS_NAME}</th>
+								<th>{TR_NAME}</th>
 								<th>{TR_DNS_CLASS}</th>
 								<th>{TR_DNS_TYPE}</th>
 								<th>{TR_DNS_DATA}</th>
-								<th>{TR_DNS_ACTION}</th>
+								<th>{TR_ACTION}</th>
 							</tr>
 						</thead>
 						<tbody>

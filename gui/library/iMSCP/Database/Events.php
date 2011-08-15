@@ -17,78 +17,78 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * @package     iMSCP
- * @package     iMSCP_Database
+ * @package	 iMSCP
+ * @package	 iMSCP_Database
  * @subpackage  Events
  * @copyright   2010-2011 by i-MSCP team
- * @author      Laurent Declercq <ldeclercq@l.declercq@nuxwin.com>
- * @version     SVN: $Id$
- * @link        http://www.i-mscp.net i-MSCP Home Site
- * @license     http://www.gnu.org/licenses/gpl-2.0.html GPL v2
+ * @author	  Laurent Declercq <ldeclercq@l.declercq@nuxwin.com>
+ * @version	 SVN: $Id$
+ * @link		http://www.i-mscp.net i-MSCP Home Site
+ * @license	 http://www.gnu.org/licenses/gpl-2.0.html GPL v2
  */
 
 /**
  * Contains all events thrown in the iMSCP_Database component
  *
- * @package     iMSCP
- * @package     iMSCP_Database
+ * @package	 iMSCP
+ * @package	 iMSCP_Database
  * @subpackage  Events
- * @author      Laurent Declercq <l.declercq@nuxwin.com>
- * @version     0.0.1
+ * @author	  Laurent Declercq <l.declercq@nuxwin.com>
+ * @version	 0.0.1
  */
 final class iMSCP_Database_Events
 {
-    /**
-     * The onBeforeConnection event occurs before connection to the database is made.
-     *
-     * The event listener method receives an iMSCP_Database_Events_Database instance.
-     *
-     * @var string
-     */
-    const onBeforeConnection = 'onBeforeConnection';
+	/**
+	 * The onBeforeConnection event occurs before connection to the database is made.
+	 *
+	 * The event listener method receives an iMSCP_Database_Events_Database instance.
+	 *
+	 * @var string
+	 */
+	const onBeforeConnection = 'onBeforeConnection';
 
-    /**
-     * The onAfterConnection event occurs after connection to the database is made.
-     *
-     * The event listener method receives an iMSCP_Database_Events_Database instance.
-     *
-     * @var string
-     */
-    const onAfterConnection = 'onAfterConnection';
+	/**
+	 * The onAfterConnection event occurs after connection to the database is made.
+	 *
+	 * The event listener method receives an iMSCP_Database_Events_Database instance.
+	 *
+	 * @var string
+	 */
+	const onAfterConnection = 'onAfterConnection';
 
-    /**
-     * The onBeforePrepare event occurs before an SQL statement was prepared for execution.
-     *
-     * The event listener method receives an iMSCP_Database_Events_Database instance.
-     *
-     * @var string
-     */
-    const onBeforePrepare = 'onBeforePrepare';
+	/**
+	 * The onBeforePrepare event occurs before an SQL statement was prepared for execution.
+	 *
+	 * The event listener method receives an iMSCP_Database_Events_Database instance.
+	 *
+	 * @var string
+	 */
+	const onBeforePrepare = 'onBeforePrepare';
 
-    /**
-     * The onAfterPrepare event occurs after an SQL statement was prepared for execution.
-     *
-     * The event listener method receives an iMSCP_Database_Events_Statement instance.
-     *
-     * @var string
-     */
-    const onAfterPrepare = 'onAfterPrepare';
+	/**
+	 * The onAfterPrepare event occurs after an SQL statement was prepared for execution.
+	 *
+	 * The event listener method receives an iMSCP_Database_Events_Statement instance.
+	 *
+	 * @var string
+	 */
+	const onAfterPrepare = 'onAfterPrepare';
 
-    /**
-     * The onBeforeExecute event occurs before a prepared SQL statement was executed.
-     *
-     * The event listener method receives an iMSCP_Database_Events_Statement instance.
-     *
-     * @var string
-     */
-    const onBeforeExecute = 'onBeforeExecute';
+	/**
+	 * The onBeforeExecute event occurs before a prepared SQL statement was executed.
+	 *
+	 * The event listener method receives an iMSCP_Database_Events_Statement instance.
+	 *
+	 * @var string
+	 */
+	const onBeforeExecute = 'onBeforeExecute';
 
-    /**
-     * The onAfterExecute event occurs after a prepared SQL statement was executed.
-     *
-     * The event listener method receives an iMSCP_Database_Events_Statement instance.
-     *
-     * @var string
-     */
-    const onAfterExecute = 'onAfterExecute';
+	/**
+	 * The onAfterExecute event occurs after a prepared SQL statement was executed.
+	 *
+	 * The event listener method receives an iMSCP_Database_Events_Statement instance.
+	 *
+	 * @var string
+	 */
+	const onAfterExecute = 'onAfterExecute';
 }

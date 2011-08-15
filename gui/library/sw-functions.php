@@ -17,13 +17,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * @category    iMSCP
- * @package     iMSCP_SoftwareInstaller
+ * @category	iMSCP
+ * @package	 iMSCP_SoftwareInstaller
  * @copyright   2010-2011 by i-MSCP team
  * @author 		Sascha Bay
- * @version     SVN: $Id$
- * @link        http://www.i-mscp.net i-MSCP Home Site
- * @license     http://www.gnu.org/licenses/gpl-2.0.html GPL v2
+ * @version	 SVN: $Id$
+ * @link		http://www.i-mscp.net i-MSCP Home Site
+ * @license	 http://www.gnu.org/licenses/gpl-2.0.html GPL v2
  */
 
 /************************************************************************************
@@ -49,44 +49,44 @@ function update_existing_client_installations_res_upload($software_id, $reseller
 	$software_master_id, $software_deleted = false)
 {
 	$query = "
-        SELECT
-            `domain_id`
-        FROM
-            `domain`
-        WHERE
-            `domain_software_allowed` = 'yes'
-        AND
-            `domain_created_id` = ?
-    ";
+		SELECT
+			`domain_id`
+		FROM
+			`domain`
+		WHERE
+			`domain_software_allowed` = 'yes'
+		AND
+			`domain_created_id` = ?
+	";
 	$res = exec_query($query, $reseller_id);
 
 	if ($res->RecordCount() > 0) {
 		while (!$res->EOF) {
 			if ($software_deleted === false) {
 				$update_query = "
-                    UPDATE
-                        `web_software_inst`
-                    SET
-                        `software_id` = ?, `software_master_id` = ?, `software_depot` = ?
-                    WHERE
-                        `software_id` = ?
-                    AND
-                        `domain_id` = ?
-                ";
+					UPDATE
+						`web_software_inst`
+					SET
+						`software_id` = ?, `software_master_id` = ?, `software_depot` = ?
+					WHERE
+						`software_id` = ?
+					AND
+						`domain_id` = ?
+				";
 				exec_query($update_query, array(
 											   $software_id, $software_master_id, 'yes',
 											   $software_master_id, $res->fields['domain_id']));
 			} else {
 				$update_query = "
-                    UPDATE
-                        `web_software_inst`
-                    SET
-                        `software_res_del` = 1
-                    WHERE
-                        `software_id` = ?
-                    AND
-                        `domain_id` = ?
-                ";
+					UPDATE
+						`web_software_inst`
+					SET
+						`software_res_del` = 1
+					WHERE
+						`software_id` = ?
+					AND
+						`domain_id` = ?
+				";
 				exec_query($update_query, array($software_id, $res->fields['domain_id']));
 			}
 
@@ -107,15 +107,15 @@ function update_existing_client_installations_sw_depot($software_id,
 	$software_master_id, $reseller_id)
 {
 	$query = "
-        SELECT
-            `domain_id`
-        FROM
-            `domain`
-        WHERE
-            `domain_software_allowed` = 'yes'
-        AND
-            `domain_created_id` = ?
-     ";
+		SELECT
+			`domain_id`
+		FROM
+			`domain`
+		WHERE
+			`domain_software_allowed` = 'yes'
+		AND
+			`domain_created_id` = ?
+	 ";
 	$res = exec_query($query, $reseller_id);
 
 	if ($res->RecordCount() > 0) {
@@ -153,13 +153,13 @@ function send_activated_sw($reseller_id, $file_name, $sw_id)
 	$cfg = iMSCP_Registry::get('config');
 
 	$query = "
-        SELECT
-            `admin_name` as `reseller`, `created_by`, `email` as `res_email`
-        FROM
-            `admin`
-        WHERE
-            `admin_id` = ?;
-    ";
+		SELECT
+			`admin_name` as `reseller`, `created_by`, `email` as `res_email`
+		FROM
+			`admin`
+		WHERE
+			`admin_id` = ?;
+	";
 	$res = exec_query($query, $reseller_id);
 
 	$to_name = $res->fields['reseller'];
@@ -167,13 +167,13 @@ function send_activated_sw($reseller_id, $file_name, $sw_id)
 	$admin_id = $res->fields['created_by'];
 
 	$query = "
-        SELECT
-            `email` as adm_email, `admin_name` as `admin`
-        FROM
-            `admin`
-        WHERE
-            `admin_id` = ?
-    ";
+		SELECT
+			`email` as adm_email, `admin_name` as `admin`
+		FROM
+			`admin`
+		WHERE
+			`admin_id` = ?
+	";
 	$res = exec_query($query, $admin_id);
 
 	$from_name = $res->fields['admin'];
@@ -234,12 +234,12 @@ function send_deleted_sw($reseller_id, $file_name, $sw_id, $subject_input,
 	$cfg = iMSCP_Registry::get('config');
 
 	$query = "
-        SELECT
-            `admin_name` as reseller, `created_by`, `email` as res_email
-        FROM
-            `admin`
-        WHERE `admin_id` = ?
-    ";
+		SELECT
+			`admin_name` as reseller, `created_by`, `email` as res_email
+		FROM
+			`admin`
+		WHERE `admin_id` = ?
+	";
 	$res = exec_query($query, $reseller_id);
 
 	$to_name = $res->fields['reseller'];
@@ -247,13 +247,13 @@ function send_deleted_sw($reseller_id, $file_name, $sw_id, $subject_input,
 	$admin_id = $res->fields['created_by'];
 
 	$query = "
-        SELECT
-            `email` as adm_email, `admin_name` as admin
-        FROM
-            `admin`
-        WHERE
-            `admin_id` = ?
-    ";
+		SELECT
+			`email` as adm_email, `admin_name` as admin
+		FROM
+			`admin`
+		WHERE
+			`admin_id` = ?
+	";
 	$res = exec_query($query, $admin_id);
 
 	$from_name = $res->fields['admin'];

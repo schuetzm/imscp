@@ -157,8 +157,9 @@ class iMSCP_Update_Database extends iMSCP_Update
 						$dbConfig->FAILED_UPDATE = "$databaseUpdateMethod;$index";
 
 						// Prepare error message
-						$errorMessage = sprintf(
-							'Database update %s failed', $databaseUpdateRevision);
+						$errorMessage = tr(
+							'Database update %s failed', $databaseUpdateRevision
+						);
 
 						// Extended error message
 						if (PHP_SAPI != 'cli') {
@@ -1017,6 +1018,143 @@ class iMSCP_Update_Database extends iMSCP_Update
 		";
 	}
 
+	protected function _databaseUpdate_76(){
+		return array(
+			"CREATE TABLE IF NOT EXISTS `user` (
+				`user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				`user_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_pass` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_type` enum('admin','reseller', 'client') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'client',
+				`user_created` int(10) unsigned NOT NULL DEFAULT '0',
+				`user_created_by` int(10) unsigned DEFAULT '0',
+				`user_uniqkey` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_uniqkey_time` timestamp NULL DEFAULT NULL,
+				`user_status` varchar(15) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd',
+				UNIQUE KEY `user_id` (`user_id`),
+				UNIQUE KEY `user_name` (`user_name`)
+			) ENGINE=InnoDB	DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+			",
+			"CREATE TABLE IF NOT EXISTS `user_data` (
+				`user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				`user_fname` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_lname` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_gender` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_firm` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_zip` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_city` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_state` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_country` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_email` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_phone` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_fax` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_street1` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_street2` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				UNIQUE KEY `user_id` (`user_id`)
+			) ENGINE=InnoDB	DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+			",
+			"CREATE TABLE IF NOT EXISTS `user_system_props` (
+				`user_id` int(10) unsigned NOT NULL DEFAULT '0',
+				`user_mailacc_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_ftpacc_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_traffic_limit` bigint(20) NOT NULL DEFAULT '-1',
+				`user_sqld_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_sqlu_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_domain_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_alias_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_subd_limit` int(11) NOT NULL DEFAULT '-1',
+				`user_ip_ids` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+				`user_disk_limit` bigint(20) NOT NULL DEFAULT '-1',
+				`user_disk_usage` bigint(20) unsigned DEFAULT '0',
+				`user_ssh` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_ssl` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_cron` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_php` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_cgi` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_backups` enum('full','sql','domain','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_dns` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				`user_software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
+				UNIQUE KEY `user_id` (`user_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+		"
+		);
+	}
+	/**
+	 * Migrate user props to user_system_prop table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_77(){
+		return "
+			REPLACE INTO
+				`user`
+			(
+				`user_id`, `user_name`, `user_pass`, `user_created`, `user_created_by`,
+				`user_uniqkey`, `user_uniqkey_time`, `user_status`, `user_type`
+			)
+			SELECT
+				`admin_id`, `admin_name`, `admin_pass`, `domain_created`,
+				`created_by`, `uniqkey`, `uniqkey_time`, 'toadd' as `admin_status`,
+				if(`admin_type` = 'user', 'client', `admin_type`)
+			FROM
+				`admin`
+		";
+	}
+
+	/**
+	 * Migrate user props to user_system_prop table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_78(){
+		return "
+			REPLACE INTO
+				`user_system_props`
+			(
+				`user_id`, `user_mailacc_limit`, `user_ftpacc_limit`,
+				`user_traffic_limit`, `user_sqld_limit`, `user_sqlu_limit`,
+				`user_domain_limit`, `user_subd_limit`, `user_ip_ids`,
+				`user_disk_limit`, `user_disk_usage`, `user_php`, `user_cgi`,
+				`user_backups`, `user_dns`, `user_software_allowed`
+			)
+			SELECT
+				`domain_admin_id`, `domain_mailacc_limit`, `domain_ftpacc_limit`,
+				`domain_traffic_limit`, `domain_sqld_limit`, `domain_sqlu_limit`,
+				`domain_alias_limit`, `domain_subd_limit`, `domain_ip_id`,
+				`domain_disk_limit`, `domain_disk_usage`, `domain_php`,
+				`domain_cgi`, `allowbackup`, `domain_dns`, `domain_software_allowed`
+			FROM
+				`domain`
+		";
+	}
+
+	/**
+	 * Migrate user props to user_system_prop table.
+	 *
+	 * @author Daniel Andreca <sci2tech@gmail.com>
+	 * @since $Id$
+	 * @return string SQL Statement
+	 */
+	protected function _databaseUpdate_79(){
+		return "
+			REPLACE INTO
+				`user_data`
+			(
+				`user_id`, `user_fname`, `user_lname`, `user_gender`, `user_firm`,
+				`user_zip`, `user_city`, `user_state`, `user_country`, `user_email`,
+				`user_phone`, `user_fax`, `user_street1`, `user_street2`
+			)
+			SELECT
+				`admin_id`, `fname`, `lname`, `gender`, `firm`, `zip`, `city`, `state`,
+				`country`, `email`, `phone`, `fax`, `street1`, `street2`
+			FROM
+				`admin`
+		";
+	}
+
 	/**
 	 * Add user status column.
 	 *
@@ -1024,14 +1162,13 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_76(){
+	protected function _databaseUpdate_80(){
 		$sqlUpd = array();
 		$columns = array(
-			array('admin',		'admin_status',			"VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'toadd'"),
 			array('domain',		'domain_mount_point',	"VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '/'"),
 			array('domain',		'url_forward',			"VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no'"),
-			array('ftp_group',	'admin_id',				"INT(10) unsigned NOT NULL DEFAULT '0' FIRST"),
-			array('ftp_users',	'admin_id',				"INT(10) unsigned NOT NULL DEFAULT '0' FIRST"),
+			array('ftp_group',	'user_id',				"INT(10) unsigned NOT NULL DEFAULT '0' FIRST"),
+			array('ftp_users',	'user_id',				"INT(10) unsigned NOT NULL DEFAULT '0' FIRST"),
 			array('web_software_inst', 'id',			"INT(10) NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`id`)"),
 		);
 		foreach($columns as $column){
@@ -1047,7 +1184,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_77(){
+	protected function _databaseUpdate_81(){
 
 		return "
 			REPLACE INTO
@@ -1083,7 +1220,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_78(){
+	protected function _databaseUpdate_82(){
 
 		return "
 			REPLACE INTO
@@ -1113,76 +1250,13 @@ class iMSCP_Update_Database extends iMSCP_Update
 	}
 
 	/**
-	 * Create table to move user props to separate table.
-	 *
-	 * @author Daniel Andreca <sci2tech@gmail.com>
-	 * @since $Id$
-	 * @return string SQL Statement
-	 */
-	protected function _databaseUpdate_79(){
-		return "
-			CREATE TABLE IF NOT EXISTS `user_system_props` (
-				`user_id` int(10) unsigned NOT NULL DEFAULT '0',
-				`user_mailacc_limit` int(11) NOT NULL DEFAULT '-1',
-				`user_ftpacc_limit` int(11) NOT NULL DEFAULT '-1',
-				`user_traffic_limit` bigint(20) NOT NULL DEFAULT '-1',
-				`user_sqld_limit` int(11) NOT NULL DEFAULT '-1',
-				`user_sqlu_limit` int(11) NOT NULL DEFAULT '-1',
-				`user_domain_limit` int(11) NOT NULL DEFAULT '-1',
-				`user_alias_limit` int(11) NOT NULL DEFAULT '-1',
-				`user_subd_limit` int(11) NOT NULL DEFAULT '-1',
-				`user_ip_ids` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-				`user_disk_limit` bigint(20) NOT NULL DEFAULT '-1',
-				`user_disk_usage` bigint(20) unsigned DEFAULT '0',
-				`user_ssh` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				`user_ssl` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				`user_php` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				`user_cgi` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				`user_backups` enum('full','sql','domain','no') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				`user_dns` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				`user_software_allowed` enum('no','yes') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'no',
-				UNIQUE KEY `user_id` (`user_id`)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-		";
-	}
-
-	/**
-	 * Migrate user props to user_system_prop table.
-	 *
-	 * @author Daniel Andreca <sci2tech@gmail.com>
-	 * @since $Id$
-	 * @return string SQL Statement
-	 */
-	protected function _databaseUpdate_80(){
-		return "
-			REPLACE INTO
-				`user_system_props`
-			(
-				`user_id`, `user_mailacc_limit`, `user_ftpacc_limit`,
-				`user_traffic_limit`, `user_sqld_limit`, `user_sqlu_limit`,
-				`user_domain_limit`, `user_subd_limit`, `user_ip_ids`,
-				`user_disk_limit`, `user_disk_usage`, `user_php`, `user_cgi`,
-				`user_backups`, `user_dns`, `user_software_allowed`
-			)
-			SELECT
-				`domain_admin_id`, `domain_mailacc_limit`, `domain_ftpacc_limit`,
-				`domain_traffic_limit`, `domain_sqld_limit`, `domain_sqlu_limit`,
-				`domain_alias_limit`, `domain_subd_limit`, `domain_ip_id`,
-				`domain_disk_limit`, `domain_disk_usage`, `domain_php`,
-				`domain_cgi`, `allowbackup`, `domain_dns`, `domain_software_allowed`
-			FROM
-				`domain`
-		";
-	}
-
-	/**
 	 * Move alias to domain table.
 	 *
 	 * @author Daniel Andreca <sci2tech@gmail.com>
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_81(){
+	protected function _databaseUpdate_83(){
 
 		return array("
 			REPLACE INTO
@@ -1228,7 +1302,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_82(){
+	protected function _databaseUpdate_84(){
 
 		return "
 			REPLACE INTO
@@ -1274,13 +1348,13 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_83(){
+	protected function _databaseUpdate_85(){
 
 		return array("
 			REPLACE INTO
 				`ftp_group`
 			(
-				`admin_id`,
+				`user_id`,
 				`groupname`,
 				`gid`,
 				`members`
@@ -1296,7 +1370,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 				`domain` AS `t2`
 			ON
 				`t1`.`gid` = `t2`.`domain_gid`
-		", "DELETE FROM `ftp_group` WHERE `admin_id` = 0"
+		", "DELETE FROM `ftp_group` WHERE `user_id` = 0"
 		);
 	}
 
@@ -1307,13 +1381,13 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_84(){
+	protected function _databaseUpdate_86(){
 
 		return array("
 			REPLACE INTO
 				`ftp_users`
 			(
-				`admin_id`,
+				`user_id`,
 				`userid`,
 				`passwd`,
 				`rawpasswd`,
@@ -1337,7 +1411,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 				`domain` AS `t2`
 			ON
 				`t1`.`uid` = `t2`.`domain_uid`
-		", "DELETE FROM `ftp_users` WHERE `admin_id` = 0"
+		", "DELETE FROM `ftp_users` WHERE `user_id` = 0"
 		);
 	}
 
@@ -1348,7 +1422,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_85(){
+	protected function _databaseUpdate_87(){
 
 		return array("
 			REPLACE INTO
@@ -1368,7 +1442,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 				`domain` AS `t2`
 			ON
 				`t1`.`domain_id` = `t2`.`domain_id`
-		", "ALTER TABLE `sql_database` CHANGE `domain_id` `admin_id` INT( 10 ) UNSIGNED NULL DEFAULT '0'"
+		", "ALTER TABLE `sql_database` CHANGE `domain_id` `user_id` INT( 10 ) UNSIGNED NULL DEFAULT '0'"
 		);
 	}
 
@@ -1379,7 +1453,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_86(){
+	protected function _databaseUpdate_88(){
 
 		return "
 			INSERT INTO
@@ -1416,7 +1490,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_87(){
+	protected function _databaseUpdate_89(){
 		$sqlUpd = array();
 
 		$columns = array(
@@ -1462,7 +1536,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_88(){
+	protected function _databaseUpdate_90(){
 
 		return "
 			REPLACE INTO
@@ -1499,7 +1573,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_89(){
+	protected function _databaseUpdate_91(){
 		$sqlUpd = array();
 
 		$columns = array(
@@ -1546,7 +1620,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @return string SQL Statement
 	 */
 
-	protected function _databaseUpdate_90(){
+	protected function _databaseUpdate_92(){
 
 		return "
 			REPLACE INTO
@@ -1583,7 +1657,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_91(){
+	protected function _databaseUpdate_93(){
 		return "
 			REPLACE INTO
 				`mail_users`
@@ -1627,7 +1701,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_92(){
+	protected function _databaseUpdate_94(){
 
 		return
 			"REPLACE INTO
@@ -1679,7 +1753,7 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_93(){
+	protected function _databaseUpdate_95(){
 
 		$sqlUpd = array();
 
@@ -1729,8 +1803,9 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_94(){
+	protected function _databaseUpdate_96(){
 		return array(
+			"DROP TABLE IF EXISTS `admin`",
 			"DROP TABLE IF EXISTS `auto_num`",
 			"DROP TABLE IF EXISTS `subdomain_alias`"
 		);
@@ -1743,23 +1818,19 @@ class iMSCP_Update_Database extends iMSCP_Update
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_95(){
+	protected function _databaseUpdate_97(){
 		return "TRUNCATE TABLE `domain_aliasses`";
 	}
 
 	/**
-	 * Empty table.
+	 * Rename Columns.
 	 *
 	 * @author Daniel Andreca <sci2tech@gmail.com>
 	 * @since $Id$
 	 * @return string SQL Statement
 	 */
-	protected function _databaseUpdate_96(){
-		return "ALTER TABLE `admin` CHANGE `domain_created` `admin_created`
-				INT(10) UNSIGNED NOT NULL default '0'";
-	}
 
-	protected function _databaseUpdate_97(){
+	protected function _databaseUpdate_98(){
 		return "UPDATE `domain` SET `domain_mount_point` = CONCAT('/', `domain_name`)
 				WHERE `domain_mount_point` = '/'";
 	}

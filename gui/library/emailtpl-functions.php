@@ -5,10 +5,10 @@
  * @copyright   2001-2006 by moleSoftware GmbH
  * @copyright   2006-2010 by ispCP | http://isp-control.net
  * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
- * @version     SVN: $Id$
- * @link        http://i-mscp.net
- * @author      ispCP Team
- * @author      i-MSCP Team
+ * @version	 SVN: $Id$
+ * @link		http://i-mscp.net
+ * @author	  ispCP Team
+ * @author	  i-MSCP Team
  *
  * @license
  * The contents of this file are subject to the Mozilla Public License
@@ -40,42 +40,36 @@
  * @param int $userId User unique identifier
  * @param string $tplName Template name
  * @return array An array that contains email parts (sender_name, sender_name_email,
- *               subject, message)
+ *			   subject, message)
  */
-function get_email_tpl_data($userId, $tplName)
-{
-    $query = "
-		SELECT
-			`fname`, `lname`, `firm`, `email`
-		FROM
-			`admin`
-		WHERE
-			`admin_id` = ?
-	";
-    $stmt = exec_query($query, $userId);
+function get_email_tpl_data($userId, $tplName){
 
-    if ((trim($stmt->fields('fname')) != '') && (trim($stmt->fields('lname')) != '')
-    ) {
-        $data['sender_name'] = $stmt->fields('fname') . ' ' . $stmt->fields('lname');
-    } else if (trim($stmt->fields('fname')) != '') {
-        $data['sender_name'] = $stmt->fields('fname');
-    } else if (trim($stmt->fields('lname')) != '') {
-        $data['sender_name'] = $stmt->fields('lname');
-    } else {
-        $data['sender_name'] = '';
-    }
+	$user = iMSCP_Props_user_user::getInstanceById($userId);
 
-    if ($stmt->fields('firm') != '') {
-        if ($data['sender_name'] != '') {
-            $data['sender_name'] .= ' ' . '[' . $stmt->fields('firm') . ']';
-        } else {
-            $data['sender_name'] = $stmt->fields('firm');
-        }
-    }
 
-    $data['sender_email'] = $stmt->fields('email');
+	if (
+		trim($user->user_fname) != '' && trim($user->user_lname) != ''
+	) {
+		$data['sender_name'] = $user->user_fname . ' ' . $user->user_lname;
+	} else if (trim($user->user_fname) != '') {
+		$data['sender_name'] = $user->user_fname;
+	} else if (trim($user->user_lname) != '') {
+		$data['sender_name'] = $user->user_lname;
+	} else {
+		$data['sender_name'] = '';
+	}
 
-    $query = "
+	if ($user->user_firm != '') {
+		if ($data['sender_name'] != '') {
+			$data['sender_name'] .= ' ' . '[' . $user->user_firm . ']';
+		} else {
+			$data['sender_name'] = $user->user_firm;
+		}
+	}
+
+	$data['sender_email'] = $user->user_email;
+
+	$query = "
 		SELECT
 			`subject`, `message`
 		FROM
@@ -85,17 +79,17 @@ function get_email_tpl_data($userId, $tplName)
 		AND
 			`name` = ?
 	";
-    $stmt = exec_query($query, array($userId, $tplName));
+	$stmt = exec_query($query, array($userId, $tplName));
 
-    if ($stmt->rowCount()) {
-        $data['subject'] = $stmt->fields['subject'];
-        $data['message'] = $stmt->fields['message'];
-    } else {
-        $data['subject'] = '';
-        $data['message'] = '';
-    }
+	if ($stmt->rowCount()) {
+		$data['subject'] = $stmt->fields['subject'];
+		$data['message'] = $stmt->fields['message'];
+	} else {
+		$data['subject'] = '';
+		$data['message'] = '';
+	}
 
-    return $data;
+	return $data;
 }
 
 /**
@@ -104,12 +98,12 @@ function get_email_tpl_data($userId, $tplName)
  * @param int $userId User unique identifier
  * @param string $tplName Template name
  * @param array $data An associative array where each key correspond to a specific
- *                    email parts: subject, message
+ *					email parts: subject, message
  * @return void
  */
 function set_email_tpl_data($userId, $tplName, $data)
 {
-    $query = "
+	$query = "
 		SELECT
 			`subject`, `message`
 		FROM
@@ -119,18 +113,18 @@ function set_email_tpl_data($userId, $tplName, $data)
 		AND
 			`name` = ?
 	";
-    $stmt = exec_query($query, array($userId, $tplName));
+	$stmt = exec_query($query, array($userId, $tplName));
 
-    if (!$stmt->rowCount()) {
-        $query = "
+	if (!$stmt->rowCount()) {
+		$query = "
 			INSERT INTO `email_tpls` (
-                `subject`, `message`, `owner_id`, `name`
-            ) VALUES (
-                ?, ?, ?, ?
-            )
+				`subject`, `message`, `owner_id`, `name`
+			) VALUES (
+				?, ?, ?, ?
+			)
 		";
-    } else {
-        $query = "
+	} else {
+		$query = "
 			UPDATE
 				`email_tpls`
 			SET
@@ -141,36 +135,36 @@ function set_email_tpl_data($userId, $tplName, $data)
 				`name` = ?
 		";
 
-    }
+	}
 
-    exec_query($query, array($data['subject'], $data['message'], $userId, $tplName));
+	exec_query($query, array($data['subject'], $data['message'], $userId, $tplName));
 }
 
 /**
  * Generates and returns welcome email.
  *
  * @see get_email_tpl_data()
- * @param int $userId      User unique identifier - Template owner
+ * @param int $userId	  User unique identifier - Template owner
  * @param string $userType User type
- * @return array           An associative array where each key correspond to a
- *                         specific email parts: sender_name, sender_name_email,
- *                         subject, message
+ * @return array		   An associative array where each key correspond to a
+ *						 specific email parts: sender_name, sender_name_email,
+ *						 subject, message
  */
 function get_welcome_email($userId, $userType = 'user')
 {
-    /** @var $cfg iMSCP_Config_Handler_File */
-    $cfg = iMSCP_Registry::get('config');
+	/** @var $cfg iMSCP_Config_Handler_File */
+	$cfg = iMSCP_Registry::get('config');
 
-    $data = get_email_tpl_data($userId, 'add-user-auto-msg');
+	$data = get_email_tpl_data($userId, 'add-user-auto-msg');
 
-    if (empty($data['subject'])) {
-        $data['subject'] = tr('Welcome {USERNAME} to i-MSCP', true);
-    }
+	if (empty($data['subject'])) {
+		$data['subject'] = tr('Welcome {USERNAME} to i-MSCP', true);
+	}
 
-    // No custom template for welcome mail - return the default
-    if (empty($data['message'])) {
-        if ($userType == 'user' && $cfg->AWSTATS_ACTIVE == 'yes') {
-            $data['message'] = tr('
+	// No custom template for welcome mail - return the default
+	if (empty($data['message'])) {
+		if ($userType == 'user' && $cfg->AWSTATS_ACTIVE == 'yes') {
+			$data['message'] = tr('
 
 Dear {NAME},
 
@@ -196,8 +190,8 @@ The i-MSCP Team
 
 ', true);
 
-        } else {
-            $data['message'] = tr('
+		} else {
+			$data['message'] = tr('
 
 Dear {NAME},
 
@@ -219,10 +213,10 @@ ___________________________
 The i-MSCP Team
 
 ', true);
-        }
-    }
+		}
+	}
 
-    return $data;
+	return $data;
 }
 
 /**
@@ -231,12 +225,12 @@ The i-MSCP Team
  * @see set_email_tpl_data()
  * @param  int $userId User unique identifier - Template owner
  * @param  array $data An associative array where each key correspond to a specific
- *                     email parts: subject, message
+ *					 email parts: subject, message
  * @return void
  */
 function set_welcome_email($userId, $data)
 {
-    set_email_tpl_data($userId, 'add-user-auto-msg', $data);
+	set_email_tpl_data($userId, 'add-user-auto-msg', $data);
 }
 
 /**
@@ -244,19 +238,19 @@ function set_welcome_email($userId, $data)
  *
  * @see get_email_tpl_data
  * @param int $admin_id User unique identifier - Template owner
- * @return array        An associative array where each key correspond to a specific
- *                      email parts: sender_name, sender_name_email, subject, message
+ * @return array		An associative array where each key correspond to a specific
+ *					  email parts: sender_name, sender_name_email, subject, message
  */
 function get_lostpassword_activation_email($admin_id)
 {
-    $data = get_email_tpl_data($admin_id, 'lostpw-msg-1');
+	$data = get_email_tpl_data($admin_id, 'lostpw-msg-1');
 
-    if (!$data['subject']) {
-        $data['subject'] = tr('Please activate your new i-MSCP password', true);
-    }
+	if (!$data['subject']) {
+		$data['subject'] = tr('Please activate your new i-MSCP password', true);
+	}
 
-    if (!$data['message']) {
-        $data['message'] = tr('
+	if (!$data['message']) {
+		$data['message'] = tr('
 
 Dear {NAME},
 
@@ -270,9 +264,9 @@ ___________________________
 The i-MSCP Team
 
 ', true);
-    }
+	}
 
-    return $data;
+	return $data;
 }
 
 /**
@@ -281,12 +275,12 @@ The i-MSCP Team
  * @see set_email_tpl_data()
  * @param int $admin_id User unique identifier
  * @param array $data   An associative array where each key correspond to a specific
- *                      email parts: subject, message
+ *					  email parts: subject, message
  * @return void
  */
 function set_lostpassword_activation_email($admin_id, $data)
 {
-    set_email_tpl_data($admin_id, 'lostpw-msg-1', $data);
+	set_email_tpl_data($admin_id, 'lostpw-msg-1', $data);
 }
 
 /**
@@ -295,18 +289,18 @@ function set_lostpassword_activation_email($admin_id, $data)
  * @see get_email_tpl_data()
  * @param int $userId User uniqaue identifier - Template owner
  * @return array An associative array where each key correspond to a specific email
- *               parts sender_name, sender_name_email, subject, message
+ *			   parts sender_name, sender_name_email, subject, message
  */
 function get_lostpassword_password_email($userId)
 {
-    $data = get_email_tpl_data($userId, 'lostpw-msg-2');
+	$data = get_email_tpl_data($userId, 'lostpw-msg-2');
 
-    if (!$data['subject']) {
-        $data['subject'] = tr('Your new i-MSCP login', true);
-    }
+	if (!$data['subject']) {
+		$data['subject'] = tr('Your new i-MSCP login', true);
+	}
 
-    if (!$data['message']) {
-        $data['message'] = tr('
+	if (!$data['message']) {
+		$data['message'] = tr('
 
 Hello {NAME},
 
@@ -321,9 +315,9 @@ ___________________________
 The i-MSCP Team
 
 ', true);
-    }
+	}
 
-    return $data;
+	return $data;
 }
 
 /**
@@ -332,12 +326,12 @@ The i-MSCP Team
  * @see set_email_tpl_data()
  * @param  int $userId User unique identifier - Template owner
  * @param  array $data An associative array where each key correspond to a specific
- *                     email parts: subject, message
+ *					 email parts: subject, message
  * @return void
  */
 function set_lostpassword_password_email($userId, $data)
 {
-    set_email_tpl_data($userId, 'lostpw-msg-2', $data);
+	set_email_tpl_data($userId, 'lostpw-msg-2', $data);
 }
 
 /**
@@ -346,18 +340,18 @@ function set_lostpassword_password_email($userId, $data)
  * @see get_email_tpl_data()
  * @param  int $userId User unique identifier - template owner
  * @return array An associative array where each key correspond to a specific
- *               email part: sender_name, sender_name_email, subject, message
+ *			   email part: sender_name, sender_name_email, subject, message
  */
 function get_order_email($userId)
 {
-    $data = get_email_tpl_data($userId, 'after-order-msg');
+	$data = get_email_tpl_data($userId, 'after-order-msg');
 
-    if (!$data['subject']) {
-        $data['subject'] = tr('Confirmation for domain order {DOMAIN}', true);
-    }
+	if (!$data['subject']) {
+		$data['subject'] = tr('Confirmation for domain order {DOMAIN}', true);
+	}
 
-    if (!$data['message']) {
-        $data['message'] = tr("
+	if (!$data['message']) {
+		$data['message'] = tr("
 
 Dear {NAME},
 
@@ -378,9 +372,9 @@ ___________________________
 The i-MSCP Team
 
 ", true);
-    }
+	}
 
-    return $data;
+	return $data;
 }
 
 /**
@@ -388,12 +382,12 @@ The i-MSCP Team
  *
  * @param  int $userId User unique identifier
  * @param  array $data An associative array where each key correspond to a specific
- *                     email parts: subject, message
+ *					 email parts: subject, message
  * @return void
  */
 function set_order_email($userId, $data)
 {
-    set_email_tpl_data($userId, 'after-order-msg', $data);
+	set_email_tpl_data($userId, 'after-order-msg', $data);
 }
 
 /**
@@ -401,19 +395,19 @@ function set_order_email($userId, $data)
  *
  * @see get_email_tpl_data()
  * @param  int $userId User unique identifier - Template owner
- * @return Array       An associative array where each key correspond to a specific
- *                     email parts: sender_name, sender_name_email, subject, message
+ * @return Array	   An associative array where each key correspond to a specific
+ *					 email parts: sender_name, sender_name_email, subject, message
  */
 function get_alias_order_email($userId)
 {
-    $data = get_email_tpl_data($userId, 'alias-order-msg');
+	$data = get_email_tpl_data($userId, 'alias-order-msg');
 
-    if (!$data['subject']) {
-        $data['subject'] = tr('New alias order for {CUSTOMER}', true);
-    }
+	if (!$data['subject']) {
+		$data['subject'] = tr('New alias order for {CUSTOMER}', true);
+	}
 
-    if (!$data['message']) {
-        $data['message'] = tr('
+	if (!$data['message']) {
+		$data['message'] = tr('
 
 Dear {RESELLER},
 
@@ -429,7 +423,7 @@ ___________________________
 The i-MSCP Team
 
 ', true);
-    }
+	}
 
-    return $data;
+	return $data;
 }

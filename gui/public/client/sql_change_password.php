@@ -112,16 +112,15 @@ function change_sql_user_pass($db_user_id, $db_user_name) {
 	redirectTo('sql_manage.php');
 }
 
-function gen_page_data(&$tpl, $db_user_id)
-{
+function gen_page_data(&$tpl, $db_user_id){
 
 	$query = "SELECT `sqlu_name` FROM `sql_user` WHERE `sqlu_id` = ?";
 	$rs = exec_query($query, $db_user_id);
 
 	$tpl->assign(
 		array(
-			'USER_NAME' => tohtml($rs->fields['sqlu_name']),
-			'ID' => $db_user_id
+			'USER_NAME'	=> tohtml($rs->fields['sqlu_name']),
+			'ID'		=> $db_user_id
 		)
 	);
 	return $rs->fields['sqlu_name'];
@@ -144,8 +143,8 @@ $db_user_name = gen_page_data($tpl, $db_user_id);
 
 if(!check_user_sql_perms($db_user_id))
 {
-    set_page_message(tr('User does not exist or you do not have permission to access this interface.'));
-    redirectTo('sql_manage.php');
+	set_page_message(tr('User does not exist or you do not have permission to access this interface.'));
+	redirectTo('sql_manage.php');
 }
 
 check_user_sql_perms($db_user_id);
@@ -174,7 +173,7 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(
-    iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
+	iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
 

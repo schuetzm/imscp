@@ -17,7 +17,7 @@
  * The Initial Developer of the Original Code is ispCP Team.
  * Portions created by Initial Developer are Copyright (C) 2006-2010 by
  * isp Control Panel. All Rights Reserved.
- * 
+ *
  * Portions created by the i-MSCP Team are Copyright (C) 2010 by
  * i-MSCP a internet Multi Server Control Panel. All Rights Reserved.
  *
@@ -37,9 +37,9 @@
  * @property mixed fields
  *
  * @category	i-MSCP
- * @package     iMSCP_Database
- * @author      ispCP Team
- * @author      iMSCP team
+ * @package	 iMSCP_Database
+ * @author	  ispCP Team
+ * @author	  iMSCP team
  */
 class iMSCP_Database_ResultSet {
 
@@ -51,14 +51,14 @@ class iMSCP_Database_ResultSet {
 	protected $_stmt = null;
 
 	/**
-     * Default fetch mode
+	 * Default fetch mode
 	 *
 	 * Controls how the next row will be returned to the caller. This value must
 	 * be one of the PDO::FETCH_* constants
-     *
-     * @var integer
-     */
-    protected $_fetchMode = PDO::FETCH_ASSOC;
+	 *
+	 * @var integer
+	 */
+	protected $_fetchMode = PDO::FETCH_ASSOC;
 
 	/**
 	 * A row from the result set associated with the referenced PDOStatement

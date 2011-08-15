@@ -84,7 +84,7 @@ class iMSCP_Database
 
     /**
      * Singleton - Make new unavailable.
-     * 
+     *
      * Creates a PDO object and connects to the database.
      *
      * According the PDO implementation, a PDOException is raised on error

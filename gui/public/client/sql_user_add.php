@@ -329,9 +329,9 @@ function add_sql_user($user_id, $db_id) {
 
 	$query = "
 		INSERT INTO `sql_user` (
-		    `sqld_id`, `sqlu_name`, `sqlu_pass`
+			`sqld_id`, `sqlu_name`, `sqlu_pass`
 		) VALUES (
-		    ?, ?, ?
+			?, ?, ?
 		)
 	";
 	exec_query($query, array($db_id, $db_user, $user_pass));
@@ -460,7 +460,7 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(
-    iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
+	iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
 

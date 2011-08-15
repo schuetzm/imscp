@@ -2,13 +2,13 @@
 /**
  * i-MSCP a internet Multi Server Control Panel
  *
- * @copyright   2001-2006 by moleSoftware GmbH
- * @copyright   2006-2010 by ispCP | http://isp-control.net
- * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
+ * @copyright	 2001-2006 by moleSoftware GmbH
+ * @copyright	 2006-2010 by ispCP | http://isp-control.net
+ * @copyright	 2010-2011 by i-MSCP | http://i-mscp.net
  * @version	 SVN: $Id$
  * @link		http://i-mscp.net
- * @author	  ispCP Team
- * @author	  i-MSCP Team
+ * @author		ispCP Team
+ * @author		i-MSCP Team
  *
  * @license
  * The contents of this file are subject to the Mozilla Public License
@@ -39,8 +39,7 @@
  *
  * @return void
  */
-function do_session_timeout()
-{
+function do_session_timeout(){
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
@@ -62,8 +61,7 @@ function do_session_timeout()
  * @param string $sessionId User session id from cookie
  * @return bool TRUE if session is valid
  */
-function session_exists($sessionId)
-{
+function session_exists($sessionId){
 	$ip = getipaddr();
 
 	$query = "
@@ -87,422 +85,26 @@ function session_exists($sessionId)
  * @return string User's Ip address
  * @todo adding proxy detection
  */
-function getipaddr()
-{
+function getipaddr(){
 	return $_SERVER['REMOTE_ADDR'];
 }
 
-/**
- * Should be documented.
- *
- * @return void
- */
-function init_login()
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	// Just make sure to expire counters in case BRUTEFORCE is turned off
-	unblock($cfg->BRUTEFORCE_BLOCK_TIME);
-
-	if ($cfg->BRUTEFORCE) {
-		is_ipaddr_blocked(null, 'bruteforce', true);
-	}
-}
 
 /**
  * Checks if an user account name exists.
  *
- * @param  string $userName User account name
+ * @param	string $userName User account name
  * @return bool TRUE if the user account name exists, FALSE otherwise
  */
-function username_exists($userName)
-{
+function username_exists($userName){
+
 	$userName = encode_idna($userName);
-
-	$query = 'SELECT `admin_id` FROM `admin` WHERE `admin_name` = ?;';
-	$stmt = exec_query($query, $userName);
-
-	return (bool) $stmt->recordCount();
-}
-
-/**
- * Returns the stored data related to an user account.
- *
- * @param string $userName User Account name
- * @return array An array that contains user account related data
- */
-function get_userdata($userName)
-{
-	$query = 'SELECT * FROM `admin` WHERE `admin_name` = ?;';
-	$stmt = exec_query($query, $userName);
-
-	return $stmt->fetchRow();
-}
-
-/**
- * Checks if an user account is expired
- *
- * @param string $userName User account name
- * @return boolTRUE if the user account is not expired, FALSE otherwise
- */
-function is_userdomain_expired($userName)
-{
-	$userData = get_userdata($userName);
-
-	if (!is_array($userData)) {
+	try{
+		$user = iMSCP_Props_client::getInstanceByName($userName);
+	}catch (Exception $e){
 		return false;
 	}
-
-	if ($userData['admin_type'] != 'user') {
-		return true;
-	}
-
-	$query = 'SELECT `domain_expires` FROM `domain` WHERE `domain_admin_id` = ?;';
-	$stmt = exec_query($query, $userData['admin_id']);
-
-	$row	= $stmt->fetchRow();
-
-	if(!empty($row) && $row['domain_expires'] >0 && time() > $row['domain_expires']) {
-		return true;
-	}
-	return false;
-}
-
-/**
- * Checks if an user account's status is 'ok'
- *
- * @param string $userName User account name to be checked
- * @return bool TRUE if the user account's status is 'ok', FALSE otherwise
- */
-function is_userdomain_ok($userName)
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	$userData = get_userdata($userName);
-
-	if (!is_array($userData)) {
-		return false;
-	} elseif($userData['admin_type'] != 'user') {
-		return true;
-	}
-
-	$query = 'SELECT `domain_status` FROM `domain` WHERE `domain_admin_id` = ?;';
-	$stmt = exec_query($query, $userData['admin_id']);
-	$row = $stmt->fetchRow();
-
-	return (bool) ($row['domain_status'] == $cfg->ITEM_OK_STATUS);
-}
-
-/**
- * Unblock Ip address.
- *
- * @throw iMSCP_Exception
- * @param  $timeout
- * @param string $type
- * @return void
- */
-function unblock($timeout = null, $type = 'bruteforce')
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	if (is_null($timeout)) {
-		$timeout = $cfg->BRUTEFORCE_BLOCK_TIME;
-	}
-
-	$timeout = time() - ($timeout * 60);
-
-	switch ($type) {
-		case 'bruteforce':
-			$query = "
-				UPDATE
-					`login`
-				SET
-					`login_count` = '1'
-				WHERE
-					`login_count` >= ?
-				AND
-					`lastaccess` < ?
-				AND
-					`user_name` is NULL
-			";
-
-			$max = $cfg->BRUTEFORCE_MAX_LOGIN;
-			break;
-		case 'captcha':
-			$query = "
-				UPDATE
-					`login`
-				SET
-					`captcha_count` = '1'
-				WHERE
-					`captcha_count` >= ?
-				AND
-					`lastaccess` < ?
-				AND
-					`user_name` is NULL
-			";
-
-			$max = $cfg->BRUTEFORCE_MAX_CAPTCHA;
-			break;
-		default:
-			write_log(sprintf('FIXME: %s:%d' . "\n" . 'Unknown unblock reason %s', __FILE__, __LINE__, $type), E_USER_ERROR);
-			throw new iMSCP_Exception('FIXME: ' . __FILE__ . ':' . __LINE__);
-	}
-
-	exec_query($query, array($max, $timeout));
-}
-
-/**
- * Checks if an user Ip address is blocked.
- *
- * @throw iMSCP_Exception_Production
- * @param string $ipAddress Ip Address to be checked
- * @param string $type Checking type (bruteforce|captcha)
- * @param bool $autoDeny
- * @return boolean TRUE if the user Ip address is blocked, FALSE otherwise
- */
-function is_ipaddr_blocked($ipAddress = null, $type = 'bruteforce', $autoDeny = false)
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	// Fix for #47: Enhancement - You are blocked for 30 minutes
-	// Read the ticket for further explainations
-	if(isset($cfg->GUI_BYPASS_BRUTEFORCE) && intval($cfg->GUI_BYPASS_BRUTEFORCE)) {
-		$ipAddress = getipaddr();
-		$query = '
-			UPDATE
-		 		`login`
-		 	SET
-		 		`lastaccess` = UNIX_TIMESTAMP(),
-		 		`login_count` = ?,
-		 		`captcha_count` = ?
-
-		 	WHERE
-		 		ipaddr = ?
-		 ';
-		exec_query($query, array(0, 0, $ipAddress));
-		return false;
-	}
-
-	if (is_null($ipAddress)) {
-		$ipAddress = getipaddr();
-	}
-
-	switch ($type) {
-		case 'bruteforce':
-			$query = "SELECT * FROM `login` WHERE `ipaddr` = ? AND `login_count` = ?";
-			$max = $cfg->BRUTEFORCE_MAX_LOGIN;
-			break;
-		case 'captcha':
-			$query = "SELECT * FROM `login` WHERE `ipaddr` = ? AND `captcha_count` = ?";
-			$max = $cfg->BRUTEFORCE_MAX_CAPTCHA;
-			break;
-		default:
-			write_log(sprintf('FIXME: %s:%d' . "\n" . 'Unknown block reason %s', __FILE__, __LINE__, $type), E_USER_ERROR);
-			throw new iMSCP_Exception('FIXME: ' . __FILE__ . ':' . __LINE__);
-	}
-
-	$stmt = exec_query($query, array($ipAddress, $max));
-
-	if (!$stmt->recordCount()) {
-		return false;
-	} elseif (!$autoDeny) {
-		return true;
-	}
-	deny_access();
-	return false; // Only to make some IDE happy
-
-}
-
-/**
- * Determine if the user should wait for login
- *
- * @throw iMSCP_Exception_Production
- * @param string $ipAddress User ip address
- * @param boolean $displayMessage
- * @return TRUE if...
- */
-function shall_user_wait($ipAddress = null, $displayMessage = true)
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	if (!$cfg->BRUTEFORCE) {
-		return false;
-	}
-
-	if (is_null($ipAddress)) {
-		$ipAddress = getipaddr();
-	}
-
-
-	$query = 'SELECT `lastaccess` FROM `login` WHERE `ipaddr` = ? AND `user_name` is NULL;';
-	$res = exec_query($query, $ipAddress);
-
-	if ($res->recordCount() == 0) {
-		return false;
-	}
-
-	$data = $res->fetchRow();
-	$lastaccess = $data['lastaccess'];
-
-	if ($cfg->BRUTEFORCE_BETWEEN) {
-		$btime = $lastaccess + $cfg->BRUTEFORCE_BETWEEN_TIME;
-	} else {
-		return false;
-	}
-
-	if ($btime > time()) {
-		if ($displayMessage) {
-			iMSCP_Registry::set('backButtonDestination', $cfg->BASE_SERVER_VHOST_PREFIX . $cfg->BASE_SERVER_VHOST);
-			throw new iMSCP_Exception_Production(tr('You have to wait %d seconds.', $btime - time()));
-		}
-
-		return true;
-	}
-
-	return false;
-}
-
-/**
- * Check/block IP for login/lostpassword if the bruteforce feature is enabled
- *
- * @throw iMSCP_Exception_Production
- * @param string $ipAddress User address ip
- * @param string $type Type of bruteforce detection (login|captcha)
- * @return void
- */
-function check_ipaddr($ipAddress = null, $type = 'bruteforce')
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	if (is_null($ipAddress)) {
-		$ipAddress = getipaddr();
-	}
-
-	$sessionId = session_id();
-
-	$query = "
-		SELECT
-			`session_id`, `ipaddr`, `user_name`, `lastaccess`, `login_count`, `captcha_count`
-		FROM
-			`login`
-		WHERE
-			`ipaddr` = ?
-		AND
-			`user_name` IS NULL
-	";
-
-	$stmt = exec_query($query, $ipAddress);
-
-	// First attempt ?
-	if ($stmt->recordCount() == 0) {
-		$query = "
-			REPLACE INTO
-				`login` (
-					`session_id`, `ipaddr`, `lastaccess`, `login_count`, `captcha_count`
-				) VALUES (
-					?, ?, UNIX_TIMESTAMP(), ?, ?
-				)
-		";
-
-		exec_query($query, array($sessionId, $ipAddress,
-									  (int)($type == 'bruteforce'),
-									  (int)($type == 'captcha')));
-
-		return;
-	} elseif ($cfg->BRUTEFORCE) {
-		$data = $stmt->fetchRow();
-		$lastAccess = $data['lastaccess'];
-		$loginCount = $data['login_count'];
-		$captchaCount = $data['captcha_count'];
-
-		if ($type == 'bruteforce' && $loginCount > $cfg->BRUTEFORCE_MAX_LOGIN) {
-			block_ipaddr($ipAddress, 'Login');
-		}
-
-		if ($type == 'captcha' && $captchaCount > $cfg->BRUTEFORCE_MAX_CAPTCHA) {
-			block_ipaddr($ipAddress, 'CAPTCHA');
-		}
-
-		if ($cfg->BRUTEFORCE_BETWEEN) {
-			$btime = $lastAccess + $cfg->BRUTEFORCE_BETWEEN_TIME;
-		} else {
-			$btime = 0;
-		}
-
-		// Updating brute force counters
-		if ($btime < time()) {
-			if ($type == 'bruteforce') {
-				$query = "
-					UPDATE
-						`login`
-					SET
-						`lastaccess` = UNIX_TIMESTAMP(),
-						`login_count` = `login_count` +1
-					WHERE
-						`ipaddr` = ?
-					AND
-						`user_name` IS NULL
-				";
-			} else if ($type == 'captcha') {
-				$query = "
-					UPDATE
-						`login`
-					SET
-						`lastaccess` = UNIX_TIMESTAMP(),
-						`captcha_count` = `captcha_count` +1
-					WHERE
-						`ipaddr` = ?
-					AND
-						`user_name` IS NULL
-				";
-			}
-
-			exec_query($query, $ipAddress);
-		} else {
-			write_log("Login error, <b><i>$ipAddress</i></b> wait " . ($btime - time()) . " seconds", E_USER_WARNING);
-			iMSCP_Registry::set('backButtonDestination', $cfg->BASE_SERVER_VHOST_PREFIX . $cfg->BASE_SERVER_VHOST);
-			throw new iMSCP_Exception_Production(tr('You have to wait %d seconds.', $btime - time()));
-		}
-	}
-}
-
-/**
- * Block an user Ip Address.
- *
- * @param string $ipAddress User Ip Address
- * @param string $type Tyoe if blockage
- */
-function block_ipaddr($ipAddress, $type = 'General')
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	write_log("$type protection, <b><i> " . tohtml($ipAddress) .
-			  "</i></b> blocked for " . $cfg->BRUTEFORCE_BLOCK_TIME ." minutes.", E_USER_WARNING);
-
-	deny_access();
-}
-
-/**
- * Display an informational deny message
- *
- * @throw iMSCP_Exception_Production
- * @return void
- */
-function deny_access()
-{
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
-
-	iMSCP_Registry::set('backButtonDestination', $cfg->BASE_SERVER_VHOST_PREFIX . $cfg->BASE_SERVER_VHOST);
-	throw new iMSCP_Exception_Production(tr('You have been blocked for %d minutes.', $cfg->BRUTEFORCE_BLOCK_TIME));
+	return true;
 }
 
 /**
@@ -517,8 +119,6 @@ function register_user($userName, $userPassword){
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
-	check_ipaddr();
-
 	if (!username_exists($userName)) {
 		write_log(tr('Login error, <b><i>%s</i></b> unknown username', tohtml($userName)), E_USER_NOTICE);
 
@@ -526,18 +126,18 @@ function register_user($userName, $userPassword){
 		return false;
 	}
 
-	$userData = get_userdata($userName);
+	$userData = iMSCP_Props_client::getInstanceByName($userName);
 
 	if ((iMSCP_Update_Database::getInstance()->isAvailableUpdate() ||
-		($cfg->MAINTENANCEMODE)) && $userData['admin_type'] != 'admin'
+		($cfg->MAINTENANCEMODE)) && $userData->user_type != 'admin'
 	) {
 		write_log(tr('Login error, <b><i>%s</i></b> system currently in maintenance mode', tohtml($userName)), E_USER_NOTICE);
 		set_page_message(tr('System is currently under maintenance! Only administrators can login.'));
 		return false;
 	}
 
-	if (crypt($userPassword, $userData['admin_pass']) == $userData['admin_pass'] ||
-		md5($userPassword) == $userData['admin_pass']
+	if (crypt($userPassword, $userData->user_pass) == $userData->user_pass ||
+		md5($userPassword) == $userData->user_pass
 	) {
 
 		if (isset($_SESSION['user_logged'])) {
@@ -545,26 +145,16 @@ function register_user($userName, $userPassword){
 			throw new iMSCP_Exception(tr('User already logged or session sharing problem! Aborting...'));
 		}
 
-		if (!is_userdomain_ok($userName)) {
-			write_log(tr('%s\'s account status is not ok!', $userName), E_USER_WARNING);
-			throw new iMSCP_Exception(tr('%s\'s account status is not ok!', $userName));
-		}
-
-		if ($userData['admin_type'] == 'user' && is_userdomain_expired($userName)) {
-			write_log(tr('%s\'s domain expired!', $userName), E_USER_NOTICE);
-			throw new iMSCP_Exception(tr('%s\'s domain expired!', tohtml($userName)));
-		}
-
 		$sessionId = session_id();
 		$query = 'UPDATE `login` SET `user_name` = ?, `lastaccess` = ? WHERE `session_id` = ?';
 		exec_query($query, array($userName, time(), $sessionId));
 
-		$_SESSION['user_logged']		= $userData['admin_name'];
-		$_SESSION['user_pass']			= $userData['admin_pass'];
-		$_SESSION['user_type']			= $userData['admin_type'];
-		$_SESSION['user_id']			= $userData['admin_id'];
-		$_SESSION['user_email']			= $userData['email'];
-		$_SESSION['user_created_by']	= $userData['created_by'];
+		$_SESSION['user_logged']		= $userData->user_name;
+		$_SESSION['user_pass']			= $userData->user_pass;
+		$_SESSION['user_type']			= $userData->user_type;
+		$_SESSION['user_id']			= $userData->user_id;
+		$_SESSION['user_email']			= $userData->user_email;
+		$_SESSION['user_created_by']	= $userData->user_created_by;
 		$_SESSION['user_login_time']	= time();
 
 		write_log(tr('%s logged in.', tohtml($userName)), E_USER_NOTICE);
@@ -583,8 +173,7 @@ function register_user($userName, $userPassword){
  *
  * @return boolean
  */
-function check_user_login()
-{
+function check_user_login(){
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
@@ -606,15 +195,15 @@ function check_user_login()
 		SELECT
 			*
 		FROM
-			`admin`, `login`
+			`user`, `login`
 		WHERE
-			admin.`admin_name` = ?
+			user.`user_name` = ?
 		AND
-			admin.`admin_pass` = ?
+			user.`user_pass` = ?
 		AND
-			admin.`admin_type` = ?
+			user.`user_type` = ?
 		AND
-			admin.`admin_id` = ?
+			user.`user_id` = ?
 		AND
 			login.`session_id` = ?
 	";
@@ -653,8 +242,7 @@ function check_user_login()
  * @param boolean $preventExternalLogin Check HTTP Referer for valid
  * request/call (ie. to prevent login from external websites)
  */
-function check_login($fileName = null, $preventExternalLogin = true)
-{
+function check_login($fileName = null, $preventExternalLogin = true){
 	if (!check_user_login()) {
 		if (is_xhr()) {
 			header('HTTP/1.0 403 Forbidden');
@@ -683,8 +271,8 @@ function check_login($fileName = null, $preventExternalLogin = true)
 					? $_SESSION['logged_from'] : $_SESSION['user_logged'];
 
 				write_log('Warning! user |' . $userLoggued . '| requested |' .
-						  tohtml($_SERVER['REQUEST_URI']) .
-						  '| with REQUEST_METHOD |' . $_SERVER['REQUEST_METHOD'] . '|', E_USER_WARNING);
+							tohtml($_SERVER['REQUEST_URI']) .
+							'| with REQUEST_METHOD |' . $_SERVER['REQUEST_METHOD'] . '|', E_USER_WARNING);
 			}
 
 			redirectTo('/index.php');
@@ -730,12 +318,11 @@ function check_login($fileName = null, $preventExternalLogin = true)
  * This function allows to switch between user's interfaces for admin and
  * reseller user accounts.
  *
- * @param  $fromId User's id that want switch to an other user's interface
- * @param  $toId User identifier that represents the destination interface
+ * @param	$fromId User's id that want switch to an other user's interface
+ * @param	$toId User identifier that represents the destination interface
  * @return void
  */
-function change_user_interface($fromId, $toId)
-{
+function change_user_interface($fromId, $toId) {
 	$index = null;
 
 	while (1) {
@@ -798,7 +385,7 @@ function change_user_interface($fromId, $toId)
 		unset_user_login_data(false, true);
 
 		if (($toAdminType != 'admin' && ((isset($_SESSION['logged_from_id']) &&
-										  $_SESSION['logged_from_id'] != $toId)
+											$_SESSION['logged_from_id'] != $toId)
 										 || !isset($_SESSION['logged_from_id'])))
 			|| ($fromAdminType == 'admin' && $toAdminType == 'admin')
 		) {
@@ -833,9 +420,9 @@ function change_user_interface($fromId, $toId)
 
 		exec_query($query, array(session_id(), getipaddr(), $toUserData['admin_name'], $_SESSION['user_login_time']));
 
-		write_log(sprintf("%s changes into %s's interface",
-						  decode_idna($fromUserData['admin_name']),
-						  decode_idna($toUserData['admin_name'])), E_USER_NOTICE);
+		write_log(tr("%s changes into %s's interface",
+							decode_idna($fromUserData['admin_name']),
+							decode_idna($toUserData['admin_name'])), E_USER_NOTICE);
 
 		break;
 	}
@@ -896,7 +483,7 @@ function unset_user_login_data($ignorePreserve = false, $restore = false)
 /**
  * Redirects to user level page
  *
- * @param  $file
+ * @param $file
  * @param bool $force
  * @return bool
  */
@@ -913,8 +500,7 @@ function redirect_to_level_page($file = null, $force = false)
 	$userType = isset($_SESSION['user_type']) ? $_SESSION['user_type'] : '';
 
 	switch ($userType) {
-		case 'user':
-			$userType = 'client';
+		case 'client':
 		case 'admin':
 		case 'reseller':
 			redirectTo('/' . $userType . '/' . $file);

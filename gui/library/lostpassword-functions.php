@@ -147,11 +147,11 @@ function removeOldKeys($ttl){
 
 	$query = '
 		UPDATE
-			`admin`
+			`user`
 		SET
-			`uniqkey` = NULL, `uniqkey_time` = NULL
+			`user_uniqkey` = NULL, `user_uniqkey_time` = NULL
 		WHERE
-			`uniqkey_time` < ?
+			`user_uniqkey_time` < ?
 	';
 	exec_query($query, $boundary);
 }
@@ -164,15 +164,10 @@ function removeOldKeys($ttl){
  * @return void
  */
 function setUniqKey($adminName, $uniqueKey){
-	$query = '
-		UPDATE
-			`admin`
-		SET
-			`uniqkey` = ?, `uniqkey_time` = ?
-		WHERE
-			`admin_name` = ?
-	';
-	exec_query($query, array($uniqueKey, date('Y-m-d H:i:s', time()), $adminName));
+	$user = iMSCP_Props_user_user::getInstanceByName($adminName);
+	$user->user_uniqkey = $uniqueKey;
+	$user->user_uniqkey_time = date('Y-m-d H:i:s', time());
+	$user->save();
 }
 
 /**
@@ -187,7 +182,7 @@ function setPassword($uniqueKey, $userPassword){
 		exit;
 	}
 
-	$query = 'UPDATE `admin` SET `admin_pass` = ? WHERE `uniqkey` = ?';
+	$query = 'UPDATE `user` SET `user_pass` = ? WHERE `user_uniqkey` = ?';
 	exec_query($query, array(crypt_user_pass($userPassword), $uniqueKey));
 }
 
@@ -198,7 +193,7 @@ function setPassword($uniqueKey, $userPassword){
  * @return bool TRUE if the key exists, FALSE otherwise
  */
 function uniqueKeyExists($uniqueKey){
-	$query = 'SELECT `uniqkey` FROM `admin` WHERE `uniqkey` = ?';
+	$query = 'SELECT `user_uniqkey` FROM `user` WHERE `user_uniqkey` = ?';
 	$stmt = exec_query($query, $uniqueKey);
 
 	return (bool) $stmt->recordCount();
@@ -233,21 +228,25 @@ function sendPassword($uniqueKey){
 
 	$query = '
 		SELECT
-			`admin_name`, `created_by`, `fname`, `lname`, `email`
+			`user_name`, `user_created_by`, `user_fname`, `user_lname`, `user_email`
 		FROM
-			`admin`
+			`user`
+		LEFT JOIN
+			`user_data`
+		ON
+			`user`.`user_id` = `user_data`.`user_id`
 		WHERE
-			`uniqkey` = ?
+			`user_uniqkey` = ?
 	';
 
 	$stmt = exec_query($query, $uniqueKey);
 
 	if ($stmt->recordCount()) {
-		$adminName = $stmt->fields['admin_name'];
-		$createdBy = $stmt->fields['created_by'];
-		$adminFirstName = $stmt->fields['fname'];
-		$adminLastName = $stmt->fields['lname'];
-		$to = $stmt->fields['email'];
+		$adminName = $stmt->fields['user_name'];
+		$createdBy = $stmt->fields['user_created_by'];
+		$adminFirstName = $stmt->fields['user_fname'];
+		$adminLastName = $stmt->fields['user_lname'];
+		$to = $stmt->fields['user_email'];
 
 		$userPassword = passgen();
 		setPassword($uniqueKey, $userPassword);
@@ -255,11 +254,11 @@ function sendPassword($uniqueKey){
 
 		$query = '
 			UPDATE
-				`admin`
+				`user`
 			SET
-				`uniqkey` = ?, `uniqkey_time` = ?
+				`user_uniqkey` = ?, `user_uniqkey_time` = ?
 			WHERE
-				`uniqkey` = ?
+				`user_uniqkey` = ?
 		';
 		exec_query($query, array('', '', $uniqueKey));
 
@@ -328,24 +327,16 @@ function requestPassword($adminName){
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
-	$query = '
-		SELECT
-			`created_by`, `fname`, `lname`, `email`
-		FROM
-			`admin`
-		WHERE
-			`admin_name` = ?
-	';
-	$stmt = exec_query($query, $adminName);
-
-	if (!$stmt->recordCount()) {
-		return false;
+	try{
+		$user = iMSCP_Props_user_user::getInstanceByName($adminName);
+	}catch (Exception $e){
+		return $false;
 	}
 
-	$createdBy = $stmt->fields['created_by'];
-	$adminFirstName = $stmt->fields['fname'];
-	$adminLastName = $stmt->fields['lname'];
-	$to = $stmt->fields['email'];
+	$createdBy = $user->user_created_by;
+	$adminFirstName = $user->user_fname;
+	$adminLastName = $user->user_lname;
+	$to = $user->user_email;
 
 	$uniqueKey = uniqkeygen();
 
@@ -358,13 +349,13 @@ function requestPassword($adminName){
 	}
 
 
-	$data = get_lostpassword_activation_email($createdBy);
-	$fromName = $data['sender_name'];
-	$fromEmail = $data['sender_email'];
-	$subject = $data['subject'];
-	$message = $data['message'];
-	$baseVhost = $cfg->BASE_SERVER_VHOST;
-	$baseVhostPrefix = $cfg->BASE_SERVER_VHOST_PREFIX;
+	$data				= get_lostpassword_activation_email($createdBy);
+	$fromName			= $data['sender_name'];
+	$fromEmail			= $data['sender_email'];
+	$subject			= $data['subject'];
+	$message			= $data['message'];
+	$baseVhost			= $cfg->BASE_SERVER_VHOST;
+	$baseVhostPrefix	= $cfg->BASE_SERVER_VHOST_PREFIX;
 
 	if ($fromName) {
 		$from = '"' . $fromName . "\" <" . $fromEmail . ">";

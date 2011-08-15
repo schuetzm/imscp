@@ -86,6 +86,19 @@ $tpl->assign(
 );
 
 // A request for new password was validated (User clicked on the link he has received by mail)
+if ($cfg->BRUTEFORCE) {
+	$bf = new iMSCP_Auth_bruteforce('captcha');
+
+	if($bf->isWaiting()){
+		iMSCP_Registry::set('backButtonDestination', $cfg->BASE_SERVER_VHOST_PREFIX . $cfg->BASE_SERVER_VHOST);
+		throw new iMSCP_Exception_Production(tr('You have to wait %s minutes.', $bf->isWaitingFor()));
+	}
+	if($bf->isBlocked()){
+		iMSCP_Registry::set('backButtonDestination', $cfg->BASE_SERVER_VHOST_PREFIX . $cfg->BASE_SERVER_VHOST);
+		throw new iMSCP_Exception_Production(tr('You have been blocked for %s minutes.', $bf->isBlockedFor()));
+	}
+}
+
 if (isset($_GET['key']) && $_GET['key'] != '') {
 	// Check key
 	check_input($_GET['key']);
@@ -98,16 +111,15 @@ if (isset($_GET['key']) && $_GET['key'] != '') {
 	}
 } elseif(isset($_POST['uname'])) { // Request for new password
 
-	// Check if we are not blocked (brute force feature)
-	check_ipaddr(getipaddr(), 'captcha');
-
 	if ($_POST['uname'] != '' && isset($_SESSION['image']) && isset($_POST['capcode'])) {
 		check_input(trim($_POST['uname']));
 		check_input($_POST['capcode']);
 
 		if($_SESSION['image'] != $_POST['capcode']) {
+			$bf->recordAttempt();
 			set_page_message(tr('Wrong security code'), 'error');
 		} elseif(!requestPassword($_POST['uname'])) {
+			$bf->recordAttempt();
 			set_page_message(tr('Wrong username'), 'error');
 		} else {
 			set_page_message(tr('Your request for new password was registered. You will receive an email with instructions to complete the process.'), 'success');
@@ -116,9 +128,6 @@ if (isset($_GET['key']) && $_GET['key'] != '') {
 		set_page_message(tr('All fields are required.'), 'error');
 	}
 
-} else { // Lost password form (Default)
-	unblock($cfg->BRUTEFORCE_BLOCK_TIME, 'captcha');
-	is_ipaddr_blocked(null, 'captcha', true);
 }
 
 // Generate page messages

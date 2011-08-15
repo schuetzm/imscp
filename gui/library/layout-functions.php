@@ -5,10 +5,10 @@
  * @copyright   2001-2006 by moleSoftware GmbH
  * @copyright   2006-2010 by ispCP | http://isp-control.net
  * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
- * @version     SVN: $Id$
- * @link        http://i-mscp.net
- * @author      ispCP Team
- * @author      i-MSCP Team
+ * @version	 SVN: $Id$
+ * @link		http://i-mscp.net
+ * @author	  ispCP Team
+ * @author	  i-MSCP Team
  *
  * @license
  * The contents of this file are subject to the Mozilla Public License
@@ -40,26 +40,22 @@
  * @param  $user_id
  * @return array
  */
-function get_user_gui_props($user_id)
-{
-    /** @var $cfg iMSCP_Config_Handler_File */
-    $cfg = iMSCP_Registry::get('config');
+function get_user_gui_props($user_id){
+	/** @var $cfg iMSCP_Config_Handler_File */
+	$cfg = iMSCP_Registry::get('config');
 
-    $query = "SELECT `lang`, `layout` FROM `user_gui_props` WHERE `user_id` = ?";
-    $stmt = exec_query($query, $user_id);
+	$user = iMSCP_Props_client::getInstanceById($user_id);
 
-    if ($stmt->recordCount() == 0 ||
-        (empty($stmt->fields['lang']) && empty($stmt->fields['layout']))
-    ) {
-        // values for user id, some default stuff
-        return array($cfg->USER_INITIAL_LANG, $cfg->USER_INITIAL_THEME);
-    } elseif (empty($stmt->fields['lang'])) {
-        return array($cfg->USER_INITIAL_LANG, $stmt->fields['layout']);
-    } elseif (empty($stmt->fields['layout'])) {
-        return array($stmt->fields['lang'], $cfg->USER_INITIAL_THEME);
-    } else {
-        return array($stmt->fields['lang'], $stmt->fields['layout']);
-    }
+	if (empty($user->lang) && empty($user->layout)) {
+		// values for user id, some default stuff
+		return array($cfg->USER_INITIAL_LANG, $cfg->USER_INITIAL_THEME);
+	} elseif (empty($user->lang)) {
+		return array($cfg->USER_INITIAL_LANG, $user->layout);
+	} elseif (empty($user->layout)) {
+		return array($user->lang, $cfg->USER_INITIAL_THEME);
+	} else {
+		return array($user->lang, $user->layout);
+	}
 }
 
 /**
@@ -71,17 +67,16 @@ function get_user_gui_props($user_id)
  * @param  iMSCP_pTemplate $tpl iMSCP_pTemplate instance
  * @return void
  */
-function generatePageMessage($tpl)
-{
-    if (!isset($_SESSION['user_page_message'])) {
-        $tpl->assign('PAGE_MESSAGE', '');
-    } else {
-        $tpl->assign(array(
-                          'MESSAGE_CLS' => $_SESSION['user_page_message_cls'],
-                          'MESSAGE' => $_SESSION['user_page_message']));
-
-        unset($_SESSION['user_page_message'], $_SESSION['user_page_message_cls']);
-    }
+function generatePageMessage($tpl){
+	if (!isset($_SESSION['user_page_message'])) {
+		$tpl->assign('PAGE_MESSAGE', '');
+	} else {
+		$tpl->assign(array(
+			'MESSAGE_CLS'	=> $_SESSION['user_page_message_cls'],
+			'MESSAGE'		=> $_SESSION['user_page_message']
+		));
+		unset($_SESSION['user_page_message'], $_SESSION['user_page_message_cls']);
+	}
 }
 
 /**
@@ -91,21 +86,21 @@ function generatePageMessage($tpl)
  * @param string $level Message level
  * @return void
  */
-function set_page_message($message, $level = 'info')
-{
-    if ($level != 'info' && $level != 'warning' && $level != 'error' &&
-        $level != 'success'
-    ) {
-        throw new iMSCP_Exception('Wrong level for page message.');
-    }
+function set_page_message($message, $level = 'info'){
+	if (
+		$level != 'info' && $level != 'warning' && $level != 'error' &&
+		$level != 'success'
+	) {
+		throw new iMSCP_Exception('Wrong level for page message.');
+	}
 
-    if (isset($_SESSION['user_page_message'])) {
-        $_SESSION['user_page_message'] .= "\n<br />$message";
-    } else {
-        $_SESSION['user_page_message'] = $message;
-    }
+	if (isset($_SESSION['user_page_message'])) {
+		$_SESSION['user_page_message'] .= "\n<br />$message";
+	} else {
+		$_SESSION['user_page_message'] = $message;
+	}
 
-    $_SESSION['user_page_message_cls'] = $level;
+	$_SESSION['user_page_message_cls'] = $level;
 }
 
 /**
@@ -114,15 +109,14 @@ function set_page_message($message, $level = 'info')
  * @param  array $messages Stack of messages to be concatenated
  * @return string Concatenated messages
  */
-function format_message($messages)
-{
-    $string = '';
+function format_message($messages){
+	$string = '';
 
-    foreach ((array)$messages as $message) {
-        $string .= $message . "<br />\n";
-    }
+	foreach ((array)$messages as $message) {
+		$string .= $message . "<br />\n";
+	}
 
-    return $string;
+	return $string;
 }
 
 /**
@@ -131,67 +125,43 @@ function format_message($messages)
  * @param  string $menu_link Menu link
  * @return mixed
  */
-function get_menu_vars($menu_link)
-{
-    $query = "
-		SELECT
-			`customer_id`, `fname`, `lname`, `firm`, `zip`, `city`, `state`,
-			`country`, `email`, `phone`, `fax`, `street1`, `street2`
-		FROM
-			`admin`
-		WHERE
-			`admin_id` = ?
-	";
-    $stmt = exec_query($query, $_SESSION['user_id']);
+function get_menu_vars($menu_link){
 
-    $search = array();
-    $replace = array();
+	$user = iMSCP_Props_client::getInstanceById($_SESSION['user_id']);
 
-    $search [] = '{uid}';
-    $replace[] = $_SESSION['user_id'];
-    $search [] = '{uname}';
-    $replace[] = tohtml($_SESSION['user_logged']);
-    $search [] = '{cid}';
-    $replace[] = tohtml($stmt->fields['customer_id']);
-    $search [] = '{fname}';
-    $replace[] = tohtml($stmt->fields['fname']);
-    $search [] = '{lname}';
-    $replace[] = tohtml($stmt->fields['lname']);
-    $search [] = '{company}';
-    $replace[] = tohtml($stmt->fields['firm']);
-    $search [] = '{zip}';
-    $replace[] = tohtml($stmt->fields['zip']);
-    $search [] = '{city}';
-    $replace[] = tohtml($stmt->fields['city']);
-    $search [] = '{state}';
-    $replace[] = $stmt->fields['state'];
-    $search [] = '{country}';
-    $replace[] = tohtml($stmt->fields['country']);
-    $search [] = '{email}';
-    $replace[] = tohtml($stmt->fields['email']);
-    $search [] = '{phone}';
-    $replace[] = tohtml($stmt->fields['phone']);
-    $search [] = '{fax}';
-    $replace[] = tohtml($stmt->fields['fax']);
-    $search [] = '{street1}';
-    $replace[] = tohtml($stmt->fields['street1']);
-    $search [] = '{street2}';
-    $replace[] = tohtml($stmt->fields['street2']);
+	$search = array();
+	$replace = array();
 
-    $query = "
-		SELECT
-			`domain_name`, `domain_admin_id`
-		FROM
-			`domain`
-		WHERE
-			`domain_admin_id` = ?
-	";
-    $stmt = exec_query($query, $_SESSION['user_id']);
+	$search [] = '{uid}';
+	$replace[] = $_SESSION['user_id'];
+	$search [] = '{uname}';
+	$replace[] = tohtml($_SESSION['user_logged']);
+	$search [] = '{fname}';
+	$replace[] = tohtml($user->user_fname);
+	$search [] = '{lname}';
+	$replace[] = tohtml($user->user_lname);
+	$search [] = '{company}';
+	$replace[] = tohtml($user->user_firm);
+	$search [] = '{zip}';
+	$replace[] = tohtml($user->user_zip);
+	$search [] = '{city}';
+	$replace[] = tohtml($user->user_city);
+	$search [] = '{state}';
+	$replace[] = tohtml($user->user_state);
+	$search [] = '{country}';
+	$replace[] = tohtml($user->user_country);
+	$search [] = '{email}';
+	$replace[] = tohtml($user->user_email);
+	$search [] = '{phone}';
+	$replace[] = tohtml($user->user_phone);
+	$search [] = '{fax}';
+	$replace[] = tohtml($user->user_fax);
+	$search [] = '{street1}';
+	$replace[] = tohtml($user->user_street1);
+	$search [] = '{street2}';
+	$replace[] = tohtml($user->user_street2);
 
-    $search [] = '{domain_name}';
-    $replace[] = $stmt->fields['domain_name'];
-
-    return str_replace($search, $replace, $menu_link);
+	return str_replace($search, $replace, $menu_link);
 }
 
 /**
@@ -202,23 +172,23 @@ function get_menu_vars($menu_link)
  * @return void
  * @todo currently not being used because there's only one layout/theme
  */
-function gen_def_layout($tpl, $user_def_layout)
-{
-    /** @var $cfg iMSCP_Config_Handler_File */
-    $cfg = iMSCP_Registry::get('config');
+function gen_def_layout($tpl, $user_def_layout){
+	/** @var $cfg iMSCP_Config_Handler_File */
+	$cfg = iMSCP_Registry::get('config');
 
-    $layouts = array('blue', 'green', 'red', 'yellow');
+	$layouts = array('blue', 'green', 'red', 'yellow');
 
-    foreach ($layouts as $layout) {
-        $selected = ($layout === $user_def_layout) ? $cfg->HTML_SELECTED : '';
+	foreach ($layouts as $layout) {
+		$selected = ($layout === $user_def_layout) ? $cfg->HTML_SELECTED : '';
 
-        $tpl->assign(array(
-                          'LAYOUT_VALUE' => $layout,
-                          'LAYOUT_SELECTED' => $selected,
-                          'LAYOUT_NAME' => $layout));
+		$tpl->assign(array(
+			'LAYOUT_VALUE'		=> $layout,
+			'LAYOUT_SELECTED'	=> $selected,
+			'LAYOUT_NAME'		=> $layout
+		));
 
-        $tpl->parse('DEF_LAYOUT', '.def_layout');
-    }
+		$tpl->parse('DEF_LAYOUT', '.def_layout');
+	}
 }
 
 /**
@@ -230,61 +200,61 @@ function gen_def_layout($tpl, $user_def_layout)
  * @author Laurent Declercq <l.declercq@nuxwin.com>
  * @since i-MSCP 1.0.1.4
  * @param bool $searchForCreator Tell whether or not search must be done for user's
- *                               creator in case no logo is found for user
- * @param bool $returnDefault    Tell whether or not default logo must be returned
+ *							   creator in case no logo is found for user
+ * @param bool $returnDefault	Tell whether or not default logo must be returned
  * @return string User logo path.
  * @todo cache issues
  */
-function layout_getUserLogo($searchForCreator = true, $returnDefault = true)
-{
-    /** @var $cfg iMSCP_Config_Handler_File */
-    $cfg = iMSCP_Registry::get('config');
+function layout_getUserLogo($searchForCreator = true, $returnDefault = true){
 
-    // On switched level, we want show logo from logged user
-    if (isset($_SESSION['logged_from_id']) && $searchForCreator) {
-        $userId = $_SESSION['logged_from_id'];
-        // Customers inherit the logo of their reseller
-    } elseif ($_SESSION['user_type'] == 'user') {
-        $userId = $_SESSION['user_created_by'];
-    } else {
-        $userId = $_SESSION['user_id'];
-    }
+	/** @var $cfg iMSCP_Config_Handler_File */
+	$cfg = iMSCP_Registry::get('config');
 
-    $query = 'SELECT `logo` FROM `user_gui_props` WHERE `user_id`= ?';
-    $stmt = exec_query($query, $userId);
+	// On switched level, we want show logo from logged user
+	if (isset($_SESSION['logged_from_id']) && $searchForCreator) {
+		$userId = $_SESSION['logged_from_id'];
+		// Customers inherit the logo of their reseller
+	} elseif ($_SESSION['user_type'] == 'user') {
+		$userId = $_SESSION['user_created_by'];
+	} else {
+		$userId = $_SESSION['user_id'];
+	}
 
-    // No logo is found for the user, let see for it creator
-    if ($searchForCreator && $userId != 1 && empty($stmt->fields['logo'])) {
-        $query = '
-            SELECT
-                `b`.`logo`
-            FROM
-                `admin` `a`
-            LEFT JOIN
-                `user_gui_props` `b` ON (`b`.`user_id` = `a`.`created_by`)
-            WHERE
-                `a`.`admin_id`= ?
-        ';
-        $stmt = exec_query($query, $userId);
-    }
+	$query = 'SELECT `logo` FROM `user_gui_props` WHERE `user_id`= ?';
+	$stmt = exec_query($query, $userId);
 
-    // No  user logo found
-    if (empty($stmt->fields['logo']) ||
-        !file_exists($cfg->GUI_ROOT_DIR . '/data/ispLogos/' . $stmt->fields['logo'])
-    ) {
-        if (!$returnDefault) {
-            return '';
-        } elseif (file_exists($cfg->GUI_ROOT_DIR . '/public/themes/' .
-                              $_SESSION['user_theme'] . '/images/imscp_logo.png')
-        ) {
-            return '../themes/' . $_SESSION['user_theme'] . '/images/imscp_logo.png';
-        } else {
-            // no logo available, we are using default
-            return $cfg->ISP_LOGO_PATH . '/' . 'isp_logo.gif';
-        }
-    }
+	// No logo is found for the user, let see for it creator
+	if ($searchForCreator && $userId != 1 && empty($stmt->fields['logo'])) {
+		$query = '
+			SELECT
+				`b`.`logo`
+			FROM
+				`user` `a`
+			LEFT JOIN
+				`user_gui_props` `b` ON (`b`.`user_id` = `a`.`user_created_by`)
+			WHERE
+				`a`.`user_id`= ?
+		';
+		$stmt = exec_query($query, $userId);
+	}
 
-    return $cfg->ISP_LOGO_PATH . '/' . $stmt->fields['logo'];
+	// No  user logo found
+	if (empty($stmt->fields['logo']) ||
+		!file_exists($cfg->GUI_ROOT_DIR . '/data/ispLogos/' . $stmt->fields['logo'])
+	) {
+		if (!$returnDefault) {
+			return '';
+		} elseif (file_exists($cfg->GUI_ROOT_DIR . '/public/themes/' .
+							  $_SESSION['user_theme'] . '/images/imscp_logo.png')
+		) {
+			return '../themes/' . $_SESSION['user_theme'] . '/images/imscp_logo.png';
+		} else {
+			// no logo available, we are using default
+			return $cfg->ISP_LOGO_PATH . '/' . 'isp_logo.gif';
+		}
+	}
+
+	return $cfg->ISP_LOGO_PATH . '/' . $stmt->fields['logo'];
 }
 
 /**
@@ -296,73 +266,73 @@ function layout_getUserLogo($searchForCreator = true, $returnDefault = true)
  * @since i-MSCP 1.0.1.4
  * @return bool TRUE on success, FALSE otherwise
  */
-function layout_updateUserLogo()
-{
-    /** @var $cfg iMSCP_Config_Handler_File */
-    $cfg = iMSCP_Registry::get('config');
+function layout_updateUserLogo(){
 
-    // closure that is run before move_uploaded_file() function - See the
-    // Utils_UploadFile() function for further information about implementation
-    // details
-    $beforeMove = function($cfg)
-    {
-        $tmpFilePath = $_FILES['logoFile']['tmp_name'];
+	/** @var $cfg iMSCP_Config_Handler_File */
+	$cfg = iMSCP_Registry::get('config');
 
-        // Checking file mime type
-        if (!($fileMimeType = checkMimeType($tmpFilePath, array('image/gif',
-                                                               'image/jpeg',
-                                                               'image/pjpeg',
-                                                               'image/png')))
-        ) {
-            set_page_message(tr('You can only upload images.'), 'error');
-            return false;
-        }
+	// closure that is run before move_uploaded_file() function - See the
+	// Utils_UploadFile() function for further information about implementation
+	// details
+	$beforeMove = function($cfg)
+	{
+		$tmpFilePath = $_FILES['logoFile']['tmp_name'];
 
-        // Retrieving file extension (gif|jpeg|png)
-        if ($fileMimeType == 'image/pjpeg' || $fileMimeType == 'image/jpeg') {
-            $fileExtension = 'jpeg';
-        } else {
-            $fileExtension = substr($fileMimeType, -3);
-        }
+		// Checking file mime type
+		if (!($fileMimeType = checkMimeType($tmpFilePath, array('image/gif',
+															   'image/jpeg',
+															   'image/pjpeg',
+															   'image/png')))
+		) {
+			set_page_message(tr('You can only upload images.'), 'error');
+			return false;
+		}
 
-        // Getting the image size
-        list($imageWidth, $imageHeigth) = getimagesize($tmpFilePath);
+		// Retrieving file extension (gif|jpeg|png)
+		if ($fileMimeType == 'image/pjpeg' || $fileMimeType == 'image/jpeg') {
+			$fileExtension = 'jpeg';
+		} else {
+			$fileExtension = substr($fileMimeType, -3);
+		}
 
-        // Checking image size
-        if ($imageWidth > 500 || $imageHeigth > 90) {
-            set_page_message(tr('Images have to be smaller than 500 x 90 pixels.'), 'error');
-            return false;
-        }
+		// Getting the image size
+		list($imageWidth, $imageHeigth) = getimagesize($tmpFilePath);
 
-        // Building an unique file name
-        $fileName = sha1(utils_randomString(15) . '-' . $_SESSION['user_id']) .
-                    '.' . $fileExtension;
+		// Checking image size
+		if ($imageWidth > 500 || $imageHeigth > 90) {
+			set_page_message(tr('Images have to be smaller than 500 x 90 pixels.'), 'error');
+			return false;
+		}
 
-        // Return destination file path
-        return $cfg->GUI_ROOT_DIR . '/data/ispLogos/' . $fileName;
-    };
+		// Building an unique file name
+		$fileName = sha1(utils_randomString(15) . '-' . $_SESSION['user_id']) .
+					'.' . $fileExtension;
 
-    if (($logoPath = utils_uploadFile('logoFile', array($beforeMove, $cfg))) === false) {
-        return false;
-    } else {
-        if ($_SESSION['user_type'] == 'admin') {
-            $userId = 1;
-        } else {
-            $userId = $_SESSION['user_id'];
-        }
+		// Return destination file path
+		return $cfg->GUI_ROOT_DIR . '/data/ispLogos/' . $fileName;
+	};
 
-        // We must catch old logo before update
-        $oldLogoFile = layout_getUserLogo(false, false);
+	if (($logoPath = utils_uploadFile('logoFile', array($beforeMove, $cfg))) === false) {
+		return false;
+	} else {
+		if ($_SESSION['user_type'] == 'admin') {
+			$userId = 1;
+		} else {
+			$userId = $_SESSION['user_id'];
+		}
 
-        $query = "UPDATE `user_gui_props` SET `logo` = ? WHERE `user_id` = ?";
-        exec_query($query, array(basename($logoPath), $userId));
+		// We must catch old logo before update
+		$oldLogoFile = layout_getUserLogo(false, false);
 
-        // Deleting old logo (we are safe here) - We don't return FALSE on failure .
-        // The administrator will be warned through logs.
-        layout_deleteUserLogo($oldLogoFile, true);
-    }
+		$query = "UPDATE `user_gui_props` SET `logo` = ? WHERE `user_id` = ?";
+		exec_query($query, array(basename($logoPath), $userId));
 
-    return true;
+		// Deleting old logo (we are safe here) - We don't return FALSE on failure .
+		// The administrator will be warned through logs.
+		layout_deleteUserLogo($oldLogoFile, true);
+	}
+
+	return true;
 }
 
 /**
@@ -374,42 +344,42 @@ function layout_updateUserLogo()
  * @param bool $onlyFile OPTIONAL Tell whether or not only logo file must be deleted
  * @return bool TRUE on success, FALSE otherwise
  */
-function layout_deleteUserLogo($logoFilePath = null, $onlyFile = false)
-{
-    /** @var $cfg iMSCP_Config_Handler_File */
-    $cfg = iMSCP_Registry::get('config');
+function layout_deleteUserLogo($logoFilePath = null, $onlyFile = false){
 
-    if (null === $logoFilePath) {
-        if ($_SESSION['user_type'] == 'admin') {
-            $logoFilePath = layout_getUserLogo(true);
-        } else {
-            $logoFilePath = layout_getUserLogo(false);
-        }
-    }
+	/** @var $cfg iMSCP_Config_Handler_File */
+	$cfg = iMSCP_Registry::get('config');
 
-    if ($_SESSION['user_type'] == 'admin') {
-        $userId = 1;
-    } else {
-        $userId = $_SESSION['user_id'];
-    }
+	if (null === $logoFilePath) {
+		if ($_SESSION['user_type'] == 'admin') {
+			$logoFilePath = layout_getUserLogo(true);
+		} else {
+			$logoFilePath = layout_getUserLogo(false);
+		}
+	}
 
-    if (!$onlyFile) {
-        $query = "UPDATE `user_gui_props` SET `logo` = ? WHERE `user_id` = ?";
-        exec_query($query, array('', $userId));
-    }
+	if ($_SESSION['user_type'] == 'admin') {
+		$userId = 1;
+	} else {
+		$userId = $_SESSION['user_id'];
+	}
 
-    if (strpos($logoFilePath, $cfg->ISP_LOGO_PATH) !== false) {
-        $logoFilePath = $cfg->GUI_ROOT_DIR . '/data/ispLogos/' . basename($logoFilePath);
+	if (!$onlyFile) {
+		$query = "UPDATE `user_gui_props` SET `logo` = ? WHERE `user_id` = ?";
+		exec_query($query, array('', $userId));
+	}
 
-        if (file_exists($logoFilePath) && @unlink($logoFilePath)) {
-            return true;
-        } else {
-            write_log(tr("System is unable to remove '%s' user logo.", $logoFilePath), E_USER_WARNING);
-            return false;
-        }
-    }
+	if (strpos($logoFilePath, $cfg->ISP_LOGO_PATH) !== false) {
+		$logoFilePath = $cfg->GUI_ROOT_DIR . '/data/ispLogos/' . basename($logoFilePath);
 
-    return true;
+		if (file_exists($logoFilePath) && @unlink($logoFilePath)) {
+			return true;
+		} else {
+			write_log(tr("System is unable to remove '%s' user logo.", $logoFilePath), E_USER_WARNING);
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /**
@@ -420,16 +390,16 @@ function layout_deleteUserLogo($logoFilePath = null, $onlyFile = false)
  * @param $logoPath Logo path to match against
  * @return bool TRUE if $logoPath is an user's logo, FALSE otherwise
  */
-function layout_isUserLogo($logoPath)
-{
-    /** @var $cfg iMSCP_Config_Handler_File */
-    $cfg = iMSCP_Registry::get('config');
+function layout_isUserLogo($logoPath){
 
-    if ($logoPath == '../themes/' . $_SESSION['user_theme'] . '/images/imscp_logo.png'
-        || $logoPath == $cfg->ISP_LOGO_PATH . '/' . 'isp_logo.gif'
-    ) {
-        return false;
-    }
+	/** @var $cfg iMSCP_Config_Handler_File */
+	$cfg = iMSCP_Registry::get('config');
 
-    return true;
+	if ($logoPath == '../themes/' . $_SESSION['user_theme'] . '/images/imscp_logo.png'
+		|| $logoPath == $cfg->ISP_LOGO_PATH . '/' . 'isp_logo.gif'
+	) {
+		return false;
+	}
+
+	return true;
 }

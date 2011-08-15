@@ -5,10 +5,10 @@
  * @copyright   2001-2006 by moleSoftware GmbH
  * @copyright   2006-2010 by ispCP | http://isp-control.net
  * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
- * @version     SVN: $Id$
- * @link        http://i-mscp.net
- * @author      ispCP Team
- * @author      i-MSCP Team
+ * @version	 SVN: $Id$
+ * @link		http://i-mscp.net
+ * @author	  ispCP Team
+ * @author	  i-MSCP Team
  *
  * @license
  * The contents of this file are subject to the Mozilla Public License
@@ -71,14 +71,14 @@ if (isset($_GET['ticket_id']) && !empty($_GET['ticket_id'])) {
 	$stmt = exec_query($query, array($ticketId, $userId, $userId));
 
 	if ($stmt->rowCount() == 0) {
-        set_page_message(tr("Ticket with Id: '%d' no found.", $ticketId), 'error');
+		set_page_message(tr("Ticket with Id: '%d' no found.", $ticketId), 'error');
 		redirectTo($previousPage . '.php');
 	}
 
-    // The ticket status was 0 so we come from ticket_closed.php
-    if($stmt->fields['ticket_status'] == 0 ) {
-        $previousPage = 'ticket_closed';
-    }
+	// The ticket status was 0 so we come from ticket_closed.php
+	if($stmt->fields['ticket_status'] == 0 ) {
+		$previousPage = 'ticket_closed';
+	}
 
 	deleteTicket($ticketId);
 	set_page_message(tr('Ticket successfully deleted.'), 'success');
@@ -91,9 +91,9 @@ if (isset($_GET['ticket_id']) && !empty($_GET['ticket_id'])) {
 	deleteTickets('closed', $userId);
 	set_page_message(tr('All closed tickets were successfully deleted.'), 'success');
 	write_log(sprintf("%s: deleted all closed tickets.", $_SESSION['user_logged']), E_USER_NOTICE);
-    $previousPage = 'ticket_closed';
+	$previousPage = 'ticket_closed';
 } else {
-    set_page_message(tr('Unknown action requested.'), 'error');
+	set_page_message(tr('Unknown action requested.'), 'error');
 }
 
 redirectTo($previousPage . '.php');

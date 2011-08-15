@@ -44,6 +44,12 @@ $tpl = new iMSCP_pTemplate();
 $tpl->define_dynamic('page', $cfg->CLIENT_TEMPLATE_PATH . '/domains_manage.tpl');
 $tpl->define_dynamic('page_message', 'page');
 $tpl->define_dynamic('logged_from', 'page');
+$tpl->define_dynamic('dmn_message', 'page');
+$tpl->define_dynamic('dmn_list', 'page');
+$tpl->define_dynamic('dmn_item', 'dmn_list');
+$tpl->define_dynamic('dmn_status_reload_true','dmn_item');
+$tpl->define_dynamic('dmn_status_reload_false','dmn_item');
+$tpl->define_dynamic('dmn_add', 'page');
 $tpl->define_dynamic('als_message', 'page');
 $tpl->define_dynamic('als_list', 'page');
 $tpl->define_dynamic('als_item', 'als_list');
@@ -205,153 +211,33 @@ function gen_user_sub_forward($sub_id, $sub_status, $url_forward, $dmn_type) {
 	}
 }
 
-function gen_user_sub_list($tpl, $user_id) {
-
-	$domain_id = get_user_domain_id($user_id);
-
-	$query = "
-		SELECT
-			`subdomain_id`,
-			`subdomain_name`,
-			`subdomain_mount`,
-			`subdomain_status`,
-			`subdomain_url_forward`,
-			`domain_name`
-		FROM
-			`subdomain` JOIN `domain`
-		ON
-			`subdomain`.`domain_id` = `domain`.`domain_id`
-		WHERE
-			`subdomain`.`domain_id` = ?
-		ORDER BY
-			`subdomain_name`
-    ";
-
-	$query2 = "
-		SELECT
-			`subdomain_alias_id`,
-			`subdomain_alias_name`,
-			`subdomain_alias_mount`,
-			`subdomain_alias_url_forward`,
-			`subdomain_alias_status`,
-			`alias_name`
-		FROM
-			`subdomain_alias` JOIN `domain_aliasses`
-		ON
-			`subdomain_alias`.`alias_id` = `domain_aliasses`.`alias_id`
-		WHERE
-			`domain_id` = ?
-		ORDER BY
-			`subdomain_alias_name`
-	";
-
-	$rs = exec_query($query, $domain_id);
-	$rs2 = exec_query($query2, $domain_id);
-
-	if (($rs->recordCount() + $rs2->recordCount()) == 0) {
-		$tpl->assign(array('SUB_MSG' => tr('Subdomain list is empty!'), 'SUB_LIST' => ''));
-		$tpl->parse('SUB_MESSAGE', 'sub_message');
-	} else {
-		$counter = 0;
-		while (!$rs->EOF) {
-			list($sub_action, $sub_action_script, $status_bool) = gen_user_sub_action($rs->fields['subdomain_id'], $rs->fields['subdomain_status']);
-			list($sub_forward, $sub_edit_link, $sub_edit) = gen_user_sub_forward($rs->fields['subdomain_id'], $rs->fields['subdomain_status'], $rs->fields['subdomain_url_forward'], 'dmn');
-			$sbd_name = decode_idna($rs->fields['subdomain_name']);
-			$sub_forward = decode_idna($sub_forward);
-            if($status_bool == false) { // reload
-				$tpl->assign('STATUS_RELOAD_TRUE', '');
-				$tpl->assign('SUB_NAME', tohtml($sbd_name));
-                $tpl->assign('SUB_ALIAS_NAME', tohtml($rs->fields['domain_name']));
-				$tpl->parse('STATUS_RELOAD_FALSE', 'status_reload_false');
-			} else {
-				$tpl->assign('STATUS_RELOAD_FALSE', '');
-				$tpl->assign('SUB_NAME', tohtml($sbd_name));
-                $tpl->assign('SUB_ALIAS_NAME', tohtml($rs->fields['domain_name']));
-				$tpl->parse('STATUS_RELOAD_TRUE', 'status_reload_true');
-			}
-			$tpl->assign(
-				array(
-					'SUB_NAME'			=> tohtml($sbd_name),
-					'SUB_MOUNT'			=> tohtml($rs->fields['subdomain_mount']),
-					'SUB_FORWARD'		=> $sub_forward,
-					'SUB_STATUS'		=> translate_dmn_status($rs->fields['subdomain_status']),
-					'SUB_EDIT_LINK'		=> $sub_edit_link,
-					'SUB_EDIT'			=> $sub_edit,
-					'SUB_ACTION'		=> $sub_action,
-					'SUB_ACTION_SCRIPT'	=> $sub_action_script,
-                    'ITEM_CLASS'        => ($counter % 2 == 0) ? 'content' : 'content2'
-				)
-			);
-			$tpl->parse('SUB_ITEM', '.sub_item');
-			$rs->moveNext();
-			$counter++;
-		}
-		while (!$rs2->EOF) {
-			list($sub_action, $sub_action_script, $status_bool) = gen_user_alssub_action($rs2->fields['subdomain_alias_id'], $rs2->fields['subdomain_alias_status']);
-			list($sub_forward, $sub_edit_link, $sub_edit) = gen_user_sub_forward($rs2->fields['subdomain_alias_id'], $rs2->fields['subdomain_alias_status'], $rs2->fields['subdomain_alias_url_forward'], 'als');
-			$sbd_name = decode_idna($rs2->fields['subdomain_alias_name']);
-			$sub_forward = decode_idna($sub_forward);
-            if($status_bool == false) { // reload
-				$tpl->assign('STATUS_RELOAD_TRUE', '');
-				$tpl->assign('SUB_NAME', tohtml($sbd_name));
-                $tpl->assign('SUB_ALIAS_NAME', tohtml($rs2->fields['alias_name']));
-				$tpl->parse('STATUS_RELOAD_FALSE', 'status_reload_false');
-			} else {
-				$tpl->assign('STATUS_RELOAD_FALSE', '');
-				$tpl->assign('SUB_NAME', tohtml($sbd_name));
-                $tpl->assign('SUB_ALIAS_NAME', tohtml($rs2->fields['alias_name']));
-				$tpl->parse('STATUS_RELOAD_TRUE', 'status_reload_true');
-			}
-			$tpl->assign(
-				array(
-					'SUB_NAME'			=> tohtml($sbd_name),
-					'SUB_MOUNT'			=> tohtml($rs2->fields['subdomain_alias_mount']),
-					'SUB_FORWARD'		=> $sub_forward,
-					'SUB_STATUS'		=> translate_dmn_status($rs2->fields['subdomain_alias_status']),
-					'SUB_EDIT_LINK'		=> $sub_edit_link,
-					'SUB_EDIT'			=> $sub_edit,
-					'SUB_ACTION'		=> $sub_action,
-					'SUB_ACTION_SCRIPT'	=> $sub_action_script,
-                    'ITEM_CLASS'        => ($counter % 2 == 0) ? 'content' : 'content2'
-				)
-			);
-			$tpl->parse('SUB_ITEM', '.sub_item');
-			$rs2->moveNext();
-			$counter++;
-		}
-
-		$tpl->parse('SUB_LIST', 'sub_list');
-		$tpl->assign('SUB_MESSAGE', '');
-	}
-}
-
-function gen_user_als_action($als_id, $als_status) {
+function gen_action($type, $id, $status) {
 
 	$cfg = iMSCP_Registry::get('config');
 
-	if ($als_status === $cfg->ITEM_OK_STATUS) {
-		return array(tr('Delete'), 'alias_delete.php?id=' . $als_id, true);
-	} else if ($als_status === $cfg->ITEM_ORDERED_STATUS) {
-		return array(tr('Delete order'), 'alias_order_delete.php?del_id=' . $als_id, false);
+	if ($status === $cfg->ITEM_OK_STATUS) {
+		return array(tr('Delete'), "${type}_delete.php?id=$id", true);
+	} else if ($status === $cfg->ITEM_ORDERED_STATUS) {
+		return array(tr('Delete order'), "${type}_order_delete.php?del_id=$id", false);
 	} else {
 		return array(tr('N/A'), '#',false);
 	}
 }
 
-function gen_user_als_forward($als_id, $als_status, $url_forward) {
+function gen_forward($type, $id, $status, $url_forward) {
 
 	if ($url_forward === 'no') {
-		if ($als_status === 'ok') {
-			return array("-", "alias_edit.php?edit_id=" . $als_id, tr("Edit"));
-		} else if ($als_status === 'ordered') {
+		if ($status === 'ok') {
+			return array("-", "${type}_edit.php?edit_id=" . $id, tr("Edit"));
+		} else if ($status === 'ordered') {
 			return array("-", "#", tr("N/A"));
 		} else {
 			return array(tr("N/A"), "#", tr("N/A"));
 		}
 	} else {
-		if ($als_status === 'ok') {
-			return array($url_forward, "alias_edit.php?edit_id=" . $als_id, tr("Edit"));
-		} else if ($als_status === 'ordered') {
+		if ($status === 'ok') {
+			return array($url_forward, "${type}_edit.php?edit_id=" . $id, tr("Edit"));
+		} else if ($status === 'ordered') {
 			return array($url_forward, "#", tr("N/A"));
 		} else {
 			return array(tr("N/A"), "#", tr("N/A"));
@@ -359,39 +245,21 @@ function gen_user_als_forward($als_id, $als_status, $url_forward) {
 	}
 }
 
-function gen_user_als_list($tpl, $user_id) {
+function gen_user_alias_list($tpl, $aliasses) {
 
-	$domain_id = get_user_domain_id($user_id);
-
-	$query = "
-		SELECT
-			`alias_id`, `alias_name`, `alias_status`, `alias_mount`, `alias_ip_id`,
-			`url_forward`
-		FROM
-			`domain_aliasses`
-		WHERE
-			`domain_id` = ?
-		ORDER BY
-			`alias_mount`, `alias_name`
-	";
-
-	$rs = exec_query($query, $domain_id);
-
-	if ($rs->recordCount() == 0) {
+	if (count($aliasses) == 0) {
 		$tpl->assign(array('ALS_MSG' => tr('Alias list is empty!'), 'ALS_LIST' => ''));
 		$tpl->parse('ALS_MESSAGE', 'als_message');
 	} else {
-		$counter = 0;
-		while (!$rs->EOF) {
-			$tpl->assign('ITEM_CLASS', ($counter % 2 == 0) ? 'content' : 'content2');
 
-			list($als_action, $als_action_script, $status_bool) = gen_user_als_action($rs->fields['alias_id'], $rs->fields['alias_status']);
-			list($als_forward, $alias_edit_link, $als_edit) = gen_user_als_forward($rs->fields['alias_id'], $rs->fields['alias_status'], $rs->fields['url_forward']);
+		foreach($aliasses as $alias) {
 
-			$alias_name = decode_idna($rs->fields['alias_name']);
-			$als_forward = decode_idna($als_forward);
+			list($action, $action_script, $status_bool) = gen_action('alias', $alias->alias_id, $alias->alias_status);
+			list($forward, $edit_link, $edit) = gen_forward('alias', $alias->alias_id, $alias->alias_status, 'no');
 
-            if($status_bool == false) { // reload
+			$alias_name = decode_idna($alias->alias_name);
+
+			if($status_bool == false) { // reload
 				$tpl->assign('ALS_STATUS_RELOAD_TRUE', '');
 				$tpl->assign('ALS_NAME', tohtml($alias_name));
 				$tpl->parse('ALS_STATUS_RELOAD_FALSE', 'als_status_reload_false');
@@ -404,24 +272,129 @@ function gen_user_als_list($tpl, $user_id) {
 			$tpl->assign(
 				array(
 					'ALS_NAME'			=> tohtml($alias_name),
-					'ALS_MOUNT'			=> tohtml($rs->fields['alias_mount']),
-					'ALS_STATUS'		=> translate_dmn_status($rs->fields['alias_status']),
-					'ALS_FORWARD'		=> tohtml($als_forward),
-					'ALS_EDIT_LINK'		=> $alias_edit_link,
-					'ALS_EDIT'			=> $als_edit,
-					'ALS_ACTION'		=> $als_action,
-					'ALS_ACTION_SCRIPT'	=> $als_action_script
+					'ALS_STATUS'		=> translate_dmn_status($alias->alias_status),
+					'ALS_ALIAS_OF'		=> iMSCP_Props_domain::getInstanceById($alias->domain_id)->domain_name,
+					'ALS_EDIT_LINK'		=> $edit_link,
+					'ALS_EDIT'			=> $edit,
+					'ALS_ACTION'		=> $action,
+					'ALS_ACTION_SCRIPT'	=> $action_script
 				)
 			);
 			$tpl->parse('ALS_ITEM', '.als_item');
-			$rs->moveNext();
-			$counter++;
 		}
 
 		$tpl->parse('ALS_LIST', 'als_list');
 		$tpl->assign('ALS_MESSAGE', '');
 	}
 }
+
+function gen_user_sub_list($tpl, $subdomains) {
+
+	if (count($subdomains) == 0) {
+		$tpl->assign(array('SUB_MSG' => tr('Subdomain list is empty!'), 'SUB_LIST' => ''));
+		$tpl->parse('SUB_MESSAGE', 'sub_message');
+	} else {
+		foreach ($subdomains as $subdomain) {
+
+			list($action, $action_script, $status_bool) = gen_action('subdomain', $subdomain->subdomain_id, $subdomain->subdomain_status);
+			list($forward, $edit_link, $edit) = gen_forward('subdomain', $subdomain->subdomain_id, $subdomain->subdomain_status, $subdomain->subdomain_url_forward);
+
+			$sbd_name = decode_idna($subdomain->subdomain_name);
+			$forward = decode_idna($forward);
+
+			if($status_bool == false) { // reload
+				$tpl->assign('STATUS_RELOAD_TRUE', '');
+				$tpl->assign('SUB_NAME', tohtml($sbd_name));
+				$tpl->parse('STATUS_RELOAD_FALSE', 'status_reload_false');
+			} else {
+				$tpl->assign('STATUS_RELOAD_FALSE', '');
+				$tpl->assign('SUB_NAME', tohtml($sbd_name));
+				$tpl->parse('STATUS_RELOAD_TRUE', 'status_reload_true');
+			}
+			$tpl->assign(
+				array(
+					'SUB_NAME'			=> tohtml($sbd_name),
+					'SUB_MOUNT'			=> tohtml($subdomain->subdomain_mount),
+					'SUB_FORWARD'		=> $forward,
+					'SUB_STATUS'		=> translate_dmn_status($subdomain->subdomain_status),
+					'SUB_EDIT_LINK'		=> $edit_link,
+					'SUB_EDIT'			=> $edit,
+					'SUB_ACTION'		=> $action,
+					'SUB_ACTION_SCRIPT'	=> $action_script,
+				)
+			);
+			$tpl->parse('SUB_ITEM', '.sub_item');
+		}
+
+		$tpl->parse('SUB_LIST', 'sub_list');
+		$tpl->assign('SUB_MESSAGE', '');
+	}
+}
+
+function gen_user_dmn_list($tpl) {
+
+	$user		= iMSCP_Props_client::getInstanceById($_SESSION['user_id']);
+	$domains	= $user->domains;
+
+	$cfg = iMSCP_Registry::get('config');
+	$subdomains = array();
+	$aliasses = array();
+
+	if (count($user->domains) == 0) {
+		$tpl->assign(array(
+			'DMN_MSG' => tr('Domain list is empty!'),
+			'DMN_LIST' => '',
+			'SUB_MSG' => tr('Subdomain list is empty!'),
+			'SUB_LIST' => '',
+			'ALS_MSG' => tr('Alias list is empty!'),
+			'ALS_LIST' => ''
+		));
+		$tpl->parse('DMN_MESSAGE', 'dmn_message');
+	} else {
+		foreach ($domains as $domain) {
+
+			$subdomains = $subdomains + $domain->subdomains;
+			$aliasses = $aliasses + $domain->aliases;
+
+			list($action, $action_script, $status_bool) = gen_action('domain', $domain->domain_id, $domain->domain_status);
+			list($forward, $edit_link, $edit) = gen_forward('domain', $domain->domain_id, $domain->domain_status, $domain->url_forward);
+
+			$dmn_name = decode_idna($domain->domain_name);
+			$forward = decode_idna($forward);
+
+			if($status_bool == false) { // reload
+				$tpl->assign('DMN_STATUS_RELOAD_TRUE', '');
+				$tpl->assign('DMN_NAME', tohtml($dmn_name));
+				$tpl->parse('DMN_STATUS_RELOAD_FALSE', 'dmn_status_reload_false');
+			} else {
+				$tpl->assign('DMN_STATUS_RELOAD_FALSE', '');
+				$tpl->assign('DMN_NAME', tohtml($dmn_name));
+				$tpl->parse('DMN_STATUS_RELOAD_TRUE', 'dmn_status_reload_true');
+			}
+
+			$tpl->assign(
+				array(
+					'DMN_NAME'			=> tohtml($dmn_name),
+					'DMN_MOUNT'			=> tohtml($domain->domain_mount_point),
+					'DMN_STATUS'		=> translate_dmn_status($domain->domain_status),
+					'DMN_FORWARD'		=> tohtml($forward),
+					'DMN_EDIT_LINK'		=> $edit_link,
+					'DMN_EDIT'			=> $edit,
+					'DMN_ACTION'		=> $action,
+					'DMN_ACTION_SCRIPT'	=> $action_script,
+					'ALTERNATIVE_URL'	=> "{$cfg->BASE_SERVER_VHOST_PREFIX}$dmn_name.{$cfg->BASE_SERVER_VHOST}"
+				)
+			);
+			$tpl->parse('DMN_ITEM', '.dmn_item');
+		}
+
+		$tpl->parse('DMN_LIST', 'dmn_list');
+		$tpl->assign('DMN_MESSAGE', '');
+		gen_user_sub_list($tpl, $subdomains);
+		gen_user_alias_list($tpl, $aliasses);
+	}
+}
+
 
 // common page data.
 
@@ -436,9 +409,11 @@ $tpl->assign(
 
 // dynamic page data.
 
-gen_user_sub_list($tpl, $_SESSION['user_id']);
-gen_user_als_list($tpl, $_SESSION['user_id']);
+gen_user_dmn_list($tpl);
+
+/*
 gen_user_dns_list($tpl, $_SESSION['user_id']);
+*/
 gen_client_mainmenu($tpl, $cfg->CLIENT_TEMPLATE_PATH . '/main_menu_manage_domains.tpl');
 gen_client_menu($tpl, $cfg->CLIENT_TEMPLATE_PATH . '/menu_manage_domains.tpl');
 
@@ -448,27 +423,22 @@ check_permissions($tpl);
 
 $tpl->assign(
 	array(
-		'TR_MANAGE_DOMAINS'	=> tr('Manage domains'),
-		'TR_DOMAIN_ALIASES'	=> tr('Domain aliases'),
-		'TR_ALS_NAME'		=> tr('Name'),
-		'TR_ALS_MOUNT'		=> tr('Mount point'),
-		'TR_ALS_FORWARD'	=> tr('Forward'),
-		'TR_ALS_STATUS'		=> tr('Status'),
-		'TR_ALS_ACTION'		=> tr('Action'),
-		'TR_SUBDOMAINS'		=> tr('Subdomains'),
-		'TR_SUB_NAME'		=> tr('Name'),
-		'TR_SUB_MOUNT'		=> tr('Mount point'),
-		'TR_SUB_FORWARD'	=> tr('Forward'),
-		'TR_SUB_STATUS'		=> tr('Status'),
-		'TR_SUB_ACTION'		=> tr('Actions'),
-		'TR_MESSAGE_DELETE'	=> tr('Are you sure you want to delete %s?', true, '%s'),
-		'TR_DNS'			=> tr("DNS zone's records (EXPERIMENTAL)"),
-		'TR_DNS_NAME'		=> tr('Name'),
-		'TR_DNS_CLASS'		=> tr('Class'),
-		'TR_DNS_TYPE'		=> tr('Type'),
-		'TR_DNS_ACTION'		=> tr('Actions'),
-		'TR_DNS_DATA'		=> tr('Record data'),
-		'TR_DOMAIN_NAME'	=> tr('Domain')
+		'TR_DOMAINS'			=> tr('Domains'),
+		'TR_NAME'				=> tr('Name'),
+		'TR_MOUNT'				=> tr('Mount point'),
+		'TR_FORWARD'			=> tr('Forward'),
+		'TR_STATUS'				=> tr('Status'),
+		'TR_ACTION'				=> tr('Actions'),
+		'TR_DOMAIN_ALIASES'		=> tr('Domain aliases'),
+		'TR_ALIAS_OF'			=> tr('Alias for domain'),
+		'TR_SUBDOMAINS'			=> tr('Subdomains'),
+		'TR_MESSAGE_DELETE'		=> tr('Are you sure you want to delete %s?', true, '%s'),
+		'TR_DNS'				=> tr('DNS zone\'s records'),
+		'TR_DNS_CLASS'			=> tr('Class'),
+		'TR_DNS_TYPE'			=> tr('Type'),
+		'TR_DNS_DATA'			=> tr('Record data'),
+		'TR_DOMAIN_NAME'		=> tr('Domain'),
+		'TR_ALTERNATIVE_URL'	=> tr('Alternative URL to reach your website')
 	)
 );
 
@@ -477,7 +447,7 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(
-    iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
+	iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
 

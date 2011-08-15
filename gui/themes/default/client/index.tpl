@@ -41,7 +41,7 @@
 			{MENU}
 		</div>
 		<div class="body">
-            <h2 class="general"><span>{TR_GENERAL_INFORMATION}</span></h2>
+			<h2 class="general"><span>{TR_GENERAL_INFORMATION}</span></h2>
 
 			<!-- BDP: page_message -->
 			<div class="{MESSAGE_CLS}">{MESSAGE}</div>
@@ -53,25 +53,32 @@
 
 			<table>
 				<tr>
-					<td style="width: 300px;">{TR_ACCOUNT_NAME} / {TR_MAIN_DOMAIN}</td>
+					<td style="width: 300px;">{TR_ACCOUNT_NAME}</td>
 					<td>{ACCOUNT_NAME}</td>
 				</tr>
 
-                <!-- BDP: alternative_domain_url -->
-                <tr>
-                    <td>{TR_DMN_TMP_ACCESS}</td>
-                    <td>
-                        <a id="dmn_tmp_access" href="{DOMAIN_ALS_URL}" target="_blank">{DOMAIN_ALS_URL}</a>
-                    </td>
-                </tr>
-                <!-- EDP: alternative_domain_url -->
+				<!-- BDP: t_ssh_support -->
+				<tr>
+					<td>{TR_SSH_SUPPORT}</td>
+					<td>{SSH_SUPPORT}</td>
+				</tr>
+				<!-- EDP: t_ssh_support -->
 
-                <tr>
-                    <td>{TR_DOMAIN_EXPIRE}</td>
-                    <td>{DMN_EXPIRES} {DMN_EXPIRES_DATE}</td>
-                </tr>
+				<!-- BDP: t_cron_support -->
+				<tr>
+					<td>{TR_CRON_SUPPORT}</td>
+					<td>{CRON_SUPPORT}</td>
+				</tr>
+				<!-- EDP: t_cron_support -->
 
-                <!-- BDP: t_php_support -->
+				<!-- BDP: t_ssl_support -->
+				<tr>
+					<td>{TR_SSL_SUPPORT}</td>
+					<td>{SSL_SUPPORT}</td>
+				</tr>
+				<!-- EDP: t_ssl_support -->
+
+				<!-- BDP: t_php_support -->
 				<tr>
 					<td>{TR_PHP_SUPPORT}</td>
 					<td>{PHP_SUPPORT}</td>
@@ -91,6 +98,13 @@
 					<td>{MYSQL_SUPPORT}</td>
 				</tr>
 				<!--EDP: t_sql1_support -->
+
+				<!-- BDP: t_dmn_support -->
+				<tr>
+					<td>{TR_DOMAINS}</td>
+					<td>{DOMAINS}</td>
+				</tr>
+				<!--EDP: t_dmn_support -->
 
 				<!-- BDP: t_sdm_support -->
 				<tr>
@@ -118,14 +132,14 @@
 					<td>{FTP_ACCOUNTS}</td>
 				</tr>
 
-				<!-- BDP: t_software_allowed -->
+				<!-- BDP: t_software_support -->
 				<tr>
- 					<td>{SW_ALLOWED}</td>
-					<td>{SW_MSG}</td>
+ 					<td>{TR_SOFTWARE_SUPPORT}</td>
+					<td>{SOFTWARE_SUPPORT}</td>
 				</tr>
-				<!-- EDP: t_software_allowed -->
+				<!-- EDP: t_software_support -->
 
-				<!-- BDP: t_sdm_support -->
+				<!-- BDP: t_sql2_support -->
 				<tr>
 					<td>{TR_SQL_DATABASES}</td>
 					<td>{SQL_DATABASES}</td>
@@ -134,7 +148,7 @@
 					<td>{TR_SQL_USERS}</td>
 					<td>{SQL_USERS}</td>
 				</tr>
-				<!--EDP: t_sdm_support -->
+				<!--EDP: t_sql2_support -->
 			</table>
 
 			<h2 class="traffic"><span>{TR_TRAFFIC_USAGE}</span></h2>

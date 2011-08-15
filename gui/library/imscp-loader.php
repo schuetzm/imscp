@@ -21,14 +21,14 @@
  * Portions created by the i-MSCP Team are Copyright (C) 2010-2011 by
  * i-MSCP a internet Multi Server Control Panel. All Rights Reserved.
  *
- * @category    i-MSCP
- * @package     Core
+ * @category	i-MSCP
+ * @package	 Core
  * @copyright   2006-2010 by ispCP | http://isp-control.net
  * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
- * @author      Laurent Declercq <l.declercq@nuxwin.com>
- * @version     SVN: $Id$
- * @link        http://i-mscp.net i-MSCP Home Site
- * @license     http://www.mozilla.org/MPL/ MPL 1.1
+ * @author	  Laurent Declercq <l.declercq@nuxwin.com>
+ * @version	 SVN: $Id$
+ * @link		http://i-mscp.net i-MSCP Home Site
+ * @license	 http://www.mozilla.org/MPL/ MPL 1.1
  */
 
 /**
@@ -37,11 +37,10 @@
  * @param string $className Class name to be loaded
  * @return void
  */
-function autoload_class($className)
-{
-    $path = str_replace('_', '/', $className);
+function autoload_class($className){
+	$path = str_replace('_', '/', $className);
 
-    if (file_exists(INCLUDEPATH . '/' . $path . '.php')) {
-        require_once INCLUDEPATH . '/' . $path . '.php';
-    }
+	if (file_exists(INCLUDEPATH . '/' . $path . '.php')) {
+		require_once INCLUDEPATH . '/' . $path . '.php';
+	}
 }

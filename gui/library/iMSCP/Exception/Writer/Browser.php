@@ -123,6 +123,7 @@ class iMSCP_Exception_Writer_Browser extends iMSCP_Exception_Writer
                 ? $productionException->getMessage()
                 : $exceptionHandler->getException()->getMessage();
         }
+        $this->_message = nl2br($this->_message);
 
         if ($this->_templateFile != null) {
             $this->_render();

@@ -41,18 +41,31 @@ iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart)
 /** @var $cfg iMSCP_Config_Handler_File */
 $cfg = iMSCP_Registry::get('config');
 
+if ($cfg->BRUTEFORCE) {
+	$bf = new iMSCP_Auth_bruteforce();
+
+	if($bf->isWaiting()){
+		iMSCP_Registry::set('backButtonDestination', $cfg->BASE_SERVER_VHOST_PREFIX . $cfg->BASE_SERVER_VHOST);
+		throw new iMSCP_Exception_Production(tr('You have to wait %s minutes.', $bf->isWaitingFor()));
+	}
+	if($bf->isBlocked()){
+		iMSCP_Registry::set('backButtonDestination', $cfg->BASE_SERVER_VHOST_PREFIX . $cfg->BASE_SERVER_VHOST);
+		throw new iMSCP_Exception_Production(tr('You have been blocked for %s minutes.', $bf->isBlockedFor()));
+	}
+}
+
 if (isset($_GET['logout'])) {
 	unset_user_login_data();
 }
 
 do_session_timeout();
-init_login();
 
 if (isset($_POST['uname']) && isset($_POST['upass'])) {
 	if (!empty($_POST['uname']) && !empty($_POST['upass'])) {
 		$uname = encode_idna($_POST['uname']);
 		check_input(trim($_POST['uname']));
 		check_input(trim($_POST['upass']));
+		$bf->recordAttempt();
 		register_user($uname, $_POST['upass']);
 	} else {
 		set_page_message(tr('All fields are required!'), 'error');
@@ -62,9 +75,6 @@ if (isset($_POST['uname']) && isset($_POST['upass'])) {
 if (check_user_login() && !redirect_to_level_page()) {
 	unset_user_login_data();
 }
-
-shall_user_wait();
-
 $theme_color = isset($_SESSION['user_theme']) ? $_SESSION['user_theme'] : $cfg->USER_INITIAL_THEME;
 
 $tpl = new iMSCP_pTemplate();

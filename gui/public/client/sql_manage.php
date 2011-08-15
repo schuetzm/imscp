@@ -90,9 +90,9 @@ function gen_db_user_list($tpl, $db_id) {
 			$user_mysql = $rs->fields['sqlu_name'];
 			$tpl->assign(
 				array(
-					'DB_USER'	=> tohtml($user_mysql),
-					'DB_USER_JS'=> tojs($user_mysql),
-					'USER_ID'	=> $user_id
+					'DB_USER'		=> tohtml($user_mysql),
+					'DB_USER_JS'	=> tojs($user_mysql),
+					'USER_ID'		=> $user_id
 				)
 			);
 			$tpl->parse('USER_LIST', '.user_list');
@@ -111,12 +111,12 @@ function gen_db_list($tpl, $user_id) {
 		FROM
 			`sql_database`
 		WHERE
-			`domain_id` = ?
+			`admin_id` = ?
 		ORDER BY
 			`sqld_name`
 	";
 
-	$rs = exec_query($query, $dmn_id);
+	$rs = exec_query($query, $_SESSION['user_id']);
 
 	if ($rs->recordCount() == 0) {
 		set_page_message(tr('Database list is empty!'));
@@ -128,9 +128,9 @@ function gen_db_list($tpl, $user_id) {
 			gen_db_user_list($tpl, $db_id);
 			$tpl->assign(
 				array(
-					'DB_ID'		=> $db_id,
-					'DB_NAME'	=> tohtml($db_name),
-					'DB_NAME_JS'=> tojs($db_name)
+					'DB_ID'			=> $db_id,
+					'DB_NAME'		=> tohtml($db_name),
+					'DB_NAME_JS'	=> tojs($db_name)
 				)
 			);
 			$tpl->parse('DB_LIST', '.db_list');
@@ -149,10 +149,10 @@ if (isset($_SESSION['sql_support']) && $_SESSION['sql_support'] == "no") {
 
 $tpl->assign(
 	array(
-		'TR_CLIENT_MANAGE_SQL_PAGE_TITLE' => tr('i-MSCP - Client/Manage SQL'),
-		'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
-		'THEME_CHARSET' => tr('encoding'),
-		'ISP_LOGO' => layout_getUserLogo()
+		'TR_CLIENT_MANAGE_SQL_PAGE_TITLE'	=> tr('i-MSCP - Client/Manage SQL'),
+		'THEME_COLOR_PATH'					=> "../themes/{$cfg->USER_INITIAL_THEME}",
+		'THEME_CHARSET'						=> tr('encoding'),
+		'ISP_LOGO'							=> layout_getUserLogo()
 	)
 );
 
@@ -171,19 +171,19 @@ check_permissions($tpl);
 
 $tpl->assign(
 	array(
-		'TR_MANAGE_SQL'			=> tr('Manage SQL'),
-		'TR_DELETE'				=> tr('Delete'),
-		'TR_DATABASE'			=> tr('Database Name and Users'),
-		'TR_CHANGE_PASSWORD'	=> tr('Change password'),
-		'TR_ACTION'				=> tr('Action'),
-		'TR_PHP_MYADMIN'		=> tr('phpMyAdmin'),
-		'TR_DATABASE_USERS'		=> tr('Database users'),
-		'TR_ADD_USER'			=> tr('Add SQL user'),
-		'TR_EXECUTE_QUERY'		=> tr('Execute query'),
-		'TR_CHANGE_PASSWORD'	=> tr('Change password'),
-		'TR_LOGIN_PMA'			=> tr('Login phpMyAdmin'),
-		'TR_DATABASE_MESSAGE_DELETE' => tr("This database will be permanently deleted. This process cannot be recovered. All users linked to this database will also be deleted if not linked to another database. Are you sure you want to delete the '%s' database?", true, '%s'),
-        'TR_USER_MESSAGE_DELETE' => tr("Are you sure you want delete the '%s' SQL user?", true, '%s')
+		'TR_MANAGE_SQL'					=> tr('Manage SQL'),
+		'TR_DELETE'						=> tr('Delete'),
+		'TR_DATABASE'					=> tr('Database Name and Users'),
+		'TR_CHANGE_PASSWORD'			=> tr('Change password'),
+		'TR_ACTION'						=> tr('Action'),
+		'TR_PHP_MYADMIN'				=> tr('phpMyAdmin'),
+		'TR_DATABASE_USERS'				=> tr('Database users'),
+		'TR_ADD_USER'					=> tr('Add SQL user'),
+		'TR_EXECUTE_QUERY'				=> tr('Execute query'),
+		'TR_CHANGE_PASSWORD'			=> tr('Change password'),
+		'TR_LOGIN_PMA'					=> tr('Login phpMyAdmin'),
+		'TR_DATABASE_MESSAGE_DELETE'	=> tr("This database will be permanently deleted. This process cannot be recovered. All users linked to this database will also be deleted if not linked to another database. Are you sure you want to delete the '%s' database?", true, '%s'),
+		'TR_USER_MESSAGE_DELETE'		=> tr("Are you sure you want delete the '%s' SQL user?", true, '%s')
 	)
 );
 
@@ -192,7 +192,7 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(
-    iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
+	iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
 

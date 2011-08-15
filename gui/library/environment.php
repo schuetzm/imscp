@@ -27,7 +27,7 @@
  * @author		ispCP Team
  * @author		i-MSCP Team
  * @version		SVN: $Id$
- * @link        http://i-mscp.net i-MSCP Home Site
+ * @link		http://i-mscp.net i-MSCP Home Site
  * @license		http://www.mozilla.org/MPL/ MPL 1.1
  */
 
@@ -148,18 +148,18 @@ $config->LOSTPASSWORD_CAPTCHA_TEXTCOLOR = array(1, 53, 920);
  * Captcha ttf fontfiles (have to be under compatible open source license)
  */
 $fonts = array(
-    'FreeMono.ttf',
-    'FreeMonoBold.ttf',
-    'FreeMonoBoldOblique.ttf',
-    'FreeMonoOblique.ttf',
-    'FreeSans.ttf',
-    'FreeSansBold.ttf',
-    'FreeSansBoldOblique.ttf',
-    'FreeSansOblique.ttf',
-    'FreeSerif.ttf',
-    'FreeSerifBold.ttf',
-    'FreeSerifBoldItalic.ttf',
-    'FreeSerifItalic.ttf'
+	'FreeMono.ttf',
+	'FreeMonoBold.ttf',
+	'FreeMonoBoldOblique.ttf',
+	'FreeMonoOblique.ttf',
+	'FreeSans.ttf',
+	'FreeSansBold.ttf',
+	'FreeSansBoldOblique.ttf',
+	'FreeSansOblique.ttf',
+	'FreeSerif.ttf',
+	'FreeSerifBold.ttf',
+	'FreeSerifBoldItalic.ttf',
+	'FreeSerifItalic.ttf'
 );
 
 // Set random captcha font file
@@ -257,8 +257,8 @@ iMSCP_Initializer::run($config);
 
 // Please: Don't move this statement before the initialization process
 if( PHP_SAPI != 'cli') {
-    $config->MAINTENANCEMODE_MESSAGE =
-        tr("We are sorry, but the system is currently under maintenance.\nPlease try again later.");
+	$config->MAINTENANCEMODE_MESSAGE =
+		tr("We are sorry, but the system is currently under maintenance.\nPlease try again later.");
 }
 
 // Remove useless variable

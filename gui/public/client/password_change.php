@@ -48,10 +48,10 @@ $tpl->define_dynamic('logged_from', 'page');
 
 $tpl->assign(
 	array(
-		'TR_CLIENT_CHANGE_PASSWORD_PAGE_TITLE' => tr('i-MSCP - Client/Change Password'),
-		'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
-		'THEME_CHARSET' => tr('encoding'),
-		'ISP_LOGO' => layout_getUserLogo()
+		'TR_CLIENT_CHANGE_PASSWORD_PAGE_TITLE'	=> tr('i-MSCP - Client/Change Password'),
+		'THEME_COLOR_PATH'						=> "../themes/{$cfg->USER_INITIAL_THEME}",
+		'THEME_CHARSET'							=> tr('encoding'),
+		'ISP_LOGO'								=> layout_getUserLogo()
 	)
 );
 
@@ -62,9 +62,9 @@ if (isset($_POST['uaction']) && $_POST['uaction'] === 'updt_pass') {
 		set_page_message(tr('Passwords do not match!'), 'error');
 	} else if (!chk_password($_POST['pass'])) {
 		if ($cfg->PASSWD_STRONG) {
-			set_page_message(sprintf(tr('The password must be at least %s long and contain letters and numbers to be valid.'), $cfg->PASSWD_CHARS), 'error');
+			set_page_message(tr('The password must be at least %s long and contain letters and numbers to be valid.', $cfg->PASSWD_CHARS), 'error');
 		} else {
-			set_page_message(sprintf(tr('Password data is shorter than %s signs or includes not permitted signs!'), $cfg->PASSWD_CHARS), 'error');
+			set_page_message(tr('Password data is shorter than %s signs or includes not permitted signs!', $cfg->PASSWD_CHARS), 'error');
 		}
 	} else if (!check_udata($_SESSION['user_id'], $_POST['curr_pass'])) {
 		set_page_message(tr('The current password is wrong!'), 'error');
@@ -73,32 +73,25 @@ if (isset($_POST['uaction']) && $_POST['uaction'] === 'updt_pass') {
 
 		$_SESSION['user_pass'] = $upass;
 
-		$user_id = $_SESSION['user_id'];
+		$user = iMSCP_Props_client::getInstanceById($_SESSION['user_id']);
+		$user->user_pass = $upass;
+		$user->save();
 
-		$query = "UPDATE `admin` SET `admin_pass` = ? WHERE `admin_id` = ?";
-
-		$rs = exec_query($query, array($upass, $user_id));
-		write_log($_SESSION['user_logged'] . ": updated password.", E_USER_NOTICE);
+		write_log($_SESSION['user_logged'] . ': updated password.', E_USER_NOTICE);
 		set_page_message(tr('Password successfully updated.'), 'success');
 	}
 }
 
 function check_udata($id, $pass) {
 
-	$query = "
-		SELECT
-			`admin_id`, `admin_pass`
-		FROM
-			`admin`
-		WHERE
-			`admin_id` = ?
-		AND
-			`admin_pass` = ?
-	";
+	$user = iMSCP_Props_client::getInstanceById($id);
 
-	$rs = exec_query($query, array($id, md5($pass)));
+	return (
+		crypt($pass, $user->user_pass) == $user->user_pass
+		||
+		md5($pass) == $user->user_pass
+	);
 
-	return (($rs->recordCount()) != 1) ? false : true;
 }
 
 /*

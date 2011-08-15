@@ -5,10 +5,10 @@
  * @copyright   2001-2006 by moleSoftware GmbH
  * @copyright   2006-2010 by ispCP | http://isp-control.net
  * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
- * @version     SVN: $Id$
- * @link        http://i-mscp.net
- * @author      ispCP Team
- * @author      i-MSCP Team
+ * @version	 SVN: $Id$
+ * @link		http://i-mscp.net
+ * @author	  ispCP Team
+ * @author	  i-MSCP Team
  *
  * @license
  * The contents of this file are subject to the Mozilla Public License
@@ -99,28 +99,28 @@ $userdata['USER_MESSAGE'] = isset($_POST['user_message']) ?
 
 $tpl = new iMSCP_pTemplate();
 $tpl->define_dynamic(array(
-                          'page' => $cfg->CLIENT_TEMPLATE_PATH . '/ticket_create.tpl',
-                          'page_message' => 'page',
-                          'logged_from' => 'page'));
+						  'page' => $cfg->CLIENT_TEMPLATE_PATH . '/ticket_create.tpl',
+						  'page_message' => 'page',
+						  'logged_from' => 'page'));
 
 $tpl->assign(array(
-                  'THEME_CHARSET' => tr('encoding'),
-                  'TR_TICKET_PAGE_TITLE' => tr('i-MSCP - Client / Support Ticket System / New Ticket'),
-                  'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
-                  'ISP_LOGO' => layout_getUserLogo(),
-                  'TR_SUPPORT_SYSTEM' => tr('Support Ticket System'),
-                  'TR_NEW_TICKET' => tr('New ticket'),
-                  'TR_LOW' => tr('Low'),
-                  'TR_MEDIUM' => tr('Medium'),
-                  'TR_HIGH' => tr('High'),
-                  'TR_VERY_HIGH' => tr('Very high'),
-                  'TR_URGENCY' => tr('Priority'),
-                  'TR_EMAIL' => tr('Email'),
-                  'TR_SUBJECT' => tr('Subject'),
-                  'TR_YOUR_MESSAGE' => tr('Your message'),
-                  'TR_SEND_MESSAGE' => tr('Send message'),
-                  'TR_OPEN_TICKETS' => tr('Open tickets'),
-                  'TR_CLOSED_TICKETS' => tr('Closed tickets')));
+				  'THEME_CHARSET' => tr('encoding'),
+				  'TR_TICKET_PAGE_TITLE' => tr('i-MSCP - Client / Support Ticket System / New Ticket'),
+				  'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
+				  'ISP_LOGO' => layout_getUserLogo(),
+				  'TR_SUPPORT_SYSTEM' => tr('Support Ticket System'),
+				  'TR_NEW_TICKET' => tr('New ticket'),
+				  'TR_LOW' => tr('Low'),
+				  'TR_MEDIUM' => tr('Medium'),
+				  'TR_HIGH' => tr('High'),
+				  'TR_VERY_HIGH' => tr('Very high'),
+				  'TR_URGENCY' => tr('Priority'),
+				  'TR_EMAIL' => tr('Email'),
+				  'TR_SUBJECT' => tr('Subject'),
+				  'TR_YOUR_MESSAGE' => tr('Your message'),
+				  'TR_SEND_MESSAGE' => tr('Send message'),
+				  'TR_OPEN_TICKETS' => tr('Open tickets'),
+				  'TR_CLOSED_TICKETS' => tr('Closed tickets')));
 
 $tpl->assign($userdata);
 
@@ -132,7 +132,7 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptEnd,
-                                              new iMSCP_Events_Response($tpl));
+											  new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
 unsetMessages();

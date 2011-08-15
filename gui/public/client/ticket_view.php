@@ -5,10 +5,10 @@
  * @copyright   2001-2006 by moleSoftware GmbH
  * @copyright   2006-2010 by ispCP | http://isp-control.net
  * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
- * @version     SVN: $Id$
- * @link        http://i-mscp.net
- * @author      ispCP Team
- * @author      i-MSCP Team
+ * @version	 SVN: $Id$
+ * @link		http://i-mscp.net
+ * @author	  ispCP Team
+ * @author	  i-MSCP Team
  *
  * @license
  * The contents of this file are subject to the Mozilla Public License
@@ -57,8 +57,8 @@ if (!hasTicketSystem($_SESSION['user_created_by'])) {
 }
 
 if (isset($_GET['ticket_id']) && !empty($_GET['ticket_id'])) {
-    $userId = $_SESSION['user_id'];
-    $ticketId = (int) $_GET['ticket_id'];
+	$userId = $_SESSION['user_id'];
+	$ticketId = (int) $_GET['ticket_id'];
 	$status = getTicketStatus($ticketId);
 	$ticketLevel = getUserLevel($ticketId);
 
@@ -66,51 +66,51 @@ if (isset($_GET['ticket_id']) && !empty($_GET['ticket_id'])) {
 		changeTicketStatus($ticketId, 3);
 	}
 
-    if (isset($_POST['uaction'])) {
-        if ($_POST['uaction'] == 'close') {
-            closeTicket($ticketId);
-        } elseif(isset($_POST['user_message'])) {
-            if(empty($_POST['user_message'])) {
-                set_page_message(tr('Please type your message.'), 'error');
-            } else {
-                updateTicket($ticketId, $userId, $_POST['urgency'], $_POST['subject'],
-                             $_POST['user_message'], 1, 1);
-            }
-        }
+	if (isset($_POST['uaction'])) {
+		if ($_POST['uaction'] == 'close') {
+			closeTicket($ticketId);
+		} elseif(isset($_POST['user_message'])) {
+			if(empty($_POST['user_message'])) {
+				set_page_message(tr('Please type your message.'), 'error');
+			} else {
+				updateTicket($ticketId, $userId, $_POST['urgency'], $_POST['subject'],
+							 $_POST['user_message'], 1, 1);
+			}
+		}
 
-        redirectTo('ticket_system.php');
-    }
+		redirectTo('ticket_system.php');
+	}
 } else {
-    set_page_message(tr('Ticket not found.'), 'error');
-    redirectTo('ticket_system.php');
+	set_page_message(tr('Ticket not found.'), 'error');
+	redirectTo('ticket_system.php');
 }
 
 $tpl = new iMSCP_pTemplate();
 $tpl->define_dynamic(array(
-                          'page' => $cfg->CLIENT_TEMPLATE_PATH . '/ticket_view.tpl',
-                          'logged_from' => 'page',
-                          'page_message' => 'page',
-                          'tickets_list' => 'page',
-                          'tickets_item' => 'tickets_list'));
+						  'page' => $cfg->CLIENT_TEMPLATE_PATH . '/ticket_view.tpl',
+						  'logged_from' => 'page',
+						  'page_message' => 'page',
+						  'tickets_list' => 'page',
+						  'tickets_item' => 'tickets_list'));
 
 $tpl->assign(array(
-                  'THEME_CHARSET' => tr('encoding'),
-                  'TR_TICKET_PAGE_TITLE' => tr('i-MSCP - Client / Support Ticket System / View Ticket'),
-                  'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
-                  'ISP_LOGO' => layout_getUserLogo(),
-                  'TR_SUPPORT_SYSTEM' => tr('Support Ticket System'),
-                  'TR_OPEN_TICKETS' => tr('Open tickets'),
-                  'TR_CLOSED_TICKETS' => tr('Closed tickets'),
-                  'TR_VIEW_SUPPORT_TICKET' => tr('View Support Ticket'),
-                  'TR_TICKET_INFO' => tr('Ticket information'),
-                  'TR_TICKET_URGENCY' => tr('Priority'),
-                  'TR_TICKET_SUBJECT' => tr('Subject'),
-                  'TR_TICKET_MESSAGES' => tr('Messages'),
-                  'TR_TICKET_FROM' => tr('From'),
-                  'TR_TICKET_DATE' => tr('Date'),
-                  'TR_TICKET_CONTENT' => tr('Message'),
-                  'TR_TICKET_NEW_REPLY' => tr('Send new reply'),
-                  'TR_TICKET_REPLY' => tr('Send reply')));
+				  'THEME_CHARSET' => tr('encoding'),
+				  'TR_TICKET_PAGE_TITLE' => tr('i-MSCP - Client / Support Ticket System / View Ticket'),
+				  'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
+				  'ISP_LOGO' => layout_getUserLogo(),
+				  'TR_SUPPORT_SYSTEM' => tr('Support Ticket System'),
+				  'TR_OPEN_TICKETS' => tr('Open tickets'),
+				  'TR_CLOSED_TICKETS' => tr('Closed tickets'),
+				  'TR_VIEW_SUPPORT_TICKET' => tr('View Support Ticket'),
+				  'TR_TICKET_INFO' => tr('Ticket information'),
+				  'TR_TICKET_URGENCY' => tr('Priority'),
+				  'TR_TICKET_SUBJECT' => tr('Subject'),
+				  'TR_TICKET_MESSAGES' => tr('Messages'),
+				  'TR_TICKET_FROM' => tr('From'),
+				  'TR_TICKET_DATE' => tr('Date'),
+				  'TR_TICKET_CONTENT' => tr('Message'),
+				  'TR_TICKET_NEW_REPLY' => tr('Send new reply'),
+				  'TR_TICKET_REPLY' => tr('Send reply')));
 
 
 gen_client_mainmenu($tpl, $cfg->CLIENT_TEMPLATE_PATH . '/main_menu_ticket_system.tpl');
@@ -122,7 +122,7 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptEnd,
-                                              new iMSCP_Events_Response($tpl));
+											  new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
 unsetMessages();

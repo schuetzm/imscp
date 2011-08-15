@@ -17,7 +17,7 @@
  * The Initial Developer of the Original Code is ispCP Team.
  * Portions created by Initial Developer are Copyright (C) 2006-2010 by
  * isp Control Panel. All Rights Reserved.
- * 
+ *
  * Portions created by the ispCP Team are Copyright (C) 2006-2010 by
  * isp Control Panel. All Rights Reserved.
  *
@@ -30,9 +30,9 @@
  * @copyright   2010-2011 by i-MSCP | http://i-mscp.net
  * @author 		ispCP Team
  * @author		i-MSCP Team
- * @author 	    Laurent Declercq <l.declercq@nuxwin.com>
+ * @author 		Laurent Declercq <l.declercq@nuxwin.com>
  * @version 	SVN: $Id$
- * @link        http://i-mscp.net i-MSCP Home Site
+ * @link		http://i-mscp.net i-MSCP Home Site
  * @license		http://www.mozilla.org/MPL/ MPL 1.1
  */
 
@@ -72,7 +72,7 @@ spl_autoload_register('autoload_class');
  * registry.
  */
 iMSCP_Registry::setAlias('exceptionHandler',
-                         iMSCP_Exception_Handler::getInstance()->setHandler());
+						 iMSCP_Exception_Handler::getInstance()->setHandler());
 
 /**
  * Attach the primary exception writer to write uncaught exceptions messages to the
@@ -87,7 +87,7 @@ iMSCP_Registry::setAlias('exceptionHandler',
  * enabled in the application wide configuration file.
  */
 iMSCP_Registry::get('exceptionHandler')->attach(
-    new iMSCP_Exception_Writer_Browser('../themes/default/exception.tpl'));
+	new iMSCP_Exception_Writer_Browser('../themes/default/exception.tpl'));
 
 /**
  * Include i-MSCP common functions
@@ -142,7 +142,7 @@ require_once 'functions.ticket_system.php';
 require_once 'iMSCP/View/Helpers/Common.php';
 
 if(isset($_SESSION['user_type'])) {
-    $helperFileName = ucfirst(strtolower($_SESSION['user_type']));
+	$helperFileName = ucfirst(strtolower($_SESSION['user_type']));
 
-    require_once 'iMSCP/View/Helpers/' . $helperFileName . '.php';
+	require_once 'iMSCP/View/Helpers/' . $helperFileName . '.php';
 }

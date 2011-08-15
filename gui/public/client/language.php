@@ -49,30 +49,23 @@ $cfg = iMSCP_Registry::get('config');
 
 $tpl = new iMSCP_pTemplate();
 $tpl->define_dynamic(array(
-                          'page' => $cfg->CLIENT_TEMPLATE_PATH . '/language.tpl',
-                          'page_message' => 'page',
-                          'def_language' => 'page',
-                          'logged_from' => 'page'));
+							'page'			=> $cfg->CLIENT_TEMPLATE_PATH . '/language.tpl',
+							'page_message'			=> 'page',
+							'def_language'			=> 'page',
+							'logged_from'			=> 'page'));
 
 if (isset($_POST['uaction']) && $_POST['uaction'] == 'save_lang') {
 	$user_id = $_SESSION['user_id'];
 	$user_lang = clean_input($_POST['def_language']);
 
-    $query = "
-        REPLACE INTO
-            `user_gui_props` (
-                user_id, lang, layout
-            ) VALUES (
-                ?, ?, ?
-            )
-    ";
+	$user = iMSCP_Props_client::getInstanceById($user_id);
+	$user->lang = $user_lang;
+	$user->save();
 
-    exec_query($query, array($user_id, $user_lang, $_SESSION['user_theme']));
-
-    if(!isset($_SESSION['logged_from_id'])) {
-	    unset($_SESSION['user_def_lang']);
-	    $_SESSION['user_def_lang'] = $user_lang;
-    }
+	if(!isset($_SESSION['logged_from_id'])) {
+		unset($_SESSION['user_def_lang']);
+		$_SESSION['user_def_lang'] = $user_lang;
+	}
 
 	set_page_message(tr('Language updated successfully.'), 'success');
 
@@ -89,14 +82,15 @@ if (isset($_SESSION['logged_from']) && isset($_SESSION['logged_from_id'])) {
 gen_def_language($tpl, $user_def_lang);
 
 $tpl->assign(array(
-                  'TR_CLIENT_LANGUAGE_TITLE' => tr('i-MSCP - Client/Change Language'),
-                  'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
-                  'THEME_CHARSET' => tr('encoding'),
-                  'ISP_LOGO' => layout_getUserLogo(),
-                  'TR_GENERAL_INFO' => tr('General information'),
-                  'TR_LANGUAGE' => tr('Language'),
-                  'TR_CHOOSE_DEFAULT_LANGUAGE' => tr('Choose your default language'),
-                  'TR_SAVE' => tr('Save')));
+	'TR_CLIENT_LANGUAGE_TITLE'		=> tr('i-MSCP - Client/Change Language'),
+	'THEME_COLOR_PATH'				=> "../themes/{$cfg->USER_INITIAL_THEME}",
+	'THEME_CHARSET'					=> tr('encoding'),
+	'ISP_LOGO'						=> layout_getUserLogo(),
+	'TR_GENERAL_INFO'				=> tr('General information'),
+	'TR_LANGUAGE'					=> tr('Language'),
+	'TR_CHOOSE_DEFAULT_LANGUAGE'	=> tr('Choose your default language'),
+	'TR_SAVE'						=> tr('Save')
+));
 
 gen_client_mainmenu($tpl, $cfg->CLIENT_TEMPLATE_PATH . '/main_menu_general_information.tpl');
 gen_client_menu($tpl, $cfg->CLIENT_TEMPLATE_PATH . '/menu_general_information.tpl');
@@ -107,7 +101,7 @@ generatePageMessage($tpl);
 $tpl->parse('PAGE', 'page');
 
 iMSCP_Events_Manager::getInstance()->dispatch(
-    iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
+	iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
 
