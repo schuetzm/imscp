@@ -65,6 +65,7 @@ function gen_client_mainmenu($tpl, $menu_file)
 						'TR_MENU_CHANGE_PASSWORD'			=> tr('Change password'),
 						'TR_MENU_CHANGE_PERSONAL_DATA'		=> tr('Change personal data'),
 						'TR_MENU_MANAGE_DOMAINS'			=> tr('Manage domains'),
+						'TR_MENU_ADD_DOMAIN'				=> tr('Add domain'),
 						'TR_MENU_ADD_SUBDOMAIN'				=> tr('Add subdomain'),
 						'TR_MENU_MANAGE_USERS'				=> tr('Email and FTP accounts'),
 						'TR_MENU_ADD_MAIL_USER'				=> tr('Add mail user'),
@@ -99,7 +100,7 @@ function gen_client_mainmenu($tpl, $menu_file)
 						'PMA_TARGET'						=> $cfg->PMA_TARGET,
 						'FILEMANAGER_PATH'					=> $cfg->FILEMANAGER_PATH,
 						'FILEMANAGER_TARGET'				=> $cfg->FILEMANAGER_TARGET,
-						'TR_MENU_ADD_DNS'					=> tr("Add DNS zone's record"),
+						'TR_MENU_ADD_DNS'					=> tr('Add DNS zone\'s record'),
 						'TR_MENU_SSL_MANAGE'				=> tr('Manage SSL certificate')
 ));
 

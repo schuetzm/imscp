@@ -22,14 +22,15 @@ class iMSCP_Props_domain extends iMSCP_Props_abstract{
 	protected $canHave			= array(
 									'subdomains'	=> array(),
 									'aliases'		=> array(),
-									'ftp'			=> array(),
 									'dns'			=> array(),
+									'ftp'			=> array(),
 									'mails'			=> array()
 								);
 
 	protected $translateProps	= array(
 									'subdomains'	=> 'iMSCP_Props_subdomain',
 									'aliases'		=> 'iMSCP_Props_alias',
+									'dns'			=> 'iMSCP_Props_dnsMngr',
 								);
 
 	public function translateObjectName(){

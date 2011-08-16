@@ -110,12 +110,12 @@ abstract class iMSCP_Props_abstract_props{
 	}
 	public function delete(){
 		//echo "$this->database delete\n";
-
 		$storageClass	= get_called_class().'Storage';
 		$storage		= new $storageClass();
 		$object_id		= static::UNIQUE_ID;
 		$storage->delete($this->database, $this->$object_id);
 	}
+
 	protected function saveProp(){
 
 		$storageClass	= get_called_class().'Storage';
@@ -125,6 +125,7 @@ abstract class iMSCP_Props_abstract_props{
 		$storage->execute($query, array_values($this->structure));
 		$this->modifiedProps = false;
 	}
+
 	public function getData(){
 		if(!$this->loadedProps){
 			$this->loadObjectProps();

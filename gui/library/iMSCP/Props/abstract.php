@@ -10,6 +10,7 @@ abstract class iMSCP_Props_abstract{
 	protected static $mainDatabase	= 'db';
 
 	protected $databases			= array();
+	protected $dbinstances			= array();
 	protected $init					= false;
 	protected $canHave				= array();
 
@@ -32,8 +33,8 @@ abstract class iMSCP_Props_abstract{
 				throw new Exception(tr('No %s has this id: %s', $instance->translateObjectName(), $id));
 			}
 			$instance = $class::testTypeMatch($instance);
-			iMSCP_Cache_objectCache::set($instance, $instance->$object_name);
 			iMSCP_Cache_objectCache::set($instance, $instance->$object_id);
+			iMSCP_Cache_objectCache::set($instance, $instance->$object_name);
 		}
 		return $instance;
 	}
@@ -72,7 +73,7 @@ abstract class iMSCP_Props_abstract{
 			$object_id		= static::UNIQUE_ID;
 			$instance = new $class($name, $object_name);
 			$instance->$object_name = $name;
-			//echo "add type instance match";
+			echo "add type instance match";
 			return $instance;
 		}
 		throw New Exception(tr('%s %s already exists', ucfirst($instance->translateObjectName()), $name));
@@ -84,7 +85,7 @@ abstract class iMSCP_Props_abstract{
 
 		foreach ($this->databases as $database){
 			//echo "\$database:$database|\$id:$id|\$byKey:$byKey\n";
-			$this->$database = new $propsClass($database, $id, $byKey);
+			$this->dbinstances{$database} = new $propsClass($database, $id, $byKey);
 			if(!is_null($byKey)){
 				$id = $this->$database->$object_id;
 				$byKey = null;
@@ -100,13 +101,13 @@ abstract class iMSCP_Props_abstract{
 		$error = '';
 		foreach($this->databases as $database) {
 			try{
-				return $this->$database->$var;
+				return $this->dbinstances{$database}->$var;
 			} catch (Exception $e){$error[] = $e->getMessage();}
 		}
 		try {
 			return $this->tryCanHave($var);
 		} catch (Exception $e){$error[] = $e->getMessage();}
-		throw new Exception(join("\n",$error));
+		throw new Exception(join("\n", $error));
 	}
 
 	protected function tryCanHave($var){
@@ -119,7 +120,8 @@ abstract class iMSCP_Props_abstract{
 				'%s property %s do not exits in %s!',
 				ucfirst($this->translateObjectName()),
 				$var,
-				join(', ', array_keys( $this->canHave)))
+				join(', ', array_keys( $this->canHave))
+			)
 		);
 	}
 
@@ -131,7 +133,7 @@ abstract class iMSCP_Props_abstract{
 		$error = array();
 		foreach($this->databases as $database) {
 			try{
-				$this->$database->$var = $value;
+				$this->dbinstances{$database}->$var = $value;
 				return;
 			} catch (Exception $e){$error[] =$e->getMessage();}
 		}
@@ -146,7 +148,7 @@ abstract class iMSCP_Props_abstract{
 		$storage = new $storageClass();
 		$storage->startTransaction();
 		foreach ($this->databases as $database){
-			$this->$database->delete();
+			$this->dbinstances{$database}->delete();
 		}
 		$storage->commitTransaction();
 	}
@@ -161,7 +163,7 @@ abstract class iMSCP_Props_abstract{
 		} else {
 			foreach ($this->databases as $database){
 				if($database != static::$mainDatabase){
-					$this->$database->save();
+					$this->dbinstances{$database}->save();
 				}
 			}
 		}
