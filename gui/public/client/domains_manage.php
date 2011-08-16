@@ -69,80 +69,52 @@ $tpl->define_dynamic('dns_item', 'dns_list');
 
 // page functions.
 
-function gen_user_dns_list($tpl, $user_id) {
-	$domain_id = get_user_domain_id($user_id);
+function gen_user_dns_list($tpl, $dnsRecords) {
 
-	$query = "
-		SELECT
-			`domain_dns`.`domain_dns_id`,
-			`domain_dns`.`domain_id`,
-			`domain_dns`.`domain_dns`,
-			`domain_dns`.`domain_class`,
-			`domain_dns`.`domain_type`,
-			`domain_dns`.`domain_text`,
-			IFNULL(`domain_aliasses`.`alias_name`, `domain`.`domain_name`) AS 'domain_name',
-			IFNULL(`domain_aliasses`.`alias_status`, `domain`.`domain_status`) AS 'domain_status',
-			`domain_dns`.`protected`
-		FROM
-			`domain_dns`
-			LEFT JOIN `domain_aliasses` USING (`alias_id`, `domain_id`),
-			`domain`
-		WHERE
-			`domain_dns`.`domain_id` = ?
-		AND
-			`domain`.`domain_id` = `domain_dns`.`domain_id`
-		ORDER BY
-			`domain_id`,
-			`alias_id`,
-			`domain_dns`,
-			`domain_type`
-	";
-
-	$rs = exec_query($query, $domain_id);
-	if ($rs->recordCount() == 0) {
-		$tpl->assign(array('DNS_MSG' => tr("Manual zone's records list is empty!"), 'DNS_LIST' => ''));
+	if (count($dnsRecords) == 0) {
+		$tpl->assign(array('DNS_MSG' => tr('Manual zone\'s records list is empty!'), 'DNS_LIST' => ''));
 		$tpl->parse('DNS_MESSAGE', 'dns_message');
 	} else {
-		$counter = 0;
 
-		while (!$rs->EOF) {
-			if ($counter % 2 == 0) {
-				$tpl->assign('ITEM_CLASS', 'content');
-			} else {
-				$tpl->assign('ITEM_CLASS', 'content2');
-			}
+		foreach ($dnsRecords as $dns) {
 
 			list($dns_action_delete, $dns_action_script_delete) = gen_user_dns_action(
-				'Delete', $rs->fields['domain_dns_id'],
-				($rs->fields['protected'] == 'no') ? $rs->fields['domain_status'] : 'PROTECTED'
+				'Delete', $dns->domain_dns_id,
+				($dns->protected == 'no')
+				?
+					iMSCP_Props_domain::getInstanceById($dns->domain_id)->domain_status
+				:
+					'PROTECTED'
 			);
 
 			list($dns_action_edit, $dns_action_script_edit) = gen_user_dns_action(
-				'Edit', $rs->fields['domain_dns_id'],
-				($rs->fields['protected'] == 'no') ? $rs->fields['domain_status'] : 'PROTECTED'
+				'Edit', $dns->domain_dns_id,
+				($dns->protected == 'no')
+				?
+					iMSCP_Props_domain::getInstanceById($dns->domain_id)->domain_status
+				:
+					'PROTECTED'
 			);
 
-			$domain_name = decode_idna($rs->fields['domain_name']);
-			$sbd_name = $rs->fields['domain_dns'];
-			$sbd_data = $rs->fields['domain_text'];
+			$domain_name = decode_idna(iMSCP_Props_domain::getInstanceById($dns->domain_id)->domain_name);
+			$sbd_name = $dns->domain_dns;
+			$sbd_data = $dns->domain_text;
+
 			$tpl->assign(
 				array(
 					'DNS_DOMAIN'				=> tohtml($domain_name),
 					'DNS_NAME'					=> tohtml($sbd_name),
-					'DNS_CLASS'					=> tohtml($rs->fields['domain_class']),
-					'DNS_TYPE'					=> tohtml($rs->fields['domain_type']),
+					'DNS_CLASS'					=> tohtml($dns->domain_class),
+					'DNS_TYPE'					=> tohtml($dns->domain_type),
 					'DNS_DATA'					=> tohtml($sbd_data),
-//					'DNS_ACTION_SCRIPT_EDIT'	=> $sub_action,
 					'DNS_ACTION_SCRIPT_DELETE'	=> tohtml($dns_action_script_delete),
 					'DNS_ACTION_DELETE'			=> tohtml($dns_action_delete),
 					'DNS_ACTION_SCRIPT_EDIT'	=> tohtml($dns_action_script_edit),
 					'DNS_ACTION_EDIT'			=> tohtml($dns_action_edit),
-					'DNS_TYPE_RECORD'			=> tr("%s record", $rs->fields['domain_type'])
+					'DNS_TYPE_RECORD'			=> tr('%s record', $dns->domain_type)
 				)
 			);
 			$tpl->parse('DNS_ITEM', '.dns_item');
-			$rs->moveNext();
-			$counter++;
 		}
 
 		$tpl->parse('DNS_LIST', 'dns_list');
@@ -161,54 +133,6 @@ function gen_user_dns_action($action, $dns_id, $status) {
 	}
 
 	return array(tr('N/A'), '#');
-}
-
-function gen_user_sub_action($sub_id, $sub_status) {
-
-	$cfg = iMSCP_Registry::get('config');
-
-	if ($sub_status === $cfg->ITEM_OK_STATUS) {
-		return array(tr('Delete'), "subdomain_delete.php?id=$sub_id",true);
-	} else {
-		return array(tr('N/A'), '#',false);
-	}
-}
-
-function gen_user_alssub_action($sub_id, $sub_status) {
-
-	$cfg = iMSCP_Registry::get('config');
-
-	if ($sub_status === $cfg->ITEM_OK_STATUS) {
-		return array(tr('Delete'), "alssub_delete.php?id=$sub_id",true);
-	} else {
-		return array(tr('N/A'), '#',false);
-	}
-}
-
-function gen_user_sub_forward($sub_id, $sub_status, $url_forward, $dmn_type) {
-
-	$cfg = iMSCP_Registry::get('config');
-
-	if ($sub_status === $cfg->ITEM_OK_STATUS) {
-		return array(
-			$url_forward === 'no' || $url_forward === NULL
-			?
-				'-'
-			:
-				$url_forward,
-			'subdomain_edit.php?edit_id='.$sub_id.'&amp;dmn_type='.$dmn_type, tr('Edit')
-		);
-	} else if ($sub_status === $cfg->ITEM_ORDERED_STATUS) {
-		return array(
-			$url_forward === 'no' || $url_forward === NULL
-			?
-				'-'
-			:
-				$url_forward, '#', tr('N/A')
-			);
-	} else {
-		return array(tr('N/A'), '#', tr('N/A'));
-	}
 }
 
 function gen_action($type, $id, $status) {
@@ -339,6 +263,7 @@ function gen_user_dmn_list($tpl) {
 	$cfg = iMSCP_Registry::get('config');
 	$subdomains = array();
 	$aliasses = array();
+	$dns = array();
 
 	if (count($user->domains) == 0) {
 		$tpl->assign(array(
@@ -347,7 +272,9 @@ function gen_user_dmn_list($tpl) {
 			'SUB_MSG' => tr('Subdomain list is empty!'),
 			'SUB_LIST' => '',
 			'ALS_MSG' => tr('Alias list is empty!'),
-			'ALS_LIST' => ''
+			'ALS_LIST' => '',
+			'DNS_MSG' => tr('Manual zone\'s records list is empty!'),
+			'DNS_LIST' => ''
 		));
 		$tpl->parse('DMN_MESSAGE', 'dmn_message');
 	} else {
@@ -355,6 +282,7 @@ function gen_user_dmn_list($tpl) {
 
 			$subdomains = $subdomains + $domain->subdomains;
 			$aliasses = $aliasses + $domain->aliases;
+			$dns = $dns + $domain->dns;
 
 			list($action, $action_script, $status_bool) = gen_action('domain', $domain->domain_id, $domain->domain_status);
 			list($forward, $edit_link, $edit) = gen_forward('domain', $domain->domain_id, $domain->domain_status, $domain->url_forward);
@@ -392,6 +320,7 @@ function gen_user_dmn_list($tpl) {
 		$tpl->assign('DMN_MESSAGE', '');
 		gen_user_sub_list($tpl, $subdomains);
 		gen_user_alias_list($tpl, $aliasses);
+		gen_user_dns_list($tpl, $dns);
 	}
 }
 

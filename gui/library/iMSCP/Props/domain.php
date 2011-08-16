@@ -31,6 +31,7 @@ class iMSCP_Props_domain extends iMSCP_Props_abstract{
 									'subdomains'	=> 'iMSCP_Props_subdomain',
 									'aliases'		=> 'iMSCP_Props_alias',
 									'dns'			=> 'iMSCP_Props_dnsMngr',
+									'mails'			=> 'iMSCP_Props_mail',
 								);
 
 	public function translateObjectName(){

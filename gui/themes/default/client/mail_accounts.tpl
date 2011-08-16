@@ -80,7 +80,15 @@
 				<!-- BDP: mails_total -->
 					<tfoot>
 						<tr>
-							<td colspan="4">{TR_TOTAL_MAIL_ACCOUNTS}: <strong>{TOTAL_MAIL_ACCOUNTS}</strong>/{ALLOWED_MAIL_ACCOUNTS}</td>
+							<td colspan="4">
+								{TR_TOTAL_MAIL_ACCOUNTS}: <strong>{TOTAL_MAIL_ACCOUNTS}</strong>
+								/
+								{TR_COUNTED_MAIL_ACCOUNTS}: <strong>{COUNTED_MAIL_ACCOUNTS}</strong>
+								/
+								{TR_DEFAULT_MAIL_ACCOUNTS}: <strong>{DEFAULT_MAIL_ACCOUNTS}</strong>
+								/
+								{TR_ALLOWED_MAIL_ACCOUNTS}: {ALLOWED_MAIL_ACCOUNTS}
+							</td>
 						</tr>
 					</tfoot>
 				<!-- EDP: mails_total -->
