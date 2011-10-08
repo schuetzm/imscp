@@ -9,12 +9,20 @@
 		<meta name="robots" content="nofollow, noindex" />
 		<link href="{THEME_COLOR_PATH}/css/imscp.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript" src="{THEME_COLOR_PATH}/js/imscp.js"></script>
+                <script type="text/javascript" src="{THEME_COLOR_PATH}/js/jquery.js"></script>
+                <script type="text/javascript" src="{THEME_COLOR_PATH}/js/jquery.imscpTooltips.js"></script>
+                <script type="text/javascript" src="{THEME_COLOR_PATH}/js/jquery.ui.core.js"></script>
 		<!--[if IE 6]>
 		<script type="text/javascript" src="{THEME_COLOR_PATH}/js/DD_belatedPNG_0.0.8a-min.js"></script>
 		<script type="text/javascript">
 			DD_belatedPNG.fix('*');
 		</script>
 		<![endif]-->
+                <script type="text/javascript">
+                        /*<![CDATA[*/
+				// later $('#start').timepicker({});
+                        /*]]>*/
+                </script>
 	</head>
 	<body>
 		<div class="header">
@@ -53,8 +61,20 @@
 			<div class="{MESSAGE_CLS}">{MESSAGE}</div>
 			<!-- EDP: page_message -->
 
-
 			<form name="manage_users_common_frm" method="post" action="">
+				<fieldset>
+					<legend>{TR_ARSP_TIME}</legend>
+			                <table cellpadding="5" cellspacing="2" style="width:400px">
+                        			<tr>
+			                        	<td><b>{TR_ARSP_START} :</b> <br><small> (JJJJ-MM-TT HH:mm)</small></td>
+			                        	<td><input id='start' type="text" name="arsp_start" size="13" value="{ARSP_START}"></td>
+                        			</tr>
+                           			<tr>
+			                        	<td><b>{TR_ARSP_STOP} :</b><br><small> (JJJJ-MM-TT HH:mm)</small> </td>
+							<td><input type="text" name="arsp_stop" size="13" value="{ARSP_STOP}"></td>
+						</tr>
+					</table>
+				</fieldset>
 				<fieldset>
 					<legend>{TR_ARSP_MESSAGE}</legend>
 					<textarea name="arsp_message" cols="50" rows="15"></textarea>
@@ -65,7 +85,7 @@
 					<input type="button" name="Submit2" value="{TR_CANCEL}" onclick="location = 'mail_accounts.php'" />
 				</div>
 				<input type="hidden" name="uaction" value="enable_arsp" />
-				<input type="hidden" name="id" value="{ID}" />
+				<input type="hidden" name="id" value="{ARSP_ID}" />
 			</form>
 
 		</div>

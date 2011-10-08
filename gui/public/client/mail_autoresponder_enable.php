@@ -1,36 +1,31 @@
 <?php
+
 /**
  * i-MSCP a internet Multi Server Control Panel
+ * Copyright (C) 2010-2011 by i-MSCP team
  *
- * @copyright 	2001-2006 by moleSoftware GmbH
- * @copyright 	2006-2010 by ispCP | http://isp-control.net
- * @copyright 	2010 by i-MSCP | http://i-mscp.net
- * @version 	SVN: $Id$
- * @link 		http://i-mscp.net
- * @author 		ispCP Team
- * @author 		i-MSCP Team
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * @license
- * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * Software distributed under the License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- * License for the specific language governing rights and limitations
- * under the License.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
  *
- * The Original Code is "VHCS - Virtual Hosting Control System".
- *
- * The Initial Developer of the Original Code is moleSoftware GmbH.
- * Portions created by Initial Developer are Copyright (C) 2001-2006
- * by moleSoftware GmbH. All Rights Reserved.
- * Portions created by the ispCP Team are Copyright (C) 2006-2010 by
- * isp Control Panel. All Rights Reserved.
- * Portions created by the i-MSCP Team are Copyright (C) 2010 by
- * i-MSCP a internet Multi Server Control Panel. All Rights Reserved.
+ * @copyright   2011 by i-MSCP | http://i-mscp.net
+ * @version     SVN: $Id:
+ * @link                http://i-mscp.net
+ * @author              i-MSCP Team
+ * @license             http://www.gnu.org/licenses/gpl-2.0.txt GPL v2
  */
+
 
 require 'imscp-lib.php';
 
@@ -38,11 +33,6 @@ iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart)
 
 check_login(__FILE__);
 
-// If the feature is disabled, redirects the client in silent way
-$domainProperties = get_domain_default_props($_SESSION['user_id'], true);
-if ($domainProperties['domain_mailacc_limit'] == '-1') {
-	redirectTo('index.php');
-}
 
 $cfg = iMSCP_Registry::get('config');
 
@@ -51,150 +41,83 @@ $tpl->define_dynamic('page', $cfg->CLIENT_TEMPLATE_PATH . '/mail_autoresponder_e
 $tpl->define_dynamic('page_message', 'page');
 $tpl->define_dynamic('logged_from', 'page');
 
-// page functions.
+$tpl->assign(
+        array(
+                'TR_CLIENT_ENABLE_AUTORESPOND_PAGE_TITLE' => tr('i-MSCP - Client/Enable Mail Auto Responder'),
+                'THEME_COLOR_PATH' => "../themes/{$cfg->USER_INITIAL_THEME}",
+                'THEME_CHARSET' => tr('encoding'),
+                'ISP_LOGO' => layout_getUserLogo()
+        )
+);
 
-function check_email_user() {
-	$dmn_name = $_SESSION['user_logged'];
-	$mail_id = $_GET['id'];
 
-	$query = "
-		SELECT
-			t1.*, t2.`domain_id`, t2.`domain_name`
-		FROM
-			`mail_users` AS t1,
-			`domain` AS t2
-		WHERE
-			t1.`mail_id` = ?
-		AND
-			t2.`domain_id` = t1.`domain_id`
-		AND
-			t2.`domain_name` = ?
-	";
-
-	$rs = exec_query($query, array($mail_id, $dmn_name));
-
-	if ($rs->recordCount() == 0) {
-		set_page_message(tr('User does not exist or you do not have permission to access this interface.'), 'error');
-		redirectTo('mail_accounts.php');
-	}
-}
-
-function gen_page_dynamic_data($tpl, $mail_id) {
-
-	$cfg = iMSCP_Registry::get('config');
-
-	if (isset($_POST['uaction']) && $_POST['uaction'] === 'enable_arsp') {
-		if (empty($_POST['arsp_message'])) {
-			$tpl->assign('ARSP_MESSAGE', '');
-			set_page_message(tr('Please type your mail autorespond message.'), 'error');
-			return;
-		}
-
-		$arsp_message = clean_input($_POST['arsp_message'], false);
-		$item_change_status = $cfg->ITEM_CHANGE_STATUS;
-
-		$query = "
-			UPDATE
-				`mail_users`
-			SET
-				`status` = ?, `mail_auto_respond` = 1, `mail_auto_respond_text` = ?
-			WHERE
-				`mail_id` = ?
-		";
-		exec_query($query, array($item_change_status, $arsp_message, $mail_id));
-
-		send_request();
-		$query = "
-			SELECT
-				`mail_type`,
-				IF(`mail_type` like 'normal_%',t2.`domain_name`,
-					IF(`mail_type` like 'alias_%',t3.`alias_name`,
-						IF(`mail_type` like 'subdom_%',CONCAT(t4.`subdomain_name`,'.',t6.`domain_name`), CONCAT(t5.`subdomain_alias_name`,'.',t7.`alias_name`))
-					)
-				) AS mailbox
-			FROM
-				`mail_users` AS t1
-			LEFT JOIN (domain AS t2) ON (t1.`domain_id` = t2.`domain_id`)
-			LEFT JOIN (domain_aliasses AS t3) ON (`sub_id` = `alias_id`)
-			LEFT JOIN (subdomain AS t4) ON (sub_id = subdomain_id)
-			LEFT JOIN (subdomain_alias AS t5) ON (`sub_id` = `subdomain_alias_id`)
-			LEFT JOIN (domain AS t6) ON (t4.`domain_id` = t6.`domain_id`)
-			LEFT JOIN (domain_aliasses AS t7) ON (t5.`alias_id` = t7.`alias_id`)
-			WHERE
-				`mail_id` = ?
-		";
-
-		$rs = exec_query($query, $mail_id);
-		$mail_name = $rs->fields['mailbox'];
-		write_log($_SESSION['user_logged'] . ": add mail autoresponder: " . $mail_name, E_USER_NOTICE);
-		set_page_message(tr('Mail account scheduled for update.'), 'success');
-		redirectTo('mail_accounts.php');
-	} else {
-		// Get Message
-		$query = "
-			SELECT
-				`mail_auto_respond_text`, `mail_acc`
-			FROM
-				`mail_users`
-			WHERE
-				`mail_id` = ?
-		";
-
-		$rs = exec_query($query, $mail_id);
-		$mail_name = $rs->fields['mail_acc'];
-
-		$tpl->assign('ARSP_MESSAGE', tohtml($rs->fields['mail_auto_respond_text']));
-		return;
-	}
-}
-
-// common page data.
-
+//Get Mail ID - if no Mail ID than exit to mail_accounts.php
 if (isset($_GET['id'])) {
-	$mail_id = $_GET['id'];
+        $mailId = $_GET['id'];
 } else if (isset($_POST['id'])) {
-	$mail_id = $_POST['id'];
+        $mailId = $_POST['id'];
 } else {
-	redirectTo('mail_accounts.php');
+        redirectTo('mail_accounts.php');
 }
 
-if (isset($_SESSION['email_support']) && $_SESSION['email_support'] == "no") {
-	header("Location: index.php");
-}
+$arsp = new iMSCP_Arsp($mailId);
+
+// If save request
+if (isset($_POST['uaction']) && $_POST['uaction'] === 'enable_arsp') {
+
+	if (!$arsp->setMessage(clean_input($_POST['arsp_message'], false))) { 
+		$errMsg[] = tr('Please type your mail autorespond message.');
+	}
+
+	if (!$arsp->setStartDate($_POST['arsp_start'])) {
+		$errMsg[] = tr('Please type a valid Start Date/Time');
+	}
+
+        if (!$arsp->setStopDate($_POST['arsp_stop'])) { 
+                $errMsg[] = tr('Please type a valid Stop Date/Time');  
+        }
+	
+	if ($arsp->getErrorFlag()) { // if an error 
+		foreach ($errMsg as $msg) {
+			set_page_message($msg, 'error');	
+		}
+	} else { // else save into DB and return to mail_accounts.php
+		$arsp->saveDB($cfg->ITEM_CHANGE_STATUS);
+		send_request(); // Send a request to the daemon for backend process
+		set_page_message(tr('Mail account scheduled for update.'), 'success');
+                redirectTo('mail_accounts.php');
+	}
+}	
 
 
 $tpl->assign(
-	array(
-		'TR_CLIENT_ENABLE_AUTORESPOND_PAGE_TITLE'	=> tr('i-MSCP - Client/Enable Mail Auto Responder'),
-		'THEME_COLOR_PATH'							=> "../themes/{$cfg->USER_INITIAL_THEME}",
-		'THEME_CHARSET'								=> tr('encoding'),
-		'ISP_LOGO'									=> layout_getUserLogo()
+        array(
+		'ARSP_MESSAGE' => tohtml($arsp->getMessage()),
+		'ARSP_START' => $arsp->getStartDate(),
+		'ARSP_STOP' => $arsp->getStopDate(),
+		'ARSP_ID' => $mailId
 	)
 );
 
-// dynamic page data.
-
-check_email_user();
-gen_page_dynamic_data($tpl, $mail_id);
-
 // static page messages.
-
 gen_client_mainmenu($tpl, $cfg->CLIENT_TEMPLATE_PATH . '/main_menu_email_accounts.tpl');
 gen_client_menu($tpl, $cfg->CLIENT_TEMPLATE_PATH . '/menu_email_accounts.tpl');
 
 gen_logged_from($tpl);
-
 check_permissions($tpl);
 
 $tpl->assign(
-	array(
-		'TR_ENABLE_MAIL_AUTORESPONDER'	=> tr('Enable mail auto responder'),
-		'TR_ARSP_MESSAGE'				=> tr('Your message'),
-		'TR_ENABLE'						=> tr('Save'),
-		'TR_CANCEL'						=> tr('Cancel'),
-		'ID'							=> $mail_id
-	)
+        array(
+                'TR_ENABLE_MAIL_AUTORESPONDER'  => tr('Enable mail auto responder'),
+                'TR_ARSP_MESSAGE' => tr('Your message'),
+		'TR_ENABLE' => tr('Save'),
+                'TR_CANCEL' => tr('Cancel'),
+                'TR_ARSP_TIME' => tr('Timeframe'),
+		'TR_ARSP_START' => tr('Start Date/Time'),
+                'TR_ARSP_STOP' => tr('Stop Date/Time')
+        )
 );
+
 generatePageMessage($tpl);
 
 $tpl->parse('PAGE', 'page');
@@ -205,3 +128,4 @@ iMSCP_Events_Manager::getInstance()->dispatch(
 $tpl->prnt();
 
 unsetMessages();
+
