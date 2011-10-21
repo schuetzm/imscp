@@ -1246,4 +1246,17 @@ class iMSCP_Update_Database extends iMSCP_Update
 	{
 		return 'DROP TABLE IF EXISTS `auto_num`';
 	}
+
+	/**
+	 * #236: Adds per-user grey listing feature.
+	 *
+	 * @author Laurent Declercq <l.declercq@nuxwin.com>
+	 * @return string SQL Statement to be executed
+	 */
+	protected  function _databaseUpdate_92()
+	{
+		return $this->_addColumn(
+			'mail_users', 'greylisting', 'VARCHAR(3) default NULL AFTER `mail_addr`'
+		);
+	}
 }
