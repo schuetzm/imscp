@@ -80,7 +80,8 @@ sub install{
 		$self::postfixConfig{'MTA_VIRTUAL_CONF_DIR'}.'/domains',
 		$self::postfixConfig{'MTA_VIRTUAL_CONF_DIR'}.'/mailboxes',
 		$self::postfixConfig{'MTA_VIRTUAL_CONF_DIR'}.'/transport',
-		$self::postfixConfig{'MTA_VIRTUAL_CONF_DIR'}.'/sender-access'
+		$self::postfixConfig{'MTA_VIRTUAL_CONF_DIR'}.'/sender-access',
+		$self::postfixConfig{'MTA_VIRTUAL_CONF_DIR'}.'/greylisting'
 	)) {
 		$rs |= $self->bkpConfFile($_);
 	}
@@ -382,6 +383,7 @@ sub buildMain{
 			MTA_VIRTUAL_DMN_HASH		=> $self::postfixConfig{'MTA_VIRTUAL_DMN_HASH'},
 			MTA_VIRTUAL_MAILBOX_HASH	=> $self::postfixConfig{'MTA_VIRTUAL_MAILBOX_HASH'},
 			MTA_VIRTUAL_ALIAS_HASH		=> $self::postfixConfig{'MTA_VIRTUAL_ALIAS_HASH'},
+			MTA_GREY_LISTING_HASH		=> $self::postfixConfig{'MTA_GREY_LISTING_HASH'},
 			MTA_MAILBOX_MIN_UID			=> $uid,
 			MTA_MAILBOX_UID				=> $uid,
 			MTA_MAILBOX_GID				=> $gid,
