@@ -906,7 +906,7 @@ sub addGreyListing {
 
 	$rs |= $wrkFile->mode(0644);
 	$rs |= $wrkFile->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
-	$rs |= $wrkFile->copyFile($mBoxHashFile);
+	$rs |= $wrkFile->copyFile($greyListingHashFile);
 
 	$self->{postmap}->{$greyListingHashFile} => $recipient;
 
@@ -938,7 +938,7 @@ sub delGreyListing {
 
 	$rs |= $wrkFile->mode(0644);
 	$rs |= $wrkFile->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
-	$rs |= $wrkFile->copyFile($mBoxHashFile);
+	$rs |= $wrkFile->copyFile($greyListingHashFile);
 
 	$self->{postmap}->{$greyListingHashFile} => $recipient;
 
