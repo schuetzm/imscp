@@ -355,8 +355,8 @@ sub addMail{
 	$rs |= $self->addMailBox($data) if $data->{MAIL_TYPE} =~ m/_mail/;
 	$rs |= $self->delMailBox($data) if $data->{MAIL_TYPE} !~ m/_mail/;
 	
-	$rs |= $self->addGreyListing($data) if $data->{MAIL_GREY_LISTING} =~ m/yes/;
-	$rs |= $self->delGreyListing($data) if $data->{MAIL_GREY_LISTING} =~ m/no/;
+	$rs |= $self->addGreyListing($data) if $data->{MAIL_GREY_LISTING} eq 'yes';
+	$rs |= $self->delGreyListing($data) if $data->{MAIL_GREY_LISTING} eq 'no';
 
 	$rs |= $self->addAutoRspnd($data) if $data->{MAIL_AUTO_RSPND};
 	$rs |= $self->delAutoRspnd($data) unless $data->{MAIL_AUTO_RSPND};
