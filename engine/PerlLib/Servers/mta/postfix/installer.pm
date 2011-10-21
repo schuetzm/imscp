@@ -200,7 +200,7 @@ sub buildLookup{
 	use iMSCP::File;
 	use iMSCP::Execute;
 
-	for (qw/aliases domains mailboxes transport sender-access/) {
+	for (qw/aliases domains mailboxes transport sender-access greylisting/) {
 		# Storing the new files in the working directory
 		$file = iMSCP::File->new(filename => "$self->{vrlDir}/$_");
 		$rs |= $file->copyFile("$self->{wrkDir}");
