@@ -419,7 +419,7 @@ CREATE TABLE IF NOT EXISTS `mail_users` (
   `mail_auto_respond_text` text collate utf8_unicode_ci,
   `quota` int(10) default '104857600',
   `mail_addr` varchar(200) collate utf8_unicode_ci default NULL,
-  `greylisting` varchar(3) collate utf8_unicode_ci default NULL,
+  `greylisting` varchar(3) collate utf8_unicode_ci NOT NULL default 'yes',
   PRIMARY KEY  (`mail_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

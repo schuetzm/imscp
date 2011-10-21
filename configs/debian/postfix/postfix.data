@@ -48,7 +48,7 @@ MTA_TRANSPORT_HASH = /etc/postfix/imscp/transport
 
 MTA_SENDER_ACCESS_HASH = /etc/postfix/imscp/sender-access
 
-MTA_GREYLISTING_HASH = /etc/postfix/imscp/greylisting
+MTA_GREY_LISTING_HASH = /etc/postfix/imscp/greylisting
 
 MTA_MAILBOX_UID_NAME = vmail
 

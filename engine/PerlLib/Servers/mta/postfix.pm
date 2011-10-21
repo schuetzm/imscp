@@ -330,7 +330,9 @@ sub addMail{
 		return 1 unless $data->{$_};
 	}
 
-	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH}, $self->{MTA_TRANSPORT_HASH}){
+	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH},
+		$self->{MTA_TRANSPORT_HASH}, $self->{MTA_GREY_LISTING_HASH}
+	){
 		if(-f $_){
 			my $file = iMSCP::File->new(filename => $_);
 			my (
@@ -352,6 +354,9 @@ sub addMail{
 
 	$rs |= $self->addMailBox($data) if $data->{MAIL_TYPE} =~ m/_mail/;
 	$rs |= $self->delMailBox($data) if $data->{MAIL_TYPE} !~ m/_mail/;
+	
+	$rs |= $self->addGreyListing($data) if $data->{MAIL_GREY_LISTING} =~ m/yes/;
+	$rs |= $self->delGreyListing($data) if $data->{MAIL_GREY_LISTING} =~ m/no/;
 
 	$rs |= $self->addAutoRspnd($data) if $data->{MAIL_AUTO_RSPND};
 	$rs |= $self->delAutoRspnd($data) unless $data->{MAIL_AUTO_RSPND};
@@ -387,7 +392,9 @@ sub delMail{
 		return 1 unless $data->{$_};
 	}
 
-	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH}, $self->{MTA_TRANSPORT_HASH}){
+	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH},
+		$self->{MTA_TRANSPORT_HASH}, $self->{MTA_GREY_LISTING_HASH}
+	){
 		if(-f $_){
 			my $file = iMSCP::File->new(filename => $_);
 			my (
@@ -406,6 +413,7 @@ sub delMail{
 
 	$rs |= $self->delSaslData($data);
 	$rs |= $self->delMailBox($data);
+	$rs |= $self->delGreyListing($data);
 	$rs |= $self->delMailForward($data);
 	$rs |= $self->delAutoRspnd($data);
 	$rs |= $self->delCatchAll($data);
@@ -435,7 +443,9 @@ sub disableMail{
 		return 1 unless $data->{$_};
 	}
 
-	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH}, $self->{MTA_TRANSPORT_HASH}){
+	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH},
+		$self->{MTA_TRANSPORT_HASH}, $self->{MTA_GREY_LISTING_HASH}
+	){
 		if(-f $_){
 			my $file = iMSCP::File->new(filename => $_);
 			my (
@@ -454,6 +464,7 @@ sub disableMail{
 
 	$rs |= $self->delSaslData($data);
 	$rs |= $self->disableMailBox($data);
+	$rs |= $self->delGreyListing($data);
 	$rs |= $self->delMailForward($data);
 	$rs |= $self->delAutoRspnd($data);
 	$rs |= $self->delCatchAll($data);
@@ -864,6 +875,72 @@ sub delCatchAll{
 	$rs |= $wrkFile->copyFile($mFWDHshFile);
 
 	$self->{postmap}->{$self->{MTA_VIRTUAL_ALIAS_HASH}} = $data->{MAIL_ADDR};
+
+	$rs;
+}
+
+# Add entry for a specific mailbox into the greylisting hash file.
+sub addGreyListing {
+
+	use File::Basename;
+	use iMSCP::File;
+
+	my $self = shift;
+	my $data = shift;
+	my $rs = 0;
+
+	my $greyListingHashFile	= $self->{MTA_GREY_LISTING_HASH};
+	my ($filename, $directories, $suffix) = fileparse($greyListingHashFile);
+	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
+	my $wrkFile	= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkContent	= $wrkFile->get();
+	return 1 unless defined $wrkContent;
+
+	my $recipient = $data->{MAIL_ADDR};
+
+	$wrkContent	=~ s/^$recipient\t[^\n]*\n//gmi;
+	$wrkContent	.= "$recipient\tgreylist/\n";
+
+	$wrkFile->set($wrkContent);
+	return 1 if $wrkFile->save();
+
+	$rs |= $wrkFile->mode(0644);
+	$rs |= $wrkFile->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
+	$rs |= $wrkFile->copyFile($mBoxHashFile);
+
+	$self->{postmap}->{$greyListingHashFile} => $recipient;
+
+	$rs;
+}
+
+# Delete entry for a specific mailbox into the greylisting hash file.
+sub delGreyListing {
+
+	use File::Basename;
+	use iMSCP::File;
+
+	my $self = shift;
+	my $data = shift;
+	my $rs = 0;
+
+	my $greyListingHashFile	= $self->{MTA_GREY_LISTING_HASH};
+	my ($filename, $directories, $suffix) = fileparse($greyListingHashFile);
+	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
+	my $wrkFile	= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkContent	= $wrkFile->get();
+	return 1 unless defined $wrkContent;
+
+	my $recipient = $data->{MAIL_ADDR};
+
+	$wrkContent	=~ s/^$recipient\t[^\n]*\n//gmi;
+	$wrkFile->set($wrkContent);
+	return 1 if $wrkFile->save();
+
+	$rs |= $wrkFile->mode(0644);
+	$rs |= $wrkFile->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
+	$rs |= $wrkFile->copyFile($mBoxHashFile);
+
+	$self->{postmap}->{$greyListingHashFile} => $recipient;
 
 	$rs;
 }

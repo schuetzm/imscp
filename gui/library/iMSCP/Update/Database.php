@@ -1256,7 +1256,8 @@ class iMSCP_Update_Database extends iMSCP_Update
 	protected  function _databaseUpdate_92()
 	{
 		return $this->_addColumn(
-			'mail_users', 'greylisting', 'VARCHAR(3) default NULL AFTER `mail_addr`'
+			'mail_users',
+			"greylisting', 'VARCHAR(3) NOT NULL default 'yes' AFTER `mail_addr`"
 		);
 	}
 }

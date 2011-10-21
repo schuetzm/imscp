@@ -133,6 +133,7 @@ sub buildMTAData{
 		MAIL_AUTO_RSPND		=> $self->{mail_auto_respond},
 		MAIL_AUTO_RSPND_TXT	=> $self->{mail_auto_respond_text},
 		MAIL_HAVE_CATCH_ALL	=> $self->{haveCatchAll},
+		MAIL_GREY_LISTING	=> $self->{greylisting},
 		MAIL_STATUS			=> $self->{status},
 		MAIL_ON_CATCHALL	=> undef
 	};
