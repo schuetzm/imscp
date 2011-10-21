@@ -1248,16 +1248,17 @@ class iMSCP_Update_Database extends iMSCP_Update
 	}
 
 	/**
-	 * #236: Adds per-user grey listing feature.
+	 * #236: Adds columns for per-user grey listing feature.
 	 *
 	 * @author Laurent Declercq <l.declercq@nuxwin.com>
 	 * @return string SQL Statement to be executed
 	 */
 	protected  function _databaseUpdate_92()
 	{
-		return $this->_addColumn(
-			'mail_users',
-			"greylisting', 'VARCHAR(3) NOT NULL default 'yes' AFTER `mail_addr`"
+		return array(
+			$this->_addColumn('reseller_props', 'mail_perm_greylisting', "VARCHAR(3) NOT NULL default 'no' AFTER `php_ini_max_memory_limit`"),
+			$this->_addColumn('domain', 'mail_perm_greylisting', "VARCHAR(3) NOT NULL default 'no' AFTER `phpini_perm_disable_functions`"),
+			$this->_addColumn('mail_users', 'greylisting', "VARCHAR(3) NOT NULL default 'yes' AFTER `mail_addr`")
 		);
 	}
 }

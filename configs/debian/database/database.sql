@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS `domain` (
   `phpini_perm_allow_url_fopen` VARCHAR( 20 ) NOT NULL DEFAULT 'no',
   `phpini_perm_display_errors` VARCHAR( 20 ) NOT NULL DEFAULT 'no',
   `phpini_perm_disable_functions` VARCHAR( 20 ) NOT NULL DEFAULT 'no',
+  `mail_perm_greylisting` VARCHAR(3) NOT NULL DEFAULT 'no',
   UNIQUE KEY `domain_id` (`domain_id`),
   UNIQUE KEY `domain_name` (`domain_name`),
   KEY `i_domain_admin_id` (`domain_admin_id`)
@@ -584,6 +585,7 @@ CREATE TABLE IF NOT EXISTS `reseller_props` (
   `php_ini_max_max_execution_time` int(11) NOT NULL DEFAULT '0',
   `php_ini_max_max_input_time` int(11) NOT NULL DEFAULT '0',
   `php_ini_max_memory_limit` int(11) NOT NULL DEFAULT '0',
+  `mail_perm_greylisting` varchar (3) NOT NULL DEFAULT 'no',
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
