@@ -110,6 +110,9 @@ smtpd_sender_restrictions    = reject_non_fqdn_sender,
                                permit_mynetworks,
                                permit_sasl_authenticated
 
+smtpd_restriction_classes = greylist
+greylist = check_policy_service inet:127.0.0.1:{PORT_POSTGREY}
+
 smtpd_recipient_restrictions = reject_non_fqdn_recipient,
                                reject_unknown_recipient_domain,
                                permit_mynetworks,
@@ -117,7 +120,7 @@ smtpd_recipient_restrictions = reject_non_fqdn_recipient,
                                reject_unauth_destination,
                                reject_unlisted_recipient,
                                check_policy_service inet:127.0.0.1:12525,
-                               check_policy_service inet:127.0.0.1:{PORT_POSTGREY},
+                               check_recipient_access hash:/etc/postfix/imscp/greylisting,
                                permit
 
 smtpd_data_restrictions      = reject_multi_recipient_bounce,
