@@ -4,6 +4,27 @@
 	/* <![CDATA[ */
 		$(document).ready(function(){
 			$('#fwd_help').iMSCPtooltips({msg:"{TR_FWD_HELP}"});
+			$('#keep_copy').hide();
+
+			$('#mail_type_forward').change(function() {
+				if($(this).is(':checked')) {
+					$('#keep_copy').show();
+				} else {
+					$('#keep_copy').hide();
+				}
+			});
+
+			<!-- BDP greylisting_feature -->
+			$('#greylisting_help').iMSCPtooltips({msg:"{TR_GREYLISTING_HELP}"});
+
+			$('#mail_type_forward').change(function() {
+				if($(this).is(':checked')){
+					$('#tr_greylisting').hide();
+				} else {
+					$('#tr_greylisting').show();
+				}
+			});
+			<!-- EDP greylisting_feature -->
 		});
 
 		function changeType() {
@@ -166,7 +187,7 @@
 				</tr>
 				<!-- EDP: to_alias_subdomain -->
 				<tr>
-					<td colspan="2"><input type="checkbox" name="mail_type_normal" value="1" onclick="changeType();" {NORMAL_MAIL_CHECKED} />{TR_NORMAL_MAIL}</td>
+					<td colspan="2"><input type="checkbox" name="mail_type_normal" id="mail_type_normal" value="1" onclick="changeType();" {NORMAL_MAIL_CHECKED} />{TR_NORMAL_MAIL} <div id="keep_copy" style="color:#666666;"><small>({TR_KEEP_COPY})</small></div></td>
 				</tr>
 				<tr>
 					<td><label for="pass">{TR_PASSWORD}</label></td>
@@ -177,14 +198,25 @@
 					<td><input id="pass_rep" type="password" name="pass_rep" value="" /></td>
 				</tr>
 				<tr>
-					<td colspan="2"><input type="checkbox" name="mail_type_forward" value="1" {FORWARD_MAIL_CHECKED} onclick="changeType();" />{TR_FORWARD_MAIL}</td>
+					<td colspan="2"><input type="checkbox" name="mail_type_forward" id="mail_type_forward" value="1" {FORWARD_MAIL_CHECKED} onclick="changeType();" />{TR_FORWARD_MAIL}</td>
 				</tr>
 				<tr>
 					<td>
-						<label for="forward_list">{TR_FORWARD_TO}</label><span class="icon i_help" id="fwd_help">Help</span>
+						<label for="forward_list">{TR_FORWARD_TO}</label><span span style="vertical-align: middle;" class="icon i_help" id="fwd_help">{TR_HELP}</span>
 					</td>
 					<td><textarea name="forward_list" id="forward_list" cols="35" rows="5">{FORWARD_LIST}</textarea></td>
 				</tr>
+				<!-- BDP: greylisting_feature -->
+				<tr id="tr_greylisting">
+					<td>
+						<label>{TR_GREYLISTING_SUPPORT}</label><span style="vertical-align: middle;" class="icon i_help" id="greylisting_help">{TR_HELP}</span>
+					</td>
+					<td>
+						<input type="radio" name="greylisting" value="yes" {GREYLISTING_CHECKED_YES} style="vertical-align: middle"/><span style="vertical-align: middle">{TR_YES}</span>
+						<input type="radio" name="greylisting" value="yes" {GREYLISTING_CHECKED_NO} style="vertical-align: middle"/><span style="vertical-align: middle">{TR_NO}</span>
+					</td>
+				</tr>
+				<!-- EDP: greylisting_feature -->
 			</table>
 			<div class="buttons">
 				<input type="hidden" name="uaction" value="add_user" />

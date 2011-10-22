@@ -44,6 +44,7 @@ if ($domainProperties['domain_mailacc_limit'] == '-1') {
 	redirectTo('index.php');
 }
 
+/** @var $cfg iMSCP_Config_Handler_File */
 $cfg = iMSCP_Registry::get('config');
 
 $tpl = new iMSCP_pTemplate();
@@ -57,11 +58,19 @@ $tpl->define_dynamic('als_sub_list', 'page');
 $tpl->define_dynamic('to_alias_domain', 'page');
 $tpl->define_dynamic('to_subdomain', 'page');
 $tpl->define_dynamic('to_alias_subdomain', 'page');
+$tpl->define_dynamic('greylisting_feature', 'page');
 
 // page functions.
 
-function gen_page_form_data(&$tpl, $dmn_name, $post_check) {
+/**
+ * @param iMSCP_pTemplate $tpl
+ * @param string $dmn_name
+ * @param $post_check
+ * @return void
+ */
+function gen_page_form_data($tpl, $dmn_name, $post_check) {
 
+	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
 	$dmn_name = decode_idna($dmn_name);
@@ -105,8 +114,16 @@ function gen_page_form_data(&$tpl, $dmn_name, $post_check) {
 	}
 }
 
+/**
+ *
+ * @param iMSCP_pTemplate $tpl $tpl
+ * @param int $dmn_id
+ * @param $post_check
+ * @return void
+ */
 function gen_dmn_als_list($tpl, $dmn_id, $post_check) {
 
+	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
 	$ok_status = $cfg->ITEM_OK_STATUS;
@@ -175,8 +192,16 @@ function gen_dmn_als_list($tpl, $dmn_id, $post_check) {
 	}
 }
 
+/**
+ * @param iMSCP_pTemplate $tpl
+ * @param int $dmn_id
+ * @param string $dmn_name
+ * @param $post_check
+ * @return void
+ */
 function gen_dmn_sub_list($tpl, $dmn_id, $dmn_name, $post_check) {
 
+	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
 	$ok_status = $cfg->ITEM_OK_STATUS;
@@ -248,8 +273,15 @@ function gen_dmn_sub_list($tpl, $dmn_id, $dmn_name, $post_check) {
 	}
 }
 
+/**
+ * @param iMSCP_pTemplate $tpl
+ * @param int $dmn_id
+ * @param $post_check
+ * @return void
+ */
 function gen_dmn_als_sub_list($tpl, $dmn_id, $post_check) {
 
+	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
 	$ok_status = $cfg->ITEM_OK_STATUS;
@@ -323,9 +355,17 @@ function gen_dmn_als_sub_list($tpl, $dmn_id, $post_check) {
 	}
 }
 
+/**
+ * @param int $domain_id
+ * @param string $dmn_name
+ * @param string $mail_acc
+ * @return bool
+ */
 function schedule_mail_account($domain_id, $dmn_name, $mail_acc) {
 
+	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
+	$domainProperties = get_domain_default_props($_SESSION['user_id'], true);
 
 	$mail_auto_respond = false;
 	$mail_auto_respond_text = '';
@@ -396,12 +436,20 @@ function schedule_mail_account($domain_id, $dmn_name, $mail_acc) {
 		$mail_forward = implode(',', $mail_accs);
 	}
 
+	if($domainProperties['mail_perm_greylisting'] == 'yes' &&
+	   ((isset($_POST['greylisting']) && $_POST['greylisting'] == 'no'))
+	) {
+		$greylisting = 'no';
+	} else {
+		$greylisting = 'yes';
+	}
+
 	$mail_type = implode(',', $mail_type);
 	list($dmn_type, $type) = explode('_', $mail_type, 2);
 
 	$check_acc_query = "
 		SELECT
-			COUNT(`mail_id`) AS cnt
+			COUNT(`mail_id`) AS `cnt`
 		FROM
 			`mail_users`
 		WHERE
@@ -425,9 +473,9 @@ function schedule_mail_account($domain_id, $dmn_name, $mail_acc) {
 		INSERT INTO `mail_users` (
 			`mail_acc`, `mail_pass`, `mail_forward`, `domain_id`, `mail_type`,
 			`sub_id`, `status`, `mail_auto_respond`, `mail_auto_respond_text`,
-			`mail_addr`
+			`mail_addr`, `greylisting`
 		) VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	';
 
 	exec_query($query, array($mail_acc,
@@ -439,7 +487,8 @@ function schedule_mail_account($domain_id, $dmn_name, $mail_acc) {
 			$cfg->ITEM_ADD_STATUS,
 			$mail_auto_respond,
 			$mail_auto_respond_text,
-			$mail_addr));
+			$mail_addr,
+			$greylisting));
 
 	update_reseller_c_props(get_reseller_id($domain_id));
 
@@ -449,6 +498,11 @@ function schedule_mail_account($domain_id, $dmn_name, $mail_acc) {
 	redirectTo('mail_accounts.php');
 }
 
+/**
+ * @param int $dmn_id
+ * @param string $dmn_name
+ * @return bool
+ */
 function check_mail_acc_data($dmn_id, $dmn_name) {
 
 	$cfg = iMSCP_Registry::get('config');
@@ -561,6 +615,11 @@ function check_mail_acc_data($dmn_id, $dmn_name) {
 	schedule_mail_account($dmn_id, $dmn_name, $mail_acc);
 }
 
+/**
+ * @param iMSCP_pTemplate $tpl
+ * @param int $user_id
+ * @return void
+ */
 function gen_page_mail_acc_props($tpl, $user_id) {
 	list($dmn_id,
 		$dmn_name,
@@ -651,7 +710,14 @@ $tpl->assign(array(
 				  'TR_FWD_HELP' => tr('Separate multiple email addresses with a line-break.'),
 				  'TR_ADD' => tr('Add'),
 				  'TR_EMPTY_DATA' => tr('You did not fill all required fields'),
-				  'TR_MAIl_ACCOUNT_DATA' => tr('Mail account data')));
+				  'TR_MAIl_ACCOUNT_DATA' => tr('Mail account data'),
+				  'TR_GREYLISTING_SUPPORT' => tr('Greylisting support'),
+				  'TR_HELP' => tr('help'),
+				  'TR_YES' => tr('yes'),
+				  'TR_NO' => tr('no'),
+				  'TR_KEEP_COPY' => tr('Keep a local copy of all mail received in my own mailbox.'),
+				  'TR_GREYLISTING_HELP' => tr('The greylisting is a little barrier against the spam. If you disable this feature on this mail account, your mail will not be delayed but you will be exposed to more spam.')
+			 ));
 
 generatePageMessage($tpl);
 
