@@ -476,6 +476,7 @@ sub delSaslData{
 
 	use File::Basename;
 	use iMSCP::Execute;
+	use iMSCP::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -485,6 +486,15 @@ sub delSaslData{
 
 	my $mailBox		= $data->{MAIL_ADDR};
 	$mailBox		=~ s/\./\\\./g;
+
+	my $sasldb = iMSCP::File->new(filename => $self->{ETC_SASLDB_FILE});
+
+	$rs |=	$sasldb->save() unless(-f $self->{ETC_SASLDB_FILE});
+	$rs |=	$sasldb->mode(0660);
+	$rs |=	$sasldb->owner(
+			$self->{SASLDB_USER},
+			$self->{SASLDB_GROUP}
+		);
 
 	$rs |= execute("$self->{CMD_SASLDB_LISTUSERS2} -f $self->{ETC_SASLDB_FILE}", \$stdout, \$stderr);
 	debug($stdout) if $stdout;
@@ -510,6 +520,7 @@ sub addSaslData{
 
 	use File::Basename;
 	use iMSCP::Execute;
+	use iMSCP::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -519,6 +530,15 @@ sub addSaslData{
 
 	my $mailBox	= $data->{MAIL_ADDR};
 	$mailBox	=~ s/\./\\\./g;
+
+	my $sasldb = iMSCP::File->new(filename => $self->{ETC_SASLDB_FILE});
+
+	$rs |=	$sasldb->save() unless(-f $self->{ETC_SASLDB_FILE});
+	$rs |=	$sasldb->mode(0660);
+	$rs |=	$sasldb->owner(
+			$self->{SASLDB_USER},
+			$self->{SASLDB_GROUP}
+		);
 
 	$rs |= execute("$self->{CMD_SASLDB_LISTUSERS2} -f $self->{ETC_SASLDB_FILE}", \$stdout, \$stderr);
 	debug($stdout) if $stdout;
