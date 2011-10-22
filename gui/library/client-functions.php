@@ -63,7 +63,7 @@ function get_domain_default_props($domainAdminId, $returnWKeys = false)
 				`domain_status`, `domain_alias_limit`, `domain_subd_limit`,
 				`domain_ip_id`, `domain_disk_limit`, `domain_disk_usage`,
 				`domain_php`, `domain_cgi`, `allowbackup`, `domain_dns`,
-				`domain_software_allowed`, `phpini_perm_system`
+				`domain_software_allowed`, `phpini_perm_system`, `mail_perm_greylisting`
 			FROM
 				`domain`
 			WHERE

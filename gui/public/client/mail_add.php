@@ -73,7 +73,10 @@ function gen_page_form_data($tpl, $dmn_name, $post_check) {
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
+	$domainProperties = get_domain_default_props($_SESSION['user_id'], true);
+
 	$dmn_name = decode_idna($dmn_name);
+	$htmlChecked = $cfg->HTML_CHECKED;
 
 	if ($post_check === 'no') {
 
@@ -81,13 +84,15 @@ function gen_page_form_data($tpl, $dmn_name, $post_check) {
 			array(
 				'USERNAME'				=> '',
 				'DOMAIN_NAME'			=> tohtml($dmn_name),
-				'MAIL_DMN_CHECKED'		=> $cfg->HTML_CHECKED,
+				'MAIL_DMN_CHECKED'		=> $htmlChecked,
 				'MAIL_ALS_CHECKED'		=> '',
 				'MAIL_SUB_CHECKED'		=> '',
 				'MAIL_ALS_SUB_CHECKED'	=> '',
-				'NORMAL_MAIL_CHECKED'	=> $cfg->HTML_CHECKED,
+				'NORMAL_MAIL_CHECKED'	=> $htmlChecked,
 				'FORWARD_MAIL_CHECKED'	=> '',
-				'FORWARD_LIST'			=> ''
+				'FORWARD_LIST'			=> '',
+				'GREYLISTING_CHECKED_YES' => $htmlChecked,
+				'GREYLISTING_CHECKED_NO' => ''
 			)
 		);
 
@@ -108,9 +113,28 @@ function gen_page_form_data($tpl, $dmn_name, $post_check) {
 				'MAIL_ALS_SUB_CHECKED'	=> ($_POST['dmn_type'] === 'als_sub') ? $cfg->HTML_CHECKED : '',
 				'NORMAL_MAIL_CHECKED'	=> (isset($_POST['mail_type_normal'])) ? $cfg->HTML_CHECKED : '',
 				'FORWARD_MAIL_CHECKED'	=> (isset($_POST['mail_type_forward'])) ? $cfg->HTML_CHECKED : '',
-				'FORWARD_LIST'			=> $f_list
+				'FORWARD_LIST'			=> $f_list,
+				'GREYLISTING_CHECKED_YES' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'yes') ? $htmlChecked : '',
+				'GREYLISTING_CHECKED_NO' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'no') ? $htmlChecked : '',
 			)
 		);
+	}
+
+	// per-user greylisting feature
+	if($domainProperties['mail_perm_greylisting'] == 'yes') {
+		if($post_check === 'no') {
+			$tpl->assign(array(
+							  'GREYLISTING_CHECKED_YES' => $htmlChecked,
+							  'GREYLISTING_CHECKED_NO' => ''));
+		} else {
+			$tpl->assign(array(
+							  'GREYLISTING_CHECKED_YES' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'yes')
+								  ? $htmlChecked : '',
+							  'GREYLISTING_CHECKED_NO' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'no')
+								  ? $htmlChecked : ''));
+		}
+	} else {
+		$tpl->assign('GREYLISTING_FEATURE', '');
 	}
 }
 
@@ -436,11 +460,13 @@ function schedule_mail_account($domain_id, $dmn_name, $mail_acc) {
 		$mail_forward = implode(',', $mail_accs);
 	}
 
+	// per-user greylisting feature
 	if($domainProperties['mail_perm_greylisting'] == 'yes' &&
-	   ((isset($_POST['greylisting']) && $_POST['greylisting'] == 'no'))
+	   (isset($_POST['greylisting']) && $_POST['greylisting'] == 'no')
 	) {
 		$greylisting = 'no';
 	} else {
+		// greylisting is enabled if user has not right to disable it or if he want it.
 		$greylisting = 'yes';
 	}
 
@@ -715,7 +741,7 @@ $tpl->assign(array(
 				  'TR_HELP' => tr('help'),
 				  'TR_YES' => tr('yes'),
 				  'TR_NO' => tr('no'),
-				  'TR_KEEP_COPY' => tr('Keep a local copy of all mail received in my own mailbox.'),
+				  'TR_KEEP_COPY' => tr('Keep a local copy of all emails received in this mailbox'),
 				  'TR_GREYLISTING_HELP' => tr('The greylisting is a little barrier against the spam. If you disable this feature on this mail account, your mail will not be delayed but you will be exposed to more spam.')
 			 ));
 

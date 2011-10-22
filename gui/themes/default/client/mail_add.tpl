@@ -14,17 +14,17 @@
 				}
 			});
 
-			<!-- BDP greylisting_feature -->
+			<!-- BDP: greylisting_feature -->
 			$('#greylisting_help').iMSCPtooltips({msg:"{TR_GREYLISTING_HELP}"});
 
-			$('#mail_type_forward').change(function() {
+			/*$('#mail_type_forward').change(function() {
 				if($(this).is(':checked')){
 					$('#tr_greylisting').hide();
 				} else {
 					$('#tr_greylisting').show();
 				}
-			});
-			<!-- EDP greylisting_feature -->
+			});*/
+			<!-- EDP: greylisting_feature -->
 		});
 
 		function changeType() {
@@ -212,8 +212,8 @@
 						<label>{TR_GREYLISTING_SUPPORT}</label><span style="vertical-align: middle;" class="icon i_help" id="greylisting_help">{TR_HELP}</span>
 					</td>
 					<td>
-						<input type="radio" name="greylisting" value="yes" {GREYLISTING_CHECKED_YES} style="vertical-align: middle"/><span style="vertical-align: middle">{TR_YES}</span>
-						<input type="radio" name="greylisting" value="yes" {GREYLISTING_CHECKED_NO} style="vertical-align: middle"/><span style="vertical-align: middle">{TR_NO}</span>
+						<input type="radio" name="greylisting" value="yes"{GREYLISTING_CHECKED_YES} /><span>{TR_YES}</span>
+						<input type="radio" name="greylisting" value="no"{GREYLISTING_CHECKED_NO} /><span>{TR_NO}</span>
 					</td>
 				</tr>
 				<!-- EDP: greylisting_feature -->
