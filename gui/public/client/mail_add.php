@@ -90,9 +90,7 @@ function gen_page_form_data($tpl, $dmn_name, $post_check) {
 				'MAIL_ALS_SUB_CHECKED'	=> '',
 				'NORMAL_MAIL_CHECKED'	=> $htmlChecked,
 				'FORWARD_MAIL_CHECKED'	=> '',
-				'FORWARD_LIST'			=> '',
-				'GREYLISTING_CHECKED_YES' => $htmlChecked,
-				'GREYLISTING_CHECKED_NO' => ''
+				'FORWARD_LIST'			=> ''
 			)
 		);
 
@@ -107,31 +105,31 @@ function gen_page_form_data($tpl, $dmn_name, $post_check) {
 			array(
 				'USERNAME'				=> clean_input($_POST['username'], true),
 				'DOMAIN_NAME'			=> tohtml($dmn_name),
-				'MAIL_DMN_CHECKED'		=> ($_POST['dmn_type'] === 'dmn') ? $cfg->HTML_CHECKED : '',
-				'MAIL_ALS_CHECKED'		=> ($_POST['dmn_type'] === 'als') ? $cfg->HTML_CHECKED : '',
-				'MAIL_SUB_CHECKED'		=> ($_POST['dmn_type'] === 'sub') ? $cfg->HTML_CHECKED : '',
-				'MAIL_ALS_SUB_CHECKED'	=> ($_POST['dmn_type'] === 'als_sub') ? $cfg->HTML_CHECKED : '',
-				'NORMAL_MAIL_CHECKED'	=> (isset($_POST['mail_type_normal'])) ? $cfg->HTML_CHECKED : '',
-				'FORWARD_MAIL_CHECKED'	=> (isset($_POST['mail_type_forward'])) ? $cfg->HTML_CHECKED : '',
-				'FORWARD_LIST'			=> $f_list,
-				'GREYLISTING_CHECKED_YES' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'yes') ? $htmlChecked : '',
-				'GREYLISTING_CHECKED_NO' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'no') ? $htmlChecked : '',
+				'MAIL_DMN_CHECKED'		=> ($_POST['dmn_type'] === 'dmn') ? $htmlChecked : '',
+				'MAIL_ALS_CHECKED'		=> ($_POST['dmn_type'] === 'als') ? $htmlChecked : '',
+				'MAIL_SUB_CHECKED'		=> ($_POST['dmn_type'] === 'sub') ? $htmlChecked : '',
+				'MAIL_ALS_SUB_CHECKED'	=> ($_POST['dmn_type'] === 'als_sub') ? $htmlChecked : '',
+				'NORMAL_MAIL_CHECKED'	=> (isset($_POST['mail_type_normal'])) ? $htmlChecked : '',
+				'FORWARD_MAIL_CHECKED'	=> (isset($_POST['mail_type_forward'])) ? $htmlChecked : '',
+				'FORWARD_LIST'			=> $f_list
 			)
 		);
 	}
 
 	// per-user greylisting feature
 	if($domainProperties['mail_perm_greylisting'] == 'yes') {
-		if($post_check === 'no') {
-			$tpl->assign(array(
-							  'GREYLISTING_CHECKED_YES' => $htmlChecked,
-							  'GREYLISTING_CHECKED_NO' => ''));
+		if($post_check == 'no') {
+			$tpl->assign(
+				array(
+					 'GREYLISTING_CHECKED_YES' => $htmlChecked,
+					 'GREYLISTING_CHECKED_NO' => ''));
 		} else {
-			$tpl->assign(array(
-							  'GREYLISTING_CHECKED_YES' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'yes')
-								  ? $htmlChecked : '',
-							  'GREYLISTING_CHECKED_NO' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'no')
-								  ? $htmlChecked : ''));
+			$tpl->assign(
+				array(
+					 'GREYLISTING_CHECKED_YES' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'yes')
+						 ? $htmlChecked : '',
+					 'GREYLISTING_CHECKED_NO' => (isset($_POST['greylisting']) && $_POST['greylisting'] == 'no')
+						 ? $htmlChecked : ''));
 		}
 	} else {
 		$tpl->assign('GREYLISTING_FEATURE', '');
