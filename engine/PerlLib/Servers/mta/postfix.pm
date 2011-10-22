@@ -354,7 +354,7 @@ sub addMail{
 
 	$rs |= $self->addMailBox($data) if $data->{MAIL_TYPE} =~ m/_mail/;
 	$rs |= $self->delMailBox($data) if $data->{MAIL_TYPE} !~ m/_mail/;
-	
+
 	$rs |= $self->addGreyListing($data) if $data->{MAIL_GREY_LISTING} eq 'yes';
 	$rs |= $self->delGreyListing($data) if $data->{MAIL_GREY_LISTING} eq 'no';
 
@@ -899,7 +899,7 @@ sub addGreyListing {
 	my $recipient = $data->{MAIL_ADDR};
 
 	$wrkContent	=~ s/^$recipient\t[^\n]*\n//gmi;
-	$wrkContent	.= "$recipient\tgreylist/\n";
+	$wrkContent	.= "$recipient\tgreylist\n";
 
 	$wrkFile->set($wrkContent);
 	return 1 if $wrkFile->save();
@@ -908,7 +908,7 @@ sub addGreyListing {
 	$rs |= $wrkFile->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
 	$rs |= $wrkFile->copyFile($greyListingHashFile);
 
-	$self->{postmap}->{$greyListingHashFile} => $recipient;
+	$self->{postmap}->{$greyListingHashFile} = $recipient;
 
 	$rs;
 }
@@ -940,7 +940,7 @@ sub delGreyListing {
 	$rs |= $wrkFile->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
 	$rs |= $wrkFile->copyFile($greyListingHashFile);
 
-	$self->{postmap}->{$greyListingHashFile} => $recipient;
+	$self->{postmap}->{$greyListingHashFile} = $recipient;
 
 	$rs;
 }
