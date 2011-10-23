@@ -1250,12 +1250,23 @@ class iMSCP_Update_Database extends iMSCP_Update
 	}
 
 	/**
-	 * #236: Adds columns for per-user grey listing feature.
+	 * #238: Delete orphan php_ini entries in the php.ini table
+	 *
+	 * @author Sascha Bay <thecry@i-mscp.net>
+	 * @return string SQL Statement to be executed
+	 */
+	protected function _databaseUpdate_92()
+	{
+		return 'DELETE FROM `php_ini` WHERE `domain_id` NOT IN (SELECT `domain_id` FROM `domain`)';
+	}
+
+	/**
+	 * #236: Adds columns for per-user grey listing feature
 	 *
 	 * @author Laurent Declercq <l.declercq@nuxwin.com>
 	 * @return string SQL Statement to be executed
 	 */
-	protected  function _databaseUpdate_92()
+	protected  function _databaseUpdate_93()
 	{
 		return array(
 			$this->_addColumn('reseller_props', 'mail_perm_greylisting', "VARCHAR(3) NOT NULL default 'no' AFTER `php_ini_max_memory_limit`"),
