@@ -137,6 +137,12 @@ function client_getMailAccountData($mailAccountId)
 				$mailAccountData['mail_pass'] = clean_input($_POST['password']);
 				$mailAccountData['mail_pass_confirmation'] = clean_input($_POST['passwordConfirmation']);
 			}
+
+			// greylisting data
+			if($domainProperties['mail_perm_greylisting'] == 'yes') {
+				$mailAccountData['greylisting_previous'] = $mailAccountData['greylisting'];
+				$mailAccountData['greylisting'] = ($_POST['greylisting'] == 'no') ? 'no' : 'yes';
+			}
 		}
 	}
 
@@ -154,7 +160,7 @@ function client_UpdateMailAccount($mailAccountData)
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg =iMSCP_Registry::get('config');
 
-	$passwordUpdate = $forwardAddressesUpdate = false;
+	$passwordUpdate = $forwardAddressesUpdate = $greylistingUpdate = false;
 
 	// Password validation
 	if($mailAccountData['mail_pass'] != '_no_' &&
@@ -186,8 +192,6 @@ function client_UpdateMailAccount($mailAccountData)
 				}
 			}
 
-			$mailAccountData['mail_forward'] = implode(',', $mailAccountData['mail_forward']);
-
 			// Check if the mail type doesn't contain xxx_forward and append it if needed
 			if (strpos($mailAccountData['mail_type'], '_forward') === false) {
 				if ($mailAccountData['mail_type'] == MT_NORMAL_MAIL) {
@@ -205,27 +209,40 @@ function client_UpdateMailAccount($mailAccountData)
 		}
 
 		$forwardAddressesUpdate = true;
-	} elseif($mailAccountData['mail_forward'] == '_no_' &&
-			 strpos($mailAccountData['mail_type'], '_forward') !== false
-	) {
-		// Check if mail type was a forward type and remove it
-		$mailAccountData['mail_type'] = preg_replace(
-			'/,[a-z]+_forward$/', '', $mailAccountData['mail_type']);
+	}
 
-		$forwardAddressesUpdate = true;
+	if($mailAccountData['mail_forward'] == '_no_') {
+		if(strpos($mailAccountData['mail_type'], '_forward') !== false) {
+			// Check if mail type was a forward type and remove it
+			$mailAccountData['mail_type'] = preg_replace(
+				'/,[a-z]+_forward$/', '', $mailAccountData['mail_type']);
+
+			$forwardAddressesUpdate = true;
+		}
+	} else {
+		// Prepare data for database insertion
+		$mailAccountData['mail_forward'] = implode(',', $mailAccountData['mail_forward']);
+	}
+
+	// greylisting support treatment
+	if(isset($mailAccountData['greylisting_previous'])) {
+		if($mailAccountData['greylisting'] != $mailAccountData['greylisting_previous']) {
+			$greylistingUpdate = true;
+		}
 	}
 
 	if (!Zend_Session::namespaceIsset('pageMessages')) {
-		if ($passwordUpdate || $forwardAddressesUpdate) {
+		if ($passwordUpdate || $forwardAddressesUpdate || $greylistingUpdate) {
 
-			$mailAccountData['status'] = ($forwardAddressesUpdate)
+			$mailAccountData['status'] = ($forwardAddressesUpdate || $greylistingUpdate)
 				? $cfg->ITEM_CHANGE_STATUS : $cfg->ITEM_OK_STATUS;
 
 			$query = "
 				UPDATE
 					`mail_users`
 				SET
-					`mail_pass` = ?, `mail_forward` = ?, `mail_type` = ?, `status` = ?
+					`mail_pass` = ?, `mail_forward` = ?, `mail_type` = ?, `status` = ?,
+					`greylisting` = ?
 				WHERE
 					`mail_id` = ?
 			";
@@ -234,6 +251,7 @@ function client_UpdateMailAccount($mailAccountData)
 									$mailAccountData['mail_forward'],
 									$mailAccountData['mail_type'],
 									$mailAccountData['status'],
+									$mailAccountData['greylisting'],
 									$mailAccountData['mail_id']));
 
 			if($mailAccountData['status'] == $cfg->ITEM_CHANGE_STATUS) {
@@ -267,6 +285,8 @@ function client_generateEditForm($tpl, $mailAccountData)
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg =iMSCP_Registry::get('config');
 
+	$domainProperties = get_domain_default_props($_SESSION['user_id'], true);
+
 	if($mailAccountData['mail_pass'] == '_no_') { // Forward only mail account
 		$tpl->assign('PASSWORD_FRM', '');
 	}
@@ -283,6 +303,21 @@ function client_generateEditForm($tpl, $mailAccountData)
 			 'FORWARD_LIST_VAL' => ($mailAccountData['mail_forward'] != '_no_' && $mailAccountData['mail_forward'] != '')
 				 ? tohtml(implode("\n", _client_normalizeForwardAddresses($mailAccountData['mail_forward'], 'idn_to_utf8'))) : ''
 		));
+
+	// Customer can enable/disable greylisting support for its mail accounts?
+	if($domainProperties['mail_perm_greylisting'] == 'yes') {
+		$tpl->assign(
+			array(
+				 'GREYLISTING_CHECKED_YES' => ($mailAccountData['greylisting'] == 'yes')
+					 ? $htmlChecked : '',
+				 'GREYLISTING_CHECKED_NO' => ($mailAccountData['greylisting'] == 'no')
+					 ? $htmlChecked : ''));
+	} else {
+		$tpl->assign(
+			array(
+				 'GREYLISTING_FEATURE_JS' => '',
+				 'GREYLISTING_FEATURE' => ''));
+	}
 }
 
 /************************************************************************************
@@ -322,7 +357,9 @@ $tpl->define_dynamic(
 		 'page' => $cfg->CLIENT_TEMPLATE_PATH . '/mail_edit.tpl',
 		 'page_message' => 'page',
 		 'logged_frm' => 'page',
-		 'password_frm' => 'page'));
+		 'password_frm' => 'page',
+		 'greylisting_feature_js' => 'page',
+		 'greylisting_feature' => 'page'));
 
 $tpl->assign(
 	array(
@@ -339,6 +376,8 @@ $tpl->assign(
 		 'TR_NO' => tr('no'),
 		 'TR_HELP' => tr('help'),
 		 'TR_FWD_HELP' => tr('Separate multiple email addresses with a space, a comma or a line-break.'),
+		 'TR_GREYLISTING_SUPPORT' => tr('Greylisting support'),
+		 'TR_GREYLISTING_HELP' => tr('The greylisting is a little barrier against the spam. If you disable this feature on this mail account, your mail will not be delayed but you will be exposed to more spam.'),
 		 'TR_UPDATE' => tr('Update'),
 		 'TR_CANCEL' => tr('Cancel')));
 
