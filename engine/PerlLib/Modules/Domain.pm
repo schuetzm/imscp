@@ -238,8 +238,8 @@ sub restore{
 		{
 			user		=> $main::imscpConfig{ROOT_USER},
 			group		=> $httpdGroup,
-			filemode	=> '0640',
-			dirmode		=> '0750',
+			filemode	=> '0644',
+			dirmode		=> '0755',
 			recursive	=> 'yes'
 		}
 	);
@@ -249,8 +249,8 @@ sub restore{
 		{
 			user		=> $main::imscpConfig{ROOT_USER},
 			group		=> $main::imscpConfig{ROOT_GROUP},
-			filemode	=> '0640',
-			dirmode		=> '0750',
+			filemode	=> '0644',
+			dirmode		=> '0755',
 			recursive	=> 'yes'
 		}
 	);
