@@ -760,13 +760,13 @@ sub dmnFolders{
 	my ($rs, $stdout, $stderr);
 
 	my @folders = (
-		["$hDir",			$data->{USER},	$apacheGroup,	0770],
+		["$hDir",			$data->{USER},	$apacheGroup,	0750],
 		["$hDir/htdocs",	$data->{USER},	$data->{GROUP},	0755],
 		["$hDir/cgi-bin",	$data->{USER},	$data->{GROUP},	0755],
 		["$hDir/phptmp",	$data->{USER},	$apacheGroup,	0770]
 	);
 
-	push(@folders, ["$hDir/errors",		$data->{USER},	$data->{GROUP},	0775])
+	push(@folders, ["$hDir/errors",		$data->{USER},	$data->{GROUP},	0755])
 		if $self->{mode} eq 'dmn';
 	push(@folders, ["$php5Dir",			$data->{USER},	$data->{GROUP},	0555])
 		if

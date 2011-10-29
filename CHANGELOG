@@ -15,6 +15,7 @@ Features / Enhancements:
 Other:
 
 Tickets:
+	- Fixed #242: Directories are created with group write permissions.
 
 -------------------------------------------------------------------------------------
 i-MSCP 1.0.1.5 (beta 5)
