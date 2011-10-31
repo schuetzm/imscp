@@ -27,7 +27,7 @@
 #####################################################################################
 # File description:
 #
-# This file contains all subroutines used by the imscp-autoinstal script.
+# This file contains all subroutines used by the imscp-autoinstall script.
 #
 
 use strict;
@@ -371,26 +371,34 @@ sub InstallDistMaintainerScripts {
 	my $SO = iMSCP::SO->new();
 	my $dist = lc($SO->{Distribution});
 
+	my $need_helper = 0;
 	foreach(
-		"$FindBin::Bin/maintscripts/preinst.$dist",
-		"$FindBin::Bin/maintscripts/postinst.$dist"
+		"preinst",
+		"postinst"
 	){
-		next if (! -f $_);
+		next if (! -f "$FindBin::Bin/maintscripts/$_.$dist");
+		$need_helper = 1;
 		my $file = iMSCP::File->new();
-		$file->{filename} = $_;
-		$file->mode(0750) and return 1;
-		$file->owner(0, 0) and return 1;
+		$file->{filename} = "$FindBin::Bin/maintscripts/$_.$dist";
+		$file->copyFile("$main::SYSTEM_ROOT/engine/setup/$_") and return 1;
+	}
+
+	if($need_helper) {
+		my $file = iMSCP::File->new();
+		$file->{filename} = "$FindBin::Bin/maintscripts/maintainer-helper.sh";
 		$file->copyFile("$main::SYSTEM_ROOT/engine/setup/") and return 1;
 	}
 
-	if(-f "$FindBin::Bin/maintscripts/preinst.$SO->{Distribution}" ||
-		-f "$FindBin::Bin/maintscripts/postinst.$SO->{Distribution}"
+	my $file = iMSCP::File->new();
+	foreach(
+		"preinst",
+		"postinst",
+		"maintainer-helper.sh"
 	) {
-		my $file = iMSCP::File->new();
-		$file->{filename} = "$FindBin::Bin/maintscripts/maintainer-helper.sh";
-		$file->mode(0750) and return 1;
-		$file->owner(0, 0) and return 1;
-		$file->copyFile("$main::SYSTEM_ROOT/engine/setup/") and return 1;
+		next if (!-f "$main::SYSTEM_ROOT/engine/setup/$_");
+		$file->{filename} = "$main::SYSTEM_ROOT/engine/setup/$_";
+		$file->mode(0750);
+		$file->owner(0, 0);
 	}
 
 	debug('Ending...');

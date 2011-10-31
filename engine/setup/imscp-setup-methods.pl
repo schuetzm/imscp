@@ -52,6 +52,7 @@ sub setup_engine {
 	my @steps = (
 		[\&load_old_imscp_cfg, 'Loading old i-MSCP configuration file: '],
 		[\&update_imscp_cfg, 'Save old variable if needed: '],
+		[\&preinst, "Pre-installation tasks for $main::imscpConfig{'DistName'}: "],
 		[\&setup_system_users, 'Creating default users: '],
 		[\&setup_imscp_database_connection, 'i-MSCP database connection: '],
 		[\&setup_imscp_database, 'i-MSCP database: '],
@@ -74,6 +75,7 @@ sub setup_engine {
 		[\&setup_imscp_daemon_network, 'i-MSCP init scripts: '],
 		[\&askBackup, 'Setting backup: '],
 		[\&rebuild_customers_cfg, 'Rebuilding all customers configuration files: '],
+		[\&postinst, "Post-installation tasks for $main::imscpConfig{'DistName'}: "],
 		[\&set_permissions, 'Permissions setup: '],
 		[\&restart_services, 'Starting all services: '],
 		[\&save_conf, 'Backup conf file: '],
@@ -129,6 +131,126 @@ sub user_dialog {
 
 	0;
 }
+
+################################################################################
+## Hooks subroutines #
+#################################################################################
+#
+#################################################################################
+## Implements the hook for the maintainers pre-installation scripts
+##
+## Hook that can be used by distribution maintainers to perform any required
+## tasks before that the actions of the main process are executed. This hook
+## allow to add a specific script named `preinst` that will be run before the
+## both setup and update process actions. This hook is automatically called after
+## that all services are shutting down except for the update process where it is
+## called after the i-MSCP configuration file processing (loading, updating...).
+##
+## Note:
+##
+## The `preinst` script can be written in PERL, PHP or SHELL (POSIX compliant),
+## and must be copied in the engine/setup directory during the make process. A
+## shared library for the scripts that are written in SHELL is available in the
+## engine/setup directory.
+##
+## @param string $context Argument that is passed to the maintainer script
+## @return int 0 on success, other otherwise
+##
+sub preinst {
+
+	debug((caller(0))[3].': Starting...');
+
+	use iMSCP::Execute;
+
+	if(-f "$main::imscpConfig{'ROOT_DIR'}/engine/setup/preinst") {
+
+		use File::MimeInfo::Magic;
+
+		my $mime_type = mimetype("$main::imscpConfig{'ROOT_DIR'}/engine/setup/preinst");
+
+		if(!($mime_type =~ /(shell|perl|php)/)){
+			error((caller(0))[3].': Unable to determine the mimetype of the `preinst` script!');
+			return 1;
+		}
+
+		my $type;
+		if(-e '/etc/imscp/imscp.old.conf') {
+			$type = 'upgrade';
+		} else {
+			$type = 'install';
+		}
+
+		my ($stdout, $stderr, $rs);
+
+		$rs = execute("$main::imscpConfig{'ROOT_DIR'}/engine/setup/preinst $type", \$stdout, \$stderr);
+		debug((caller(0))[3].": Preinstall script returned: $stdout") if $stdout;
+		error((caller(0))[3].": $stderr") if $rs;
+		return $rs if($rs);
+
+	}
+
+	debug((caller(0))[3].': Ending...');
+
+	0;
+}
+
+################################################################################
+## Implements the hook for the maintainers post-installation scripts
+##
+## Hook that can be used by distribution maintainers to perform any required
+## tasks after that the actions of the main process are executed. This hook
+## allow to add a specific script named `postinst` that will be run after the
+## both setup and update process actions. This hook is automatically called
+## before the set_permissions() subroutine call and so, before that all services
+## are restarting.
+##
+## Note:
+##
+## The `postinst` script can be written in PERL, PHP or SHELL (POSIX compliant),
+## and must be copied in the engine/setup directory during the make process. A
+## shared library for the scripts that are written in SHELL is available in the
+## engine/setup directory.
+##
+## @param string $context Argument that is passed to the maintainer script
+## @return int 0 on success, other otherwise
+##
+sub postinst {
+
+	debug((caller(0))[3].': Starting...');
+
+	use iMSCP::Execute;
+
+	if(-f "$main::imscpConfig{'ROOT_DIR'}/engine/setup/postinst") {
+
+		use File::MimeInfo::Magic;
+
+		my $mime_type = mimetype("$main::imscpConfig{'ROOT_DIR'}/engine/setup/postinst");
+
+		if(!($mime_type =~ /(shell|perl|php)/)){
+			error((caller(0))[3].': Unable to determine the mimetype of the `postinst` script!');
+			return 1;
+		}
+
+		my $type;
+		if(-e '/etc/imscp/imscp.old.conf') {
+			$type = 'upgrade';
+		} else {
+			$type = 'install';
+		}
+
+		my ($stdout, $stderr, $rs);
+		$rs = execute("$main::imscpConfig{'ROOT_DIR'}/engine/setup/postinst $type", \$stdout, \$stderr);
+		debug((caller(0))[3].": Postinstall script returned: $stdout") if $stdout;
+		error((caller(0))[3].": $stderr") if $rs;
+		return $rs if($rs);
+
+	}
+
+	debug((caller(0))[3].': Ending...');
+
+	0;
+}
+
 
 ################################################################################
 # Load old i-MSCP main configuration file
