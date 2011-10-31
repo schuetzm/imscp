@@ -37,6 +37,22 @@ use warnings;
 # Hight level subroutines
 #
 
+sub _installPackage {
+	my ($rs, $stdout, $stderr);
+
+	if(!execute('which apt-get')) {
+		$rs = execute("apt-get -y install @_", \$stdout, \$stderr);
+	} elsif(!execute('which zypper')) {
+		$rs = execute("zypper -n install @_", \$stdout, \$stderr);
+	} else {
+		$rs = 1;
+	}
+	debug("$stdout") if $stdout;
+	error("$stderr") if $stderr;
+	error("Unable to install the @_ package(s)") if $rs && !$stderr;
+	return $rs;
+}
+
 # Install pre-required packages.
 #
 # Ensure that 'lsb-release' and 'dialog' tools are installed on the system.
@@ -49,7 +65,7 @@ sub preInstall {
 
 	my ($rs, $stdout, $stderr);
 
-	fatal('Not a Debian like system') if(_checkPkgManager());
+	fatal('Cannot find a package manager') if(_checkPkgManager());
 
 	my @pkg = ();
 	push @pkg, 'lsb-release' if(execute("which lsb_release", \$stdout, \$stderr));
@@ -57,11 +73,7 @@ sub preInstall {
 
 
 	if(scalar @pkg){
-		$rs = execute("apt-get -y install @pkg", \$stdout, \$stderr);
-		debug("$stdout") if $stdout;
-		error("$stderr") if $stderr;
-		error("Unable to install the @pkg package(s)") if $rs && !$stderr;
-
+		$rs = _installPackages(@pkg);
 		return $rs if $rs;
 	}
 
@@ -206,7 +218,7 @@ sub processSpecificConfFile {
 
 	my $SO = iMSCP::SO->new();
 	my $specificPath = "$FindBin::Bin/configs/" . lc($SO->{Distribution});
-	my $commonPath = "$FindBin::Bin/configs/debian";
+	my $commonPath = "$FindBin::Bin/configs/common";
 	my $path = -d $specificPath ? $specificPath : $commonPath;
 
 	unless(chdir($path)){
@@ -222,7 +234,7 @@ sub processSpecificConfFile {
 
 	my $dir = iMSCP::Dir->new();
 
-	# /configs/debian
+	# /configs/common
 	$dir->{dirname} = $commonPath;
 
 
@@ -706,7 +718,7 @@ sub _copyConfig {
 	my $distro = lc($SO->{Distribution});
 
 	my $alternativeFolder = my $currentFolder = getcwd(); #upstream
-	$alternativeFolder =~ s!\/$distro!\/debian!;
+	$alternativeFolder =~ s!\/$distro!\/common!;
 
 	my $source = -e $name ? $name : "$alternativeFolder/$name";
 
@@ -833,7 +845,7 @@ sub _chmodFile {
 	0;
 }
 
-# Checks for debian packager availability.
+# Checks for packager availability.
 #
 # @access private
 # @return int 0 on success, other on failure
@@ -844,8 +856,11 @@ sub _checkPkgManager {
 
 	my ($rs, $stdout, $stderr);
 
+	$rs = execute('which apt-get', \$stdout, \$stderr);
+	$rs = execute('which zypper', \$stdout, \$stderr)	if $rs;
+
 	debug('Ending...');
-	return execute('which apt-get', \$stdout, \$stderr);
+	return $rs;
 }
 
 1;

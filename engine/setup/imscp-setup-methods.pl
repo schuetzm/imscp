@@ -747,18 +747,9 @@ sub setup_resolver {
 	use iMSCP::File;
 	use iMSCP::Dialog;
 
-	my ($err, $file, $content, $out);
+	my ($out, $stdout, $stderr);
 
 	if(-f $main::imscpConfig{'RESOLVER_CONF_FILE'}) {
-		$file = iMSCP::File->new(filename => $main::imscpConfig{'RESOLVER_CONF_FILE'});
-		$content = $file->get();
-
-		if (! $content){
-			$err = "Can't read $main::imscpConfig{'RESOLVER_CONF_FILE'}";
-			error("$err");
-			return 1;
-		}
-
 		if($main::imscpConfig{'LOCAL_DNS_RESOLVER'} !~ /yes|no/i) {
 			if($main::imscpConfigOld{'LOCAL_DNS_RESOLVER'} && $main::imscpConfigOld{'LOCAL_DNS_RESOLVER'} =~ /yes|no/i){
 				$main::imscpConfig{'LOCAL_DNS_RESOLVER'} = $main::imscpConfigOld{'LOCAL_DNS_RESOLVER'};
@@ -768,27 +759,13 @@ sub setup_resolver {
 			}
 		}
 
-		if($main::imscpConfig{'LOCAL_DNS_RESOLVER'} =~ /yes/i) {
-			if($content !~ /nameserver 127.0.0.1/i) {
-				$content =~ s/(nameserver.*)/nameserver 127.0.0.1\n$1/i;
-			}
-		} else {
-			$content =~ s/nameserver 127.0.0.1//i;
+		my $rs = $main::autoInstallClass->setResolver(\$stdout, \$stderr);
+		if($rs) {
+			error($stderr);
+			return $rs;
 		}
-
-		# Saving the old file if needed
-		if(!-f "$main::imscpConfig{'RESOLVER_CONF_FILE'}.bkp") {
-			$file->copyFile("$main::imscpConfig{'RESOLVER_CONF_FILE'}.bkp") and return 1;
-		}
-
-		# Storing the new file
-		$file->set($content) and return 1;
-		$file->save() and return 1;
-		$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
-		$file->mode(0644) and return 1;
-
 	} else {
-		error("Unable to found your resolv.conf file!");
+		error("Unable to find your resolv.conf file!");
 		return 1;
 	}
 
@@ -904,14 +881,14 @@ sub setup_imscp_daemon_network {
 		$file->mode(0755) and return 1;
 
 		# Services installation / update (Debian, Ubuntu)
-		$rs = execute("/usr/sbin/update-rc.d -f $fileName remove", \$stdout, \$stderr);
+		$rs = $main::autoInstallClass->disableService($fileName, \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $rs;
 
 		# Fix for #119: Defect - Error when adding IP's
 		# We are now using dependency based boot sequencing (insserv)
 		# See http://wiki.debian.org/LSBInitScripts ; Must be read carrefully
-		$rs = execute("/usr/sbin/update-rc.d $fileName defaults", \$stdout, \$stderr);
+		$rs = $main::autoInstallClass->enableService($fileName, \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $rs;
 	}

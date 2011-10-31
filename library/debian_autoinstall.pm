@@ -42,8 +42,9 @@ use iMSCP::Execute qw/execute/;
 use iMSCP::Dialog;
 
 use vars qw/@ISA/;
-@ISA = ('Common::SingletonClass');
+@ISA = ('Common::SingletonClass', 'library::common_autoinstall');
 use Common::SingletonClass;
+use library::common_autoinstall;
 
 # Initializer.
 #
@@ -136,25 +137,6 @@ sub preRequish {
 	0;
 }
 
-# Load old i-MSCP main configuration file.
-#
-# @return int 0
-sub loadOldImscpConfigFile {
-
-	debug('Starting...');
-
-	use iMSCP::Config;
-
-	$main::imscpConfigOld = {};
-
-	my $oldConf = "$main::defaultConf{'CONF_DIR'}/imscp.old.conf";
-
-	tie %main::imscpConfigOld, 'iMSCP::Config', 'fileName' => $oldConf, noerrors => 1 if (-f $oldConf);
-
-	debug('Ending...');
-	0;
-}
-
 # Process apt source list.
 #
 # This subroutine parse the apt source list file to ensure presence of the non-free
@@ -224,77 +206,6 @@ sub UpdateAptSourceList {
 	0;
 }
 
-# Reads packages list to be installed.
-#
-# @param self $self iMSCP::debian_autoinstall instance
-# @return int 0 on success, other on failure
-sub readPackagesList {
-	debug('Starting...');
-
-	my $self = shift;
-	my $SO = iMSCP::SO->new();
-	my $confile = "$FindBin::Bin/docs/" . ucfirst($SO->{Distribution}) . "/" .
-		lc($SO->{Distribution}) . "-packages-" . lc($SO->{CodeName}) . ".xml";
-
-	fatal(ucfirst($SO->{Distribution})." $SO->{CodeName} is not supported!") if (! -f  $confile);
-
-	eval "use XML::Simple";
-
-	fatal('Unable to load perl module XML::Simple...') if($@);
-
-	my $xml = XML::Simple->new(NoEscape => 1);
-	my $data = eval { $xml->XMLin($confile, KeyAttr => 'name') };
-
-	foreach(keys %{$data}){
-		if(ref($data->{$_}) eq 'ARRAY'){
-			$self->_parseArray($data->{$_});
-		} else {
-			if($data->{$_}->{alternative}){
-				my $server  = $_;
-				my @alternative = keys %{$data->{$server}->{alternative}};
-
-				for (my $index = $#alternative; $index >= 0; --$index ){
-					my $defServer = $alternative[$index];
-					my $oldServer = $main::imscpConfigOld{uc($server) . '_SERVER'};
-
-					if($@){
-						error("$@");
-						return 1;
-					}
-
-					if($oldServer && $defServer eq $oldServer){
-						splice @alternative, $index, 1 ;
-						unshift(@alternative, $defServer);
-						last;
-					}
-				}
-
-				my $rs;
-
-				do{
-					$rs = iMSCP::Dialog->factory()->radiolist(
-						"Choose server $server",
-						@alternative,
-						#uncoment after dependicies check is implemented
-						#'Not Used'
-					);
-				} while (!$rs);
-
-				$self->{userSelection}->{$server} = lc($rs) eq 'not used' ? 'no' : $rs;
-
-				foreach(@alternative){
-					delete($data->{$server}->{alternative}->{$_}) if($_ ne $rs);
-				}
-			}
-
-			$self->_parseHash($data->{$_});
-		}
-	};
-
-	debug('Ending...');
-	0;
-}
-
 # Install Debian packages list required by i-MSCP.
 #
 # @param self $self iMSCP::debian_autoinstall instance
@@ -317,78 +228,74 @@ sub installPackagesList {
 	0;
 }
 
-# Perfomr post-build tasks.
-#
+# Enable service
+# 
+# @access public
 # @param self $self iMSCP::debian_autoinstall instance
-# @return in 0 on success, other on failure
-sub postBuild {
-	debug('Starting...');
-
+# @param string $service Name of service
+# @return int
+sub disableService {
 	my $self = shift;
+	my $fileName = shift;
+	my $stdout = shift;
+	my $stderr = shift;
+	return execute("/usr/sbin/update-rc.d -f $fileName remove", $stdout, $stderr);
+}
 
-	my $x = qualify_to_ref("SYSTEM_CONF", 'main');
+# Enable service
+# 
+# @access public
+# @param self $self iMSCP::debian_autoinstall instance
+# @param string $service Name of service
+# @return int
+sub enableService {
+	my $self = shift;
+	my $fileName = shift;
+	my $stdout = shift;
+	my $stderr = shift;
+	return execute("/usr/sbin/update-rc.d $fileName defaults", $stdout, $stderr);
+}
 
-	my $nextConf = $$$x . '/imscp.conf';
-	tie %main::nextConf, 'iMSCP::Config', 'fileName' => $nextConf;
+# Configure the resolver according to user's preferences
+#
+# @access public
+# @param self $self iMSCP::debian_autoinstall instance
+# @return int
+sub setResolver {
+	my $self = shift;
+	my $stdout = shift;
+	my $stderr = shift;
 
-	$main::nextConf{uc($_) . "_SERVER"} = lc($self->{userSelection}->{$_}) foreach(keys %{$self->{userSelection}});
+	my $file = iMSCP::File->new(filename => $main::imscpConfig{'RESOLVER_CONF_FILE'});
+	my $content = $file->get();
 
-	debug('Ending...');
+	if (! $content){
+		my $err = "Can't read $main::imscpConfig{'RESOLVER_CONF_FILE'}";
+		error("$err");
+		return 1;
+	}
+
+	if($main::imscpConfig{'LOCAL_DNS_RESOLVER'} =~ /yes/i) {
+		if($content !~ /nameserver 127.0.0.1/i) {
+			$content =~ s/(nameserver.*)/nameserver 127.0.0.1\n$1/i;
+		}
+	} else {
+		$content =~ s/nameserver 127.0.0.1//i;
+	}
+
+	# Saving the old file if needed
+	if(!-f "$main::imscpConfig{'RESOLVER_CONF_FILE'}.bkp") {
+		$file->copyFile("$main::imscpConfig{'RESOLVER_CONF_FILE'}.bkp") and return 1;
+	}
+
+	# Storing the new file
+	$file->set($content) and return 1;
+	$file->save() and return 1;
+	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->mode(0644) and return 1;
+
 	0;
 }
 
-# Trim a string.
-#
-# @access private
-# @param string $var String to be trimmed
-# @return string
-sub _trim {
-	my $var = shift;
-	$var =~ s/^\s+//;
-	$var =~ s/\s+$//;
-	$var;
-}
-
-# Parse hash.
-#
-# @access private
-# @param self $self iMSCP::debian_autoinstall instance
-# @param HASH $hash Hash to be parsed
-# @return void
-sub _parseHash {
-	my $self = shift;
-	my $hash = shift;
-
-	foreach(values %{$hash}) {
-		if(ref($_) eq 'HASH') {
-			$self->_parseHash($_);
-		} elsif(ref($_) eq 'ARRAY') {
-			$self->_parseArray($_);
-		} else {
-			$self->{toInstall} .= " " . _trim($_);
-		}
-	}
-}
-
-# Parse array
-#
-# @access private
-# @param self $self iMSCP::debian_autoinstall instance
-# @param ARRAY $array Array to be parsed
-# @return void
-sub _parseArray {
-	my $self = shift;
-	my $array = shift;
-
-	foreach(@{$array}){
-		if(ref($_) eq 'HASH') {
-			$self->_parseHash($_);
-		}elsif(ref($_) eq 'ARRAY') {
-			$self->_parseArray($_);
-		} else {
-			$self->{toInstall} .= " " . _trim($_);
-		}
-	}
-}
 
 1;
