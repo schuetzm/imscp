@@ -120,6 +120,8 @@ sub restart{
 	# Reload config
 	$rs = execute("$self->{CMD_NAMED} restart", \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
+	$stderr =~ s/.*waiting.*//g;
+	$stderr =~ s/(^|\n)[\n\s]*/$1/g;
 	error("$stderr") if $stderr;
 	return $rs if $rs;
 
