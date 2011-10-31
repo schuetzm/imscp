@@ -485,6 +485,8 @@ sub delSaslData{
 			$self->{SASLDB_GROUP}
 		);
 
+	return 0 if(-z $self->{ETC_SASLDB_FILE});
+
 	$rs |= execute("$self->{CMD_SASLDB_LISTUSERS2} -f $self->{ETC_SASLDB_FILE}", \$stdout, \$stderr);
 	debug($stdout) if $stdout;
 	error($stderr) if $stderr;
