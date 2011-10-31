@@ -1,0 +1,7 @@
+#!/bin/bash
+
+site="${1#.conf}"
+cd /etc/apache2/vhosts.d || exit
+mv -n "$site.disabled" "$site.conf" 2>/dev/null
+/bin/true
+
