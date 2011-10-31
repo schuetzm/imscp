@@ -51,36 +51,17 @@ sub _init{
 	fatal('Can not guess operating system') if ($self->getSO);
 }
 
-# Gets information about distribution.
-#
-# When this method is called, the following public attributes are populated:
-#
-# - Distribution : Contains the distribution name
-# - CodeName :  Contains the distribution code name
-# - Version :  Contains the distribution version
-#
-# @param self $self iMSCP::SO instance
-# @return int 0 on success, other on failure
-
-sub getSO{
-
+sub _getLsbInfo {
 	my $self = shift;
+
 	my ($rs, $stdout, $stderr);
-
-	fatal('Not a Debian like system') if(execute('which apt-get', \$stdout, \$stderr));
-
-	if(execute('which lsb_release', \$stdout, \$stderr)){
-		$rs = execute('apt-get -y install lsb-release', \$stdout, \$stderr);
-		debug("$stdout") if $stdout;
-		error("$stderr") if $stderr;
-		return $rs if $rs;
-	}
 
 	# Retrieves distribution name
 	$rs = execute('lsb_release -si', \$stdout, \$stderr);
 	debug("Distribution is $stdout") if $stdout;
 	error("Can not guess operating system: $stderr") if $stderr;
 	return $rs if $rs;
+	$stdout =~ s/ /_/g;	# "SUSE LINUX" contains a space
 	$self->{Distribution} = $stdout;
 
 	# Retrieves distribution code name
@@ -96,6 +77,59 @@ sub getSO{
 	error("Can not guess operating system: $stderr") if $stderr;
 	return $rs if $rs;
 	$self->{CodeName} = $stdout;
+	0;
+}
+
+sub _detectDebian {
+	my $self = shift;
+
+	my ($rs, $stdout, $stderr);
+
+	return 1 if(execute('which apt-get', \$stdout, \$stderr));
+
+	if(execute('which lsb_release', \$stdout, \$stderr)){
+		$rs = execute('apt-get -y install lsb-release', \$stdout, \$stderr);
+		debug("$stdout") if $stdout;
+		error("$stderr") if $stderr;
+		return $rs if $rs;
+	}
+
+	return $self->_getLsbInfo();
+}
+
+sub _detectOpenSuSE() {
+	my $self = shift;
+
+	my ($rs, $stdout, $stderr);
+
+	return 1 unless(-e '/etc/SuSE-release');
+
+	return $self->_getLsbInfo();
+}
+
+# Gets information about distribution.
+#
+# When this method is called, the following public attributes are populated:
+#
+# - Distribution : Contains the distribution name
+# - CodeName :  Contains the distribution code name
+# - Version :  Contains the distribution version
+#
+# @param self $self iMSCP::SO instance
+# @return int 0 on success, other on failure
+
+sub getSO{
+
+	my $self = shift;
+	my $rs;
+
+	$rs = $self->_detectDebian();
+	$rs = $self->_detectOpenSuSE()	if $rs;
+
+	if($rs) {
+		fatal('Unknown distribution');
+		return $rs;
+	}
 
 	debug ("Found $self->{Distribution} $self->{Version} $self->{CodeName}");
 	0;
