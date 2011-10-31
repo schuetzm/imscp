@@ -939,8 +939,8 @@ sub restart_services {
 		['CMD_IMSCPN',			'restart',	1],
 		['CMD_IMSCPD',			'restart',	1],
 		['CMD_CLAMD',			'reload',	1],
-		['CMD_POSTGREY',		'reload',	1],
-		['CMD_POLICYD_WEIGHT',	'reload',	0],
+		['CMD_POSTGREY',		'restart',	1],
+		['CMD_POLICYD_WEIGHT',		'restart',	0],
 		['CMD_AMAVIS',			'reload',	1]
 	);
 
