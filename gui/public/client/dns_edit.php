@@ -345,7 +345,7 @@ function tryPost($id, $data) {
 
 function validate_CNAME($record, &$err = null) {
 
-	if (preg_match('~([^a-z,A-Z,0-9\.])~u', $record['dns_cname'], $e)) {
+	if (preg_match('~([^-a-z,A-Z,0-9\.])~u', $record['dns_cname'], $e)) {
 		$err .= sprintf(tr('Use of disallowed char("%s") in CNAME'), $e[1]);
 		return false;
 	}
