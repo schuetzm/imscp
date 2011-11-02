@@ -17,14 +17,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * @package     iMSCP
- * @package     iMSCP_Debug
- * @subpackage  Bar_Plugin
- * @copyright   2010-2011 by i-MSCP team
- * @author      Laurent Declercq <l.declercq@nuxwin.com>
- * @version     SVN: $Id$
- * @link        http://www.i-mscp.net i-MSCP Home Site
- * @license     http://www.gnu.org/licenses/gpl-2.0.txt GPL v2
+ * @package		iMSCP
+ * @package		iMSCP_Debug
+ * @subpackage	Bar_Plugin
+ * @copyright	2010-2011 by i-MSCP team
+ * @author		Laurent Declercq <l.declercq@nuxwin.com>
+ * @link		http://www.i-mscp.net i-MSCP Home Site
+ * @license		http://www.gnu.org/licenses/gpl-2.0.txt GPL v2
  */
 
 /** @See iMSCP_Debug_Bar_Plugin */
@@ -35,109 +34,148 @@ require_once 'iMSCP/Debug/Bar/Plugin.php';
  *
  * Provide debug information about all included files.
  *
- * @package     iMSCP
- * @package     iMSCP_Debug
- * @subpackage  Bar_Plugin
- * @author      Laurent Declercq <l.declercq@nuxwin.com>
- * @version     0.0.1
+ * @package		iMSCP
+ * @package		iMSCP_Debug
+ * @subpackage	Bar_Plugin
+ * @author		Laurent Declercq <l.declercq@nuxwin.com>
+ * @version		0.0.2
  */
-class iMSCP_Debug_Bar_Plugin_Files extends iMSCP_Debug_Bar_Plugin
+class iMSCP_Debug_Bar_Plugin_Files extends iMSCP_Debug_Bar_Plugin implements
+	iMSCP_Events_Listeners_Interface
 {
-    /**
-     * Plugin unique identifier.
-     *
-     * @var string
-     */
-    const IDENTIFIER = 'Files';
+	/**
+	 * Plugin unique identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'Files';
 
-    /**
-     * Stores included files
-     *
-     * @var
-     */
-    protected $_includedFiles = null;
+	/**
+	 * Events that this plugin listens on.
+	 *
+	 * @var array
+	 */
+	protected $_listenedEvents = iMSCP_pTemplate_Events::onBeforeLoadTemplateFile;
 
-    /**
-     * Returns plugin unique identifier.
-     *
-     * @return string Plugin unique identifier.
-     */
-    public function getIdentifier()
-    {
-        return self::IDENTIFIER;
-    }
+	/**
+	 * Implements onLoadTemplateFile hook.
+	 *
+	 * @param $templatePath Loaded template path
+	 * @return void
+	 */
+	public function onBeforeLoadTemplateFile($templatePath)
+	{
+		$this->_loadedTemplateFiles[] = realpath($templatePath);
+	}
 
-    /**
-     * Returns list of events that this plugin listens on.
-     *
-     * @abstract
-     * @return array
-     */
-    public function getListenedEvents()
-    {
-        return array();
-    }
+	/**
+	 * Stores included files
+	 *
+	 * @var
+	 */
+	protected $_includedFiles = array();
 
-    /**
-     * Returns plugin tab.
-     *
-     * @return string
-     */
-    public function getTab()
-    {
-        return count($this->_getIncludedFiles()) . ' ' . $this->getIdentifier();
-    }
+	/**
+	 * Store loaded template files.
+	 *
+	 * @var array
+	 */
+	protected $_loadedTemplateFiles = array();
 
-    /**
-     * Returns the plugin panel.
-     *
-     * @return string
-     */
-    public function getPanel()
-    {
-        $included = $this->_getIncludedFiles();
-        $xhtml = '<h4>File Information</h4>';
-        $xhtml .= count($included) . ' Files Included<br />';
-        $size = 0;
+	/**
+	 * Returns plugin unique identifier.
+	 *
+	 * @return string Plugin unique identifier.
+	 */
+	public function getIdentifier()
+	{
+		return self::IDENTIFIER;
+	}
 
-        foreach ($included as $file) {
-            $size += filesize($file);
-        }
+	/**
+	 * Returns list of events that this plugin listens on.
+	 *
+	 * @return array
+	 */
+	public function getListenedEvents()
+	{
+		return $this->_listenedEvents;
+	}
 
-        $xhtml .= 'Total Size: ' . round($size / 1024, 1) . 'K<br />';
-        $xhtml .= '<h4>Application Files</h4>';
+	/**
+	 * Returns plugin tab.
+	 *
+	 * @return string
+	 */
+	public function getTab()
+	{
+		return count($this->_getIncludedFiles()) +
+			   count($this->_loadedTemplateFiles) . ' ' . $this->getIdentifier();
+	}
 
-        foreach ($included as $file) {
-            $xhtml .= $file . '<br />';
-        }
+	/**
+	 * Returns the plugin panel.
+	 *
+	 * @return string
+	 */
+	public function getPanel()
+	{
+		$includedPhpFiles = $this->_getIncludedFiles();
+		$loadedTemplateFiles = $this->_getLoadedTemplateFiles();
+		$xhtml = '<h4>File Information</h4>';
+		$xhtml .= count($includedPhpFiles) + count($loadedTemplateFiles) . ' Files Included/loaded<br />';
+		$size = 0;
 
-        return $xhtml;
-    }
+		foreach ($includedPhpFiles as $file) {
+			$size += filesize($file);
+		}
 
-    /**
-     * Returns plugin icon.
-     *
-     * @return string
-     */
-    public function getIcon()
-    {
-        return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADPSURBVCjPdZFNCsIwEEZHPYdSz1DaHsMzuPM6RRcewSO4caPQ3sBDKCK02p+08DmZtGkKlQ+GhHm8MBmiFQUU2ng0B7khClTdQqdBiX1Ma1qMgbDlxh0XnJHiit2JNq5HgAo3KEx7BFAM/PMI0CDB2KNvh1gjHZBi8OR448GnAkeNDEDvKZDh2Xl4cBcwtcKXkZdYLJBYwCCFPDRpMEjNyKcDPC4RbXuPiWKkNABPOuNhItegz0pGFkD+y3p0s48DDB43dU7+eLWes3gdn5Y/LD9Y6skuWXcAAAAASUVORK5CYII=';
-    }
+		$xhtml .= 'Total Size: ' . round($size / 1024, 1) . 'K<br />';
+		$xhtml .= '<h4>PHP Files</h4>';
 
-    /**
-     * Returns list of all included files.
-     *
-     * @return array
-     */
-    protected function _getIncludedFiles()
-    {
-        if (null !== $this->_includedFiles) {
-            return $this->_includedFiles;
-        }
+		foreach ($includedPhpFiles as $file) {
+			$xhtml .= $file . '<br />';
+		}
 
-        $this->_includedFiles = get_included_files();
-        sort($this->_includedFiles);
+		$xhtml .= '<h4>Templates Files</h4>';
 
-        return $this->_includedFiles;
-    }
+		foreach ($loadedTemplateFiles as $file) {
+			$xhtml .= $file . '<br />';
+		}
+
+		return $xhtml;
+	}
+
+	/**
+	 * Returns plugin icon.
+	 *
+	 * @return string
+	 */
+	public function getIcon()
+	{
+		return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADPSURBVCjPdZFNCsIwEEZHPYdSz1DaHsMzuPM6RRcewSO4caPQ3sBDKCK02p+08DmZtGkKlQ+GhHm8MBmiFQUU2ng0B7khClTdQqdBiX1Ma1qMgbDlxh0XnJHiit2JNq5HgAo3KEx7BFAM/PMI0CDB2KNvh1gjHZBi8OR448GnAkeNDEDvKZDh2Xl4cBcwtcKXkZdYLJBYwCCFPDRpMEjNyKcDPC4RbXuPiWKkNABPOuNhItegz0pGFkD+y3p0s48DDB43dU7+eLWes3gdn5Y/LD9Y6skuWXcAAAAASUVORK5CYII=';
+	}
+
+	/**
+	 * Returns list of included files.
+	 *
+	 * @return array
+	 */
+	protected function _getIncludedFiles()
+	{
+		$this->_includedFiles = get_included_files();
+		sort($this->_includedFiles);
+
+		return $this->_includedFiles;
+	}
+
+	/**
+	 * Returns list of loaded template files.
+	 *
+	 * @return array
+	 */
+	protected function _getLoadedTemplateFiles()
+	{
+		return $this->_loadedTemplateFiles;
+	}
 }
