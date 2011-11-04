@@ -70,6 +70,7 @@ case "$1" in
 
 		print_title "Enabling required services:"
 		for service in apache2 named rpcbind fam ; do
+			"/etc/init.d/$service" restart
 			/sbin/insserv "$service"
 		done
 		print_status
