@@ -50,7 +50,7 @@
 		<php5>php5-ftp</php5>
 		<php5>php5-gd</php5>
 		<php5>php5-gettext</php5>
-		<php5>php5-intl</php5>
+		<php5>&apos;php5-intl&gt;=5.3.8&apos;</php5><!-- on openSuSE 11.4, php5-intl-5.3.5 is broken -->
 		<php5>php5-mbstring</php5>
 		<php5>php5-mcrypt</php5>
 		<php5>php5-mysql</php5>
@@ -76,6 +76,7 @@
 		<library>perl-IO-stringy</library>
 		<library>perl-Mail-Sendmail</library>
 		<library>perl-MailTools</library>
+		<library>perl-MIME-tools</library>
 		<library>perl-Net-DNS</library>
 		<library>perl-Net-LibIDN</library>
 		<library>perl-Net-Netmask</library>
