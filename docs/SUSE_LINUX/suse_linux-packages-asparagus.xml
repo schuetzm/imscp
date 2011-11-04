@@ -80,7 +80,7 @@
 		<library>perl-Net-DNS</library>
 		<library>perl-Net-LibIDN</library>
 		<library>perl-Net-Netmask</library>
-		<library>perl-SMTP-Server</library>
+		<!--library>perl-SMTP-Server</library--><!-- will be built from src rpm -->
 		<library>perl-SNMP</library>
 		<library>perl-Term-ReadKey</library>
 		<library>perl-Term-ReadPassword</library>
@@ -116,7 +116,7 @@
 	<other>openssl</other>
 	<other>gawk</other>
 	<other>patch</other>
-	<other>policyd-weight</other>
+	<!--other>policyd-weight</other--><!-- will be built from src rpm -->
 	<other>postgrey</other>
 	<other>procmail</other>
 	<other>rkhunter</other>
