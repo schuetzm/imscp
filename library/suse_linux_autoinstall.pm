@@ -120,7 +120,7 @@ sub preRequish {
 
 	my($rs, $stderr);
 
-	$rs = execute('zypper -n install dialog perl-XML-Simple make', undef, \$stderr);
+	$rs = execute('zypper -n install --force-resolution -- dialog perl-XML-Simple make', undef, \$stderr);
 	error("$stderr") if $stderr;
 	error('Unable to install pre-required packages.') if $rs && ! $stderr;
 	return $rs if $rs;
