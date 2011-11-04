@@ -33,8 +33,8 @@
 
 ### BEGIN INIT INFO
 # Provides:             imscp_network
-# Required-Start:       $local_fs $remote_fs $network mysql
-# Required-Stop:        $local_fs $remote_fs $network mysql
+# Required-Start:       $local_fs $remote_fs $network
+# Required-Stop:        $local_fs $remote_fs $network
 # Default-Start:        2 3 4 5
 # Default-Stop:         0 1 6
 # Short-Description:    i-MSCP Network Traffic Logger
