@@ -60,6 +60,7 @@ sub addSystemUser{
 	my $systemUser		= $self->{system} ? '-r' : '';
 	my $copySkeleton	= $self->{system} || $self->{skipCreateHome} ? '' : '-k';
 	my $skeletonPath	= $self->{system} || $self->{skipCreateHome} ? '' : "\"$main::imscpConfig{'GUI_ROOT_DIR'}/data/user_home\"";
+	$copySkeleton = $skeletonPath = ''	unless($skeletonPath && -d $skeletonPath);
 	my $shell			= $self->{shell} ? $self->{shell} : '/bin/false';
 
 
