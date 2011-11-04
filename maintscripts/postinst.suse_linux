@@ -69,7 +69,7 @@ case "$1" in
 		print_status
 
 		print_title "Enabling required services:"
-		for service in rpcbind fam ; do
+		for service in apache2 named rpcbind fam ; do
 			/sbin/insserv "$service"
 		done
 		print_status
