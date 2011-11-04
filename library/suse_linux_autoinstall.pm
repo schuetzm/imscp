@@ -161,7 +161,7 @@ sub installPackagesList {
 
 	my($rs, $stderr);
 
-	$rs = execute("zypper -n install -- $self->{toInstall}", undef, \$stderr);
+	$rs = execute("zypper -n install --force-resolution -- $self->{toInstall}", undef, \$stderr);
 	error("$stderr") if $stderr && $rs;
 	error('Can not install packages.') if $rs && ! $stderr;
 	return $rs if $rs;
