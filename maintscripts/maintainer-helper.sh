@@ -56,30 +56,31 @@
 
 # Retrieving the main i-MSCP configuration file path
 if [ -f "/etc/imscp/imscp.conf" ] ; then
-    CONF_FILE=/etc/imscp/imscp.conf
+	# Linux
+	CONF_PREFIX=/etc/imscp
 	CMD_SED=`which sed`
 elif [ -f "/usr/local/etc/imscp/imscp.conf" ] ; then
-    CONF_FILE=/usr/local/etc/imscp/imscp.conf
-	    if [ -f "$(which gsed)" ]; then
-           CMD_SED=`which gsed`
-        else
-          printf "\033[1;31m[Error]\033[0m gsed not found!\n"
-        fi
+	# BSD
+	CONF_PREFIX=/usr/local/etc/imscp
+	if [ -f "$(which gsed)" ]; then
+		CMD_SED=`which gsed`
+	else
+		printf "\033[1;31m[Error]\033[0m gsed not found!\n"
+	fi
 else
-    printf "\033[1;31m[Error]\033[0m i-MSCP configuration file not found!\n"
-    exit 1
+	printf "\033[1;31m[Error]\033[0m i-MSCP configuration file not found!\n"
+	exit 1
 fi
 
-OLD_IFS=$IFS
-IFS=$
+CONF_FILES="imscp.conf apache/apache.data courier/courier.data postfix/postfix.data bind/bind.data dovecot/dovecot.data proftpd/proftpd.data"
+CONF_FILES=`echo " $CONF_FILES" | sed "s| | $CONF_PREFIX/|g"`
 
 # Reading needed entries from imscp.conf
-for a in $(grep -E '^(AMAVIS|APACHE_|BASE_SERVER_IP|CMD_|DEBUG|DATABASE_HOST|DEFAULT_ADMIN_ADDRESS|ETC_|LOG_DIR|MTA_|ROOT_|PHP_FASTCGI|SPAMASSASSIN|Version)' \
-${CONF_FILE} | $CMD_SED 's/\s*=\s*\(.*\)/="\1"/') ; do
-	 eval $a
+for a in $(cat $CONF_FILES | \
+	grep -E '^(AMAVIS|APACHE_|BASE_SERVER_IP|CMD_|DEBUG|DATABASE_HOST|DEFAULT_ADMIN_ADDRESS|ETC_|LOG_DIR|MTA_|ROOT_|PHP_FASTCGI|SPAMASSASSIN|Version)' | \
+	$CMD_SED 's/\s*=\s*\(.*\)/="\1"/') ; do
+	eval $a
 done
-
-IFS=$OLD_IFS
 
 # Enable DEBUG mode if needed
 if [ $DEBUG -eq 1 ]; then
