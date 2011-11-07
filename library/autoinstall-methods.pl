@@ -37,7 +37,7 @@ use warnings;
 # Hight level subroutines
 #
 
-sub _installPackage {
+sub _installPackages {
 	my ($rs, $stdout, $stderr);
 
 	if(!execute('which apt-get')) {
