@@ -298,4 +298,77 @@ sub setResolver {
 }
 
 
+################################################################################
+# Setup rkhunter - (Setup / Update)
+#
+# This subroutine process the following tasks:
+#
+# - update rkhunter database files (only during setup process)
+# - Debian specific: Updates the configuration file and cron task, and
+# remove default unreadable created log file
+#
+# @return int 0 on success, other on failure
+#
+sub setup_rkhunter {
+
+	my ($rs, $rdata);
+
+	# Deleting any existent log files
+	my $file = iMSCP::File->new (filename => $main::imscpConfig{'RKHUNTER_LOG'});
+	$file->set();
+	$file->save() and return 1;
+	$file->owner('root', 'adm');
+	$file->mode(0644);
+
+	# Updates the rkhunter configuration provided by Debian like distributions
+	# to disable the default cron task (i-MSCP provides its own cron job for rkhunter)
+	if(-e '/etc/default/rkhunter') {
+		# Get the file as a string
+		$file = iMSCP::File->new (filename => '/etc/default/rkhunter');
+		$rdata = $file->get();
+		return 1 if(!$rdata);
+
+		# Disable cron task default
+		$rdata =~ s/CRON_DAILY_RUN="(yes)?"/CRON_DAILY_RUN="no"/gmi;
+
+		# Saving the modified file
+		$file->set($rdata) and return 1;
+		$file->save() and return 1;
+	}
+
+	# Updates the logrotate configuration provided by Debian like distributions
+	# to modify rigts
+	if(-e '/etc/logrotate.d/rkhunter') {
+		# Get the file as a string
+		$file = iMSCP::File->new (filename => '/etc/logrotate.d/rkhunter');
+		$rdata = $file->get();
+		return 1 if(!$rdata);
+
+		# Disable cron task default
+		$rdata =~ s/create 640 root adm/create 644 root adm/gmi;
+
+		# Saving the modified file
+		$file->set($rdata) and return 1;
+		$file->save() and return 1;
+	}
+
+	# Update weekly cron task provided by Debian like distributions to avoid
+	# creation of unreadable log file
+	if(-e '/etc/cron.weekly/rkhunter') {
+		# Get the rkhunter file content
+		$file = iMSCP::File->new (filename => '/etc/cron.weekly/rkhunter');
+		$rdata = $file->get();
+		return 1 if(!$rdata);
+
+		# Adds `--nolog`option to avoid unreadable log file
+		$rdata =~ s/(--versioncheck\s+|--update\s+)(?!--nolog)/$1--nolog /g;
+
+		# Saving the modified file
+		$file->set($rdata) and return 1;
+		$file->save() and return 1;
+	}
+
+	0;
+}
+
 1;

@@ -42,7 +42,7 @@
   compress
   delaycompress
   notifempty
-  create 640 root adm
+  create 640 root root
   sharedscripts
   prerotate
     /srv/www/imscp/engine/traffic/imscp-vrl-traff >/var/log/imscp/imscp-vrl-traff.log 2>&1
@@ -64,7 +64,7 @@
   compress
   delaycompress
   notifempty
-  create 640 root adm
+  create 640 root root
 }
 
 # ProFTPd traffic rotation for i-MSCP traffic count
