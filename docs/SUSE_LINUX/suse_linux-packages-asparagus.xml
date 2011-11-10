@@ -47,6 +47,7 @@
 	<php>
 		<php5>php5-pear</php5>
 		<php5>php5</php5>
+		<php5>php5-fastcgi</php5>
 		<php5>php5-ftp</php5>
 		<php5>php5-gd</php5>
 		<php5>php5-gettext</php5>
