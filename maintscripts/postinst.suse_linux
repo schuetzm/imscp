@@ -54,7 +54,7 @@ case "$1" in
 			print_status
 		done
 
-		for module in logio suexec proxy proxy_html rewrite $PHP_FASTCGI ; do
+		for module in logio suexec proxy proxy_html proxy_http rewrite $PHP_FASTCGI ; do
 			print_title "Enabling apache2 module $module:"
 			a2enmod "$module" >/dev/null
 			print_status
