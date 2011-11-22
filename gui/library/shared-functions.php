@@ -1117,6 +1117,7 @@ function is_serialized($data)
  *
  * @param  iMSCP_pTemplate $tpl Template engine
  * @return void
+ * @deprecated use customerHasFeature() instead
  */
 function check_permissions($tpl)
 {
@@ -1956,15 +1957,16 @@ function decrypt_db_password($password)
  *
  * @see iMSCP_Database::execute()
  * @throws iMSCP_Exception_Database
- * @param string $query				 SQL statement to be executed
- * @param array|int|string $parameters  OPTIONAL parameters - See iMSCP_Database::execute()
- * @return iMSCP_Database_ResultSet	 An iMSCP_Database_ResultSet object
+ * @param string $query					Sql statement to be executed
+ * @param array|int|string $parameters	OPTIONAL parameters - See iMSCP_Database::execute()
+ * @return iMSCP_Database_ResultSet		An iMSCP_Database_ResultSet object
+ * @todo (Improve exception management)
  */
 function execute_query($query, $parameters = null)
 {
 	static $db = null;
 
-	if(null === $db) {
+	if (null === $db) {
 		/** @var $db iMSCP_Database */
 		$db = iMSCP_Registry::get('db');
 	}
@@ -1987,25 +1989,25 @@ function execute_query($query, $parameters = null)
 /**
  * Convenience method to prepare and execute a query.
  *
- * @throws iMSCP_Exception_Database
- * @param string $query			 SQL statement
- * @param string|int|array $bind	Data to bind to the placeholders
- * @return iMSCP_Database_ResultSet A iMSCP_Database_ResultSet object that represents
- *								  a result set
+ * @throws iMSCP_Exception_Database		 When query fail
+ * @param string $query					 Sql statement
+ * @param string|int|array $bind		 Data to bind to the placeholders
+ * @return iMSCP_Database_ResultSet|null A iMSCP_Database_ResultSet object that represents
+ *										 a result set
  */
 function exec_query($query, $bind = null)
 {
 	static $db = null;
 
-	if(null === $db) {
+	if (null === $db) {
 		/** @var $db iMSCP_Database */
 		$db = iMSCP_Registry::get('db');
 	}
 
 	try {
 		$stmt = $db->execute($db->prepare($query), $bind);
-	} catch(PDOException $e) {
-		throw new iMSCP_Exception_Database($e->getMessage() . " - Query: $query");
+	} catch (PDOException $e) {
+		throw new iMSCP_Exception_Database($e->getMessage(), $query, $e->getCode(), $e);
 	}
 
 	return $stmt;
@@ -2145,4 +2147,3 @@ function unsetMessages()
 		}
 	}
 }
-

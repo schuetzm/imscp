@@ -70,7 +70,7 @@
 							</td>
 						</tr>
 						<tr>
-							<td width="300">
+							<td style="width:300px;">
 								<label for="lostpassword_timeout">{TR_LOSTPASSWORD_TIMEOUT}</label>
 							</td>
 							<td>
@@ -95,7 +95,7 @@
 							</td>
 						</tr>
 						<tr>
-							<td width="300">
+							<td style="width:300px;">
 								<label for="passwd_chars">{TR_PASSWD_CHARS}</label>
 							</td>
 							<td>
@@ -289,9 +289,9 @@
 							</td>
 							<td>
 								<select name="phpini_error_reporting" id="phpini_error_reporting">
-									<option value="E_ALL & ~E_NOTICE" {PHPINI_ERROR_REPORTING_0}>{TR_PHPINI_ERROR_REPORTING_DEFAULT}</option>
+									<option value="E_ALL &amp; ~E_NOTICE" {PHPINI_ERROR_REPORTING_0}>{TR_PHPINI_ERROR_REPORTING_DEFAULT}</option>
 									<option value="E_ALL | E_STRICT" {PHPINI_ERROR_REPORTING_1}>{TR_PHPINI_ERROR_REPORTING_DEVELOPEMENT}</option>
-									<option value="E_ALL & ~E_DEPRECATED" {PHPINI_ERROR_REPORTING_2}>{TR_PHPINI_ERROR_REPORTING_PRODUCTION}</option>
+									<option value="E_ALL &amp; ~E_DEPRECATED" {PHPINI_ERROR_REPORTING_2}>{TR_PHPINI_ERROR_REPORTING_PRODUCTION}</option>
 									<option value="0" {PHPINI_ERROR_REPORTING_3}>{TR_PHPINI_ERROR_REPORTING_NONE}</option>
 								</select>
 							</td>
@@ -301,8 +301,7 @@
 								<label for="phpini_post_max_size">{TR_PHPINI_POST_MAX_SIZE}</label>
 							</td>
 							<td>
-								<input name="phpini_post_max_size" id="phpini_post_max_size" type="text" value="{PHPINI_POST_MAX_SIZE}" />
-								MB
+								<input name="phpini_post_max_size" id="phpini_post_max_size" type="text" value="{PHPINI_POST_MAX_SIZE}" /> {TR_MIB}
 							</td>
 						</tr>
 						<tr>
@@ -310,8 +309,7 @@
 								<label for="phpini_upload_max_filesize">{TR_PHPINI_UPLOAD_MAX_FILESIZE}</label>
 							</td>
 							<td>
-								<input name="phpini_upload_max_filesize" id="phpini_upload_max_filesize" type="text" value="{PHPINI_UPLOAD_MAX_FILESIZE}" />
-								MB
+								<input name="phpini_upload_max_filesize" id="phpini_upload_max_filesize" type="text" value="{PHPINI_UPLOAD_MAX_FILESIZE}" /> {TR_MIB}
 							</td>
 						</tr>
 						<tr>
@@ -319,8 +317,7 @@
 								<label for="phpini_max_execution_time">{TR_PHPINI_MAX_EXECUTION_TIME}</label>
 							</td>
 							<td>
-								<input name="phpini_max_execution_time" id="phpini_max_execution_time" type="text" value="{PHPINI_MAX_EXECUTION_TIME}" />
-								sec
+								<input name="phpini_max_execution_time" id="phpini_max_execution_time" type="text" value="{PHPINI_MAX_EXECUTION_TIME}" /> {TR_SEC}
 							</td>
 						</tr>
 						<tr>
@@ -328,8 +325,7 @@
 								<label for="phpini_max_input_time">{TR_PHPINI_MAX_INPUT_TIME}</label>
 							</td>
 							<td>
-								<input name="phpini_max_input_time" id="phpini_max_input_time" type="text" value="{PHPINI_MAX_INPUT_TIME}" />
-								sec
+								<input name="phpini_max_input_time" id="phpini_max_input_time" type="text" value="{PHPINI_MAX_INPUT_TIME}" /> {TR_SEC}
 							</td>
 						</tr>
 						<tr>
@@ -337,8 +333,7 @@
 								<label for="phpini_memory_limit">{TR_PHPINI_MEMORY_LIMIT}</label>
 							</td>
 							<td>
-								<input name="phpini_memory_limit" id="phpini_memory_limit" type="text" value="{PHPINI_MEMORY_LIMIT}" />
-								MB
+								<input name="phpini_memory_limit" id="phpini_memory_limit" type="text" value="{PHPINI_MEMORY_LIMIT}" /> {TR_MIB}
 							</td>
 						</tr>
 						<tr>
@@ -346,22 +341,22 @@
 								<label>{TR_PHPINI_DISABLE_FUNCTIONS}</label>
 							</td>
 							<td>
-								<input name="phpini_df_show_source" id="phpini_df_show_source" type="checkbox" {PHPINI_DF_SHOW_SOURCE_CHK} value="show_source" />
-								<label for="phpini_df_show_source">show_source</label>
-								<input name="phpini_df_system" id="phpini_df_system" type="checkbox" {PHPINI_DF_SYSTEM_CHK} value="system" />
-								<label for="phpini_df_system">system</label>
-								<input name="phpini_df_shell_exec" id="phpini_df_shell_exec" type="checkbox" {PHPINI_DF_SHELL_EXEC_CHK} value="shell_exec" />
-								<label for="phpini_df_shell_exec">shell_exec</label>
-								<input name="phpini_df_passthru" id="phpini_df_passthru" type="checkbox" {PHPINI_DF_PASSTHRU_CHK} value="passthru" />
-								<label for="phpini_df_passthru">passthru</label>
-								<input name="phpini_df_exec" id="phpini_df_exec" type="checkbox" {PHPINI_DF_EXEC_CHK} value="exec" />
-								<label for="phpini_df_exec">exec</label>
-								<input name="phpini_df_phpinfo" id="phpini_df_phpinfo" type="checkbox" {PHPINI_DF_PHPINFO_CHK} value="phpinfo" />
-								<label for="phpini_df_phpinfo">phpinfo</label>
-								<input name="phpini_df_shell" id="phpini_df_shell" type="checkbox" {PHPINI_DF_SHELL_CHK} value="shell" />
-								<label for="phpini_df_shell">shell</label>
-								<input name="phpini_df_symlink" id="phpini_df_symlink" type="checkbox" {PHPINI_DF_SYMLINK_CHK} value="symlink" />
-								<label for="phpini_df_symlink">symlink</label>
+								<input name="show_source" id="show_source" type="checkbox" {SHOW_SOURCE} value="show_source" />
+								<label for="show_source">show_source</label>
+								<input name="system" id="system" type="checkbox" {SYSTEM} value="system" />
+								<label for="system">system</label>
+								<input name="shell_exec" id="shell_exec" type="checkbox" {SHELL_EXEC} value="shell_exec" />
+								<label for="shell_exec">shell_exec</label>
+								<input name="passthru" id="passthru" type="checkbox" {PASSTHRU} value="passthru" />
+								<label for="passthru">passthru</label>
+								<input name="exec" id="exec" type="checkbox" {EXEC} value="exec" />
+								<label for="exec">exec</label>
+								<input name="phpinfo" id="phpinfo" type="checkbox" {PHPINFO} value="phpinfo" />
+								<label for="phpinfo">phpinfo</label>
+								<input name="shell" id="shell" type="checkbox" {SHELL} value="shell" />
+								<label for="shell">shell</label>
+								<input name="symlink" id="symlink" type="checkbox" {SYMLINK} value="symlink" />
+								<label for="symlink">symlink</label>
 							</td>
 						</tr>
 					</table>

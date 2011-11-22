@@ -17,16 +17,16 @@
  * The Initial Developer of the Original Code is ispCP Team.
  * Portions created by Initial Developer are Copyright (C) 2006-2010 by
  * isp Control Panel. All Rights Reserved.
- * 
+ *
  * Portions created by the i-MSCP Team are Copyright (C) 2010 by
  * i-MSCP a internet Multi Server Control Panel. All Rights Reserved.
  *
  * @category	i-MSCP
- * @package		iMSCP_Exception
- * @copyright 	2006-2010 by ispCP | http://isp-control.net
- * @copyright 	2010 by i-MSCP | http://i-mscp.net
+ * @package		iMSCP_Core
+ * @subpackage	Exception
+ * @copyright	2006-2010 by ispCP | http://isp-control.net
+ * @copyright	2010-2011 by i-MSCP | http://i-mscp.net
  * @author		Laurent Declercq <l.declercq@nuxwin.com>
- * @version		SVN: $Id$
  * @link		http://i-mscp.net i-MSCP Home Site
  * @license		http://www.mozilla.org/MPL/ MPL 1.1
  */
@@ -39,9 +39,42 @@ require_once  'iMSCP/Exception.php';
 /**
  * Exception used on production by iMSCP_Exception_Handler
  *
- * @package		iMSCP_Exception
+ * @category	i-MSCP
+ * @package		iMSCP_Core
+ * @subpackage	Exception
  * @author		Laurent Declercq <l.declercq@nuxwin.com>
- * @since       1.0.7 (ispCP)
- * @version		1.0.0
+ * @version		0.0.2
  */
-class iMSCP_Exception_Database extends iMSCP_Exception {}
+class iMSCP_Exception_Database extends iMSCP_Exception
+{
+	/**
+	 * Query that failed.
+	 *
+	 * @var null
+	 */
+	protected $_query = null;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $msg Exception Message
+	 * @param string $query query Last query executed
+	 * @param int $code Exception code
+	 * @param Exception $previous OPTIONAL Previous exception
+	 */
+	public function __construct($msg = '', $query = null, $code = 0, Exception $previous = null)
+	{
+		parent::__construct($msg, (int)$code, $previous);
+		$this->_query = (string)$query;
+	}
+
+	/**
+	 * Gets query.
+	 *
+	 * @return string
+	 */
+	public function getQuery()
+	{
+		return $this->_query;
+	}
+}

@@ -37,7 +37,6 @@
  * @copyright	2001-2006 by moleSoftware GmbH
  * @copyright	2006-2010 by ispCP | http://isp-control.net
  * @copyright	2010-2011 by i-MSCP | http://i-mscp.net
- * @version		SVN: $Id$
  * @link		http://i-mscp.net
  * @author		ispCP Team
  * @author		i-MSCP Team
@@ -220,10 +219,6 @@ function client_UpdateMailAccount($mailAccountData)
 
 	if (!Zend_Session::namespaceIsset('pageMessages')) {
 		if ($passwordUpdate || $forwardAddressesUpdate) {
-
-			$mailAccountData['status'] = ($forwardAddressesUpdate)
-				? $cfg->ITEM_CHANGE_STATUS : $cfg->ITEM_OK_STATUS;
-
 			$query = "
 				UPDATE
 					`mail_users`
@@ -236,17 +231,12 @@ function client_UpdateMailAccount($mailAccountData)
 									$mailAccountData['mail_pass'],
 									$mailAccountData['mail_forward'],
 									$mailAccountData['mail_type'],
-									$mailAccountData['status'],
+									$cfg->ITEM_CHANGE_STATUS,
 									$mailAccountData['mail_id']));
 
-			if($mailAccountData['status'] == $cfg->ITEM_CHANGE_STATUS) {
-				// Sending request to the i-MSCP daemon for backend process
-				send_request();
-				set_page_message(tr('Mail account scheduled for update.'), 'success');
-			} else {
-				set_page_message(tr('Password successfully updated.'), 'success');
-			}
-
+			// Sending request to the i-MSCP daemon for backend process
+			send_request();
+			set_page_message(tr('Mail account scheduled for update.'), 'success');
 			write_log("{$_SESSION['user_logged']}: updated mail account: {$mailAccountData['mail_addr']}", E_USER_NOTICE);
 		} else {
 			set_page_message(tr("Nothing's been changed."), 'info');
@@ -300,9 +290,8 @@ iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart)
 check_login(__FILE__);
 
 // If the feature is disabled, redirects the client in silent way
-$domainProperties = get_domain_default_props($_SESSION['user_id'], true);
-if ($domainProperties['domain_mailacc_limit'] == '-1') {
-	redirectTo('index.php');
+if (!customerHasFeature('mail')) {
+    redirectTo('index.php');
 }
 
 /** @var $cfg iMSCP_Config_Handler_File */
@@ -355,7 +344,6 @@ generatePageMessage($tpl);
 
 $tpl->parse('PAGE', 'page');
 
-iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptEnd,
-											  new iMSCP_Events_Response($tpl));
+iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptEnd, new iMSCP_Events_Response($tpl));
 
 $tpl->prnt();
