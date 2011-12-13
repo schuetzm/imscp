@@ -2,11 +2,11 @@
 		/*<![CDATA[*/
 		$(document).ready(function() {
 			errFieldsStack = {ERR_FIELDS_STACK};
-			$.each(errFieldsStack, function(){$('#' + this).addClass('input_error');});
+			$.each(errFieldsStack, function(){$('#' + this).css('border-color', '#ca1d11');});
 			$('#domain_expires').datepicker();
 			$('#domain_never_expires').change(function(){
 				if($(this).is(':checked')) {
-					$('#domain_expires').removeClass('input_error').attr('disabled', 'disabled')
+					$('#domain_expires').css('border-color', '#cccccc').attr('disabled', 'disabled')
 				} else {
 					$('#domain_expires').removeAttr('disabled');
 				}
@@ -26,13 +26,11 @@
 				modal:true,
 				dialogClass:'body',
 				buttons:{'{TR_CLOSE}':function(){$(this).dialog('close');}},
-				create: function(){
-					$('.ui-buttonset').buttonset();
-				}
+				create: function(){$('.ui-buttonset').buttonset();}
 			});
 
-			// Re-add the PHP Editor to the form
-			$('#editFrm').submit(function(){$('#php_editor_dialog').parent().appendTo($(this));});
+			// Re-add the PHP Editor container to the form
+			$('#php_editor_dialog').parent().appendTo($('#dialogContainer'));
 
 			// PHP Editor settings button
 			if($('#domain_php').val()=='no'){$('#php_editor_block').hide();}
@@ -95,15 +93,15 @@
 	<form name="editFrm" id="editFrm" method="post" action="domain_edit.php?edit_id={EDIT_ID}">
 		<table>
 			<tr>
-				<th colspan="4">{TR_DOMAIN_OVERVIEW}</th>
+				<th colspan="3">{TR_DOMAIN_OVERVIEW}</th>
 			</tr>
 			<tr>
 				<td>{TR_DOMAIN_NAME}</td>
-				<td colspan="3">{DOMAIN_NAME}</td>
+				<td colspan="2">{DOMAIN_NAME}</td>
 			</tr>
 			<tr>
 				<td>{TR_DOMAIN_EXPIRE_DATE}</td>
-				<td colspan="3">{DOMAIN_EXPIRE_DATE}</td>
+				<td colspan="2">{DOMAIN_EXPIRE_DATE}</td>
 			</tr>
 			<tr>
 				<td>{TR_DOMAIN_NEW_EXPIRE_DATE}</td>
@@ -115,15 +113,17 @@
 						</span>
 					</div>
 				</td>
-				<td colspan="2">
+				<td>
 					<input type="checkbox" name="domain_never_expires" id="domain_never_expires" {DOMAIN_NEVER_EXPIRES_CHECKED} style="vertical-align: middle;"/>
 					<label for="domain_never_expires" style="vertical-align: middle;">{TR_DOMAIN_NEVER_EXPIRES}</label>
 				</td>
 			</tr>
 			<tr>
 				<td>{TR_DOMAIN_IP}</td>
-				<td colspan="3">{DOMAIN_IP} {IP_DOMAIN}</td>
+				<td colspan="2">{DOMAIN_IP} {IP_DOMAIN}</td>
 			</tr>
+		</table>
+		<table>
 			<tr>
 				<th>{TR_DOMAIN_LIMITS}</th>
 				<th>{TR_LIMIT_VALUE}</th>
@@ -237,6 +237,8 @@
 					<span style="font-size: smaller;">{TR_RESELLER_DISKPACE_COMSUPTION}</span>
 				</td>
 			</tr>
+		</table>
+		<table>
 			<tr>
 				<th>{TR_FEATURE}</th>
 				<th colspan="3">{TR_STATUS}</th>
@@ -254,19 +256,18 @@
 			<!-- BDP: php_editor_block -->
 			<tr id="php_editor_block">
 				<td><label for="phpiniSystem">{TR_PHP_EDITOR}</label></td>
-				<td colspan="3">
-					<select id="phpiniSystem" name="phpiniSystem">
+				<td colspan="3" id="dialogContainer" style="height: 30px;">
+					<select id="phpiniSystem" name="phpiniSystem" style="vertical-align: middle;">
 						<option value="yes" {PHP_EDITOR_YES}>{TR_YES}</option>
 						<option value="no" {PHP_EDITOR_NO}>{TR_NO}</option>
 					</select>
-					<input type="button" name="php_editor_dialog_open" id="php_editor_dialog_open" value="{TR_SETTINGS}" />
+					<button type="button" id="php_editor_dialog_open" style="vertical-align: middle;">{TR_SETTINGS}</button>
 					<div style="margin:0" id="php_editor_dialog" title="{TR_PHP_EDITOR_SETTINGS}">
 						<div class="php_editor_error success">
 							<span id="msg_default">{TR_FIELDS_OK}</span>
 						</div>
 						<table>
 							<!-- BDP: php_editor_permissions_block -->
-
 							<tr class="description">
 								<th colspan="2">{TR_PERMISSIONS}</th>
 							</tr>
@@ -283,7 +284,6 @@
 								</td>
 							</tr>
 							<!-- EDP: php_editor_register_globals_block -->
-
 							<!-- BDP: php_editor_allow_url_fopen_block -->
 							<tr>
 							   <td>{TR_CAN_EDIT_ALLOW_URL_FOPEN}</td>
@@ -297,7 +297,6 @@
 								</td>
 							</tr>
 							<!-- EDP: php_editor_allow_url_fopen_block -->
-
 							<!-- BDP: php_editor_display_errors_block -->
 							<tr>
 							   <td>{TR_CAN_EDIT_DISPLAY_ERRORS}</td>
@@ -311,7 +310,6 @@
 								</td>
 							</tr>
 							<!-- EDP: php_editor_display_errors_block -->
-
 							<!-- BDP: php_editor_disable_functions_block -->
 							<tr>
 							   <td>{TR_CAN_EDIT_DISABLE_FUNCTIONS}</td>
@@ -327,19 +325,16 @@
 								</td>
 							</tr>
 							<!-- EDP: php_editor_disable_functions_block -->
-
 							<!-- EDP: php_editor_permissions_block -->
-
 							<!-- BDP: php_editor_default_values_block -->
 							<tr class="description">
 								<th colspan="2">{TR_DIRECTIVES_VALUES}</th>
 							</tr>
-
 							<tr>
 							  <td><label for="post_max_size">{TR_PHP_POST_MAX_SIZE_DIRECTIVE}</label></td>
-							  <td>
-								  <input name="post_max_size" id="post_max_size" type="text" value="{POST_MAX_SIZE}" /> <span>{TR_MIB}</span>
-							  </td>
+								<td>
+									<input name="post_max_size" id="post_max_size" type="text" value="{POST_MAX_SIZE}" /> <span>{TR_MIB}</span>
+								</td>
 							</tr>
 							<tr>
 							  <td><label for="upload_max_filezize">{PHP_UPLOAD_MAX_FILEZISE_DIRECTIVE}</label></td>
@@ -365,7 +360,6 @@
 									<input name="memory_limit" id="memory_limit" type="text" value="{MEMORY_LIMIT}" /> <span>{TR_MIB}</span>
 							  </td>
 							</tr>
-
 							<!-- EDP: php_editor_default_values_block -->
 						</table>
 					</div>
@@ -373,7 +367,6 @@
 			</tr>
 			<!-- EDP: php_editor_block -->
 			<!-- EDP: php_block -->
-
 			<!-- BDP: cgi_block -->
 			<tr>
 				<td><label for="domain_cgi">{TR_CGI}</label></td>
@@ -385,7 +378,6 @@
 				</td>
 			</tr>
 			<!-- EDP: cgi_block -->
-
 			<!-- BDP: dns_block -->
 			<tr>
 				<td><label for="domain_dns">{TR_DNS}</label></td>
@@ -397,7 +389,6 @@
 				</td>
 			</tr>
 			<!-- EDP: dns_block -->
-
 			<!-- BDP: aps_block -->
 			<tr>
 				<td><label for="domain_software_allowed">{TR_APS}</label></td>
@@ -409,7 +400,6 @@
 				</td>
 			</tr>
 			<!-- EDP: aps_block -->
-
 			<!-- BDP: backup_block -->
 			<tr>
 				<td><label for="allowbackup">{TR_BACKUP}</label></td>
@@ -423,7 +413,6 @@
 				</td>
 			</tr>
 			<!-- EDP: backup_block -->
-
 		</table>
 		<div class="buttons">
 			<input name="submit" type="submit" value="{TR_UPDATE}"/>

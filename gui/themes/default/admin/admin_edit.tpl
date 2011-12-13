@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-    <body>
         <div class="header">
             {MAIN_MENU}
             <div class="logo">
@@ -11,18 +10,18 @@
                 <h1 class="manage_users">{TR_MENU_MANAGE_USERS}</h1>
             </div>
             <ul class="location-menu">
-                <!-- <li><a class="help" href="#">Help</a></li> -->
-                <li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a>
-                </li>
+                <li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a></li>
             </ul>
             <ul class="path">
                 <li><a href="manage_users.php">{TR_MENU_MANAGE_USERS}</a></li>
                 <li><a>{TR_EDIT_ADMIN}</a></li>
             </ul>
         </div>
+
         <div class="left_menu">
             {MENU}
         </div>
+
         <div class="body">
             <h2 class="user_{USER_ICON_COLOR}"><span>{TR_EDIT_ADMIN}</span></h2>
 
@@ -31,11 +30,12 @@
             <!-- EDP: page_message -->
 
             <form name="admin_edit_user" method="post" action="admin_edit.php">
-                <fieldset>
-                    <legend>{TR_CORE_DATA}</legend>
                     <table>
+						<tr>
+							<th colspan="2">{TR_CORE_DATA}</th>
+						</tr>
                         <tr>
-                            <td style="width:300px;">
+                            <td>
                                 <label for="username">{TR_USERNAME}</label>
                             </td>
                             <td class="content" id="username">{USERNAME}</td>
@@ -61,13 +61,12 @@
                             </td>
                         </tr>
                     </table>
-                </fieldset>
-
-                <fieldset>
-                    <legend>{TR_ADDITIONAL_DATA}</legend>
                     <table>
+						<tr>
+							<th colspan="2">{TR_ADDITIONAL_DATA}</th>
+						</tr>
                         <tr>
-                            <td style="width:300px;">
+                            <td>
                                 <label for="fname">{TR_FIRST_NAME}</label>
                             </td>
                             <td>
@@ -145,7 +144,6 @@
                             <td><input type="text" name="fax" value="{FAX}" /></td>
                         </tr>
                     </table>
-                </fieldset>
                 <div class="buttons">
                     <input name="Submit" type="submit" class="button" value="{TR_UPDATE}" />
                     <input id="send_data" type="checkbox" name="send_data" checked="checked" />

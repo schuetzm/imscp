@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-	<body>
 		<script language="JavaScript" type="text/JavaScript">
 		/*<![CDATA[*/
 			$(document).ready(function(){
@@ -36,10 +35,9 @@
 
 		<div class="location">
 			<div class="location-area">
-			<h1 class="manage_users">{TR_MENU_MANAGE_USERS}</h1>
-		</div>
-		<ul class="location-menu">
-				<!-- <li><a class="help" href="#">Help</a></li> -->
+				<h1 class="settings">{TR_MENU_SETTINGS}</h1>
+			</div>
+			<ul class="location-menu">
 				<li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a></li>
 			</ul>
 			<ul class="path">
@@ -54,10 +52,10 @@
 
 		<div class="body">
 			<h2 class="apps_installer"><span>{TR_UPLOAD_SOFTWARE}</span></h2>
+
 			<!-- BDP: page_message -->
 			<div class="{MESSAGE_CLS}">{MESSAGE}</div>
 			<!-- EDP: page_message -->
-
 
 			<table>
 				<tr>

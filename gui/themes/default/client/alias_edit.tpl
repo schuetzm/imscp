@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-<body>
 	<script type="text/javascript">
 	/* <![CDATA[ */
 		function setForwardReadonly(obj){
@@ -36,7 +35,11 @@
 			<li><a href="#" onclick="return false;">{TR_TITLE_EDIT_ALIAS}</a></li>
 		</ul>
 	</div>
-	<div class="left_menu">{MENU}</div>
+
+	<div class="left_menu">
+		{MENU}
+	</div>
+
 	<div class="body">
 		<h2 class="domains"><span>{TR_TITLE_EDIT_ALIAS}</span></h2>
 

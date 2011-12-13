@@ -1,6 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-	<body>
-
 	<div class="header">
 		{MAIN_MENU}
 		<div class="logo">
@@ -19,14 +17,14 @@
 				<li><a href="server_status.php">{TR_SERVER_STATUS}</a></li>
 			</ul>
 		</div>
+
 		<div class="left_menu">
 			{MENU}
 		</div>
-		<div class="footer">
-			i-MSCP {VERSION}<br />build: {BUILDDATE}<br />Codename: {CODENAME}
-		</div>
+
 		<div class="body">
 			<h2 class="doc"><span>{TR_SERVER_STATUS}</span></h2>
+
 			<!-- BDP: props_list -->
 			<table>
 				<tr>

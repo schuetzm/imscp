@@ -1368,4 +1368,34 @@ class iMSCP_Update_Database extends iMSCP_Update
 			$this->_dropIndex('sql_user', 'sqlu_id')
 		);
 	}
+
+	/**
+	 * #292: Feature - Layout color chooser
+	 *
+	 * @author Laurent Declercq <l.declercq@nuxwin.com>
+	 * @return string SQL Statement to be executed
+	 */
+	protected function _databaseUpdate_96()
+	{
+		return $this->_addColumn(
+			'user_gui_props',
+			'layout_color',
+			"VARCHAR(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL AFTER `layout`"
+		);
+	}
+
+	/**
+	 * Allow to change SSH port number.
+	 *
+	 * @author Laurent Declercq <l.declercq@nuxwin.com>
+	 * @return void
+	 */
+	protected function _databaseUpdate_97()
+	{
+		$dbConfig = iMSCP_Registry::get('dbConfig');
+
+		if(isset($dbConfig->PORT_SSH)) {
+			$dbConfig->PORT_SSH = '22;tcp;SSH;1;1;';
+		}
+	}
 }

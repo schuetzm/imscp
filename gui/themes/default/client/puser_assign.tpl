@@ -1,10 +1,6 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-	</head>
-
-	<body>
 		<div class="header">
 			{MAIN_MENU}
-
 			<div class="logo">
 				<img src="{ISP_LOGO}" alt="i-MSCP logo" />
 			</div>
@@ -15,7 +11,6 @@
 				<h1 class="webtools">{TR_MENU_WEBTOOLS}</h1>
 			</div>
 			<ul class="location-menu">
-				<!-- <li><a class="help" href="#">Help</a></li> -->
 				<!-- BDP: logged_from -->
 				<li><a class="backadmin" href="change_user_interface.php?action=go_back">{YOU_ARE_LOGGED_AS}</a></li>
 				<!-- EDP: logged_from -->
@@ -32,7 +27,6 @@
 		<div class="left_menu">
 			{MENU}
 		</div>
-
 
 		<div class="body">
 			<h2 class="users"><span>{TR_USER_ASSIGN}</span></h2>

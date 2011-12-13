@@ -1,6 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-    <body>
-
         <div class="header">
             {MAIN_MENU}
             <div class="logo">
@@ -12,18 +10,18 @@
                 <h1 class="manage_users">{TR_MENU_MANAGE_USERS}</h1>
             </div>
             <ul class="location-menu">
-                <!-- <li><a class="help" href="#">Help</a></li> -->
-                <li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a>
-                </li>
+                <li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a></li>
             </ul>
             <ul class="path">
                 <li><a href="manage_users.php">{TR_MENU_MANAGE_USERS}</a></li>
                 <li><a href="admin_add.php">{TR_MENU_ADD_ADMIN}</a></li>
             </ul>
         </div>
+
         <div class="left_menu">
             {MENU}
         </div>
+
         <div class="body">
             <h2 class="user_yellow"><span>{TR_ADD_ADMIN}</span></h2>
 
@@ -33,11 +31,12 @@
 
             <form name="admin_add_user" method="post" action="admin_add.php">
                 <!-- BDP: props_list -->
-                <fieldset>
-                    <legend>{TR_CORE_DATA}</legend>
                     <table>
+						<tr>
+							<th colspan="2">{TR_CORE_DATA}</th>
+						</tr>
                         <tr>
-                            <td style="width:300px;">
+                            <td>
                                 <label for="username">{TR_USERNAME}</label>
                             </td>
                             <td>
@@ -65,12 +64,12 @@
                             </td>
                         </tr>
                     </table>
-                </fieldset>
-                <fieldset>
-                    <legend>{TR_ADDITIONAL_DATA}</legend>
                     <table>
+						<tr>
+							<th colspan="2">{TR_ADDITIONAL_DATA}</th>
+						</tr>
                         <tr>
-                            <td style="width:300px;">
+                            <td>
                                 <label for="first_name">{TR_FIRST_NAME}</label>
                             </td>
                             <td>

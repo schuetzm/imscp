@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-    <body>
         <script type="text/javascript">
             /* <![CDATA[ */
             function action_delete(url, subject) {
@@ -28,7 +27,6 @@
                 <h1 class="support">{TR_SUPPORT_SYSTEM}</h1>
             </div>
             <ul class="location-menu">
-                <!-- <li><a class="help" href="#">Help</a></li> -->               
                 <li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a></li>
             </ul>
             <ul class="path">
@@ -36,9 +34,11 @@
                 <li><a href="ticket_closed.php">{TR_CLOSED_TICKETS}</a></li>
             </ul>
         </div>
+
         <div class="left_menu">
             {MENU}
         </div>
+
         <div class="body">
             <h2 class="support"><span>{TR_CLOSED_TICKETS}</span></h2>
 

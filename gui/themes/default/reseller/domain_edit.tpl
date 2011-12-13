@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-<body>
 	<div class="header">
 		{MAIN_MENU}
 		<div class="logo">
@@ -28,11 +27,11 @@
 	</div>
 
 	<div class="body">
+		<h2 class="domains"><span>{TR_EDIT_DOMAIN}</span></h2>
+
 		<!-- BDP: page_message -->
 		<div class="{MESSAGE_CLS}">{MESSAGE}</div>
 		<!-- EDP: page_message -->
-
-		<h2 class="domains"><span>{TR_EDIT_DOMAIN}</span></h2>
 
 	<!-- INCLUDE "../shared/partials/forms/domain_edit.tpl" -->
 	</div>

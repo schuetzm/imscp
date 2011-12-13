@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-<body>
 	<script type="text/javascript">
 	/* <![CDATA[ */
 		$(document).ready(function(){
@@ -31,11 +30,8 @@
 			<h1 class="email">{TR_MENU_MAIL_ACCOUNTS}</h1>
 		</div>
 		<ul class="location-menu">
-			<!-- <li><a class="help" href="#">Help</a></li> -->
 			<!-- BDP: logged_from -->
-			<li>
-				<a class="backadmin" href="change_user_interface.php?action=go_back">{YOU_ARE_LOGGED_AS}</a>
-			</li>
+			<li><a class="backadmin" href="change_user_interface.php?action=go_back">{YOU_ARE_LOGGED_AS}</a></li>
 			<!-- EDP: logged_from -->
 			<li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a></li>
 		</ul>
@@ -47,7 +43,7 @@
 	</div>
 
 	<div class="left_menu">
-	{MENU}
+		{MENU}
 	</div>
 
 	<div class="body">

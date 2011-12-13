@@ -11,13 +11,18 @@ Features / Enhancements:
 		Components:
 			- DebugBar - Files plugin: Count and shows the loaded templates files
 		Core:
+			- Added layout color switcher
+			- Reseller level - Added flash message for new orders (Only for confirmed orders)
+			- Reseller level - Added flash message for new domain alias orders
 			- pTemplate: Added a set of events (see the iMSCP_pTemplate_Events class)
 			- Events system: Allows to pass arbitrary data to the events listeners methods
+			- PhpMyAdmin on-click logon - Set language according user panel language
 		Javascript
-			- Updated jQuery to version 1.7.0
+			- Integrated jQuery DataTables plugin (v.1.8.2)
+			- Updated jQuery to version 1.7.1
 			- Updated jQuery UI to version 1.8.16 (minified version)
 		Tools:
-			- Updated PhpMyAdmin to version 3.4.7.1
+			- Updated PhpMyAdmin to version 3.4.8
 
 Tickets:
 	- Fixed #242: Security Faillure - Directories are created with group write permissions
@@ -31,6 +36,7 @@ Tickets:
 	- Fixed #255: Defect - Hide support feature menu item at user level
 	- Fixed #259: Cosmetics - Different style for input and select elements
 	- Fixed #260: Cosmetics - Move app installer menu items to different section
+	- Fixed #263: Defect - Unable to delete htusers && htgroups
 	- Fixed #264: Defect - PHP Editor not available
 	- Fixed #265: Defect - Disabled feature can not be enabled
 	- Fixed #267: Defect - mod_cband configurations are not removed
@@ -41,6 +47,11 @@ Tickets:
 	- Fixed #275: Defect - Service status always down when using ipv6 as base ip
 	- Fixed #278: Defect - Possible corruption of postfix's domain configuration
 	- Fixed #279: Defect - Installer should not fail when we are using another webmail
+	- Fixed #286: Defect - Error by update
+	- Fixed #287: Update - phpMyAdmin 3.4.8 released
+	- Fixed #289: Defect - Ubuntu update error without end
+	- Fixed #292: Feature - Layout color chooser
+	- Fixed #294: Defect - Notice: Undefined index: user_id...
 
 -------------------------------------------------------------------------------------
 i-MSCP 1.0.1.5 (beta 5)

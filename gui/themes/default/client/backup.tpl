@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-<body>
 	<script type="text/javascript">
 	/* <![CDATA[ */
 	function action_delete(url, subject) {
@@ -28,7 +27,11 @@
 			<li><a href="#" onclick="return false;">{TR_LMENU_DAILY_BACKUP}</a></li>
 		</ul>
 	</div>
-	<div class="left_menu">{MENU}</div>
+
+	<div class="left_menu">
+		{MENU}
+	</div>
+
 	<div class="body">
 		<h2 class="hdd"><span>{TR_BACKUP}</span></h2>
 

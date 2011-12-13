@@ -1,5 +1,4 @@
 <!-- INCLUDE "../shared/layout/header.tpl" -->
-    <body>
         <div class="header">
             {MAIN_MENU}
             <div class="logo">
@@ -12,7 +11,6 @@
                 <h1 class="webtools">{TR_MENU_SYSTEM_TOOLS}</h1>
             </div>
             <ul class="location-menu">
-                <!-- <li><a class="help" href="#">Help</a></li> -->
                 <li><a class="logout" href="../index.php?logout">{TR_MENU_LOGOUT}</a></li>
             </ul>
             <ul class="path">
@@ -32,81 +30,85 @@
 			<!-- EDP: page_message -->
 
             <!-- BDP: props_list -->
-            <table class="description">
+            <table>
                 <tr>
-                    <th style="width:300px;">{TR_KERNEL}</th>
+                    <td>{TR_KERNEL}</td>
                     <td>{KERNEL}</td>
                 </tr>
                 <tr>
-                    <th>{TR_UPTIME}</th>
+                    <td>{TR_UPTIME}</td>
                     <td>{UPTIME}</td>
                 </tr>
                 <tr>
-                    <th>{TR_LOAD}</th>
+                    <td>{TR_LOAD}</td>
                     <td>{LOAD}</td>
                 </tr>
             </table>
 
             <!-- EDP: props_list -->
             <h2 class="tools"><span>{TR_CPU_SYSTEM_INFO}</span></h2>
-            <table class="description">
+
+            <table>
                 <tr>
-                    <th style="width:300px;">{TR_CPU_MODEL}</th>
+                    <td>{TR_CPU_MODEL}</td>
                     <td >{CPU_MODEL}</td>
                 </tr>
                 <tr>
-                    <th>{TR_CPU_COUNT}</th>
+                    <td>{TR_CPU_COUNT}</td>
                     <td>{CPU_COUNT}</td>
                 </tr>
                 <tr>
-                    <th>{TR_CPU_MHZ}</th>
+                    <td>{TR_CPU_MHZ}</td>
                     <td>{CPU_MHZ}</td>
                 </tr>
                 <tr>
-                    <th >{TR_CPU_CACHE}</th>
+                    <td>{TR_CPU_CACHE}</td>
                     <td>{CPU_CACHE}</td>
                 </tr>
                 <tr>
-                    <th>{TR_CPU_BOGOMIPS}</th>
+                    <td>{TR_CPU_BOGOMIPS}</td>
                     <td>{CPU_BOGOMIPS}</td>
                 </tr>
             </table>
 
             <h2 class="tools"><span>{TR_MEMRY_SYSTEM_INFO}</span></h2>
 
-            <table>
-                <tr>
-                    <th style="width:300px;">{TR_RAM}</th>
-                    <th>{TR_TOTAL}</th>
-                    <th>{TR_USED}</th>
-                    <th>{TR_FREE}</th>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>{RAM_TOTAL}</td>
-                    <td>{RAM_USED}</td>
-                    <td>{RAM_FREE}</td>
-                </tr>
-                <tr>
-                    <th>{TR_SWAP}</th>
-                    <th>{TR_TOTAL}</th>
-                    <th>{TR_USED}</th>
-                    <th>{TR_FREE}</th>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>{SWAP_TOTAL}</td>
-                    <td>{SWAP_USED}</td>
-                    <td>{SWAP_FREE}</td>
-                </tr>
-            </table>
+			<table>
+				<tr>
+					<th>{TR_RAM}</th>
+					<th>{TR_TOTAL}</th>
+					<th>{TR_USED}</th>
+					<th>{TR_FREE}</th>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>{RAM_TOTAL}</td>
+					<td>{RAM_USED}</td>
+					<td>{RAM_FREE}</td>
+				</tr>
+			</table>
+
+			<table>
+				<tr>
+					<th>{TR_SWAP}</th>
+					<th>{TR_TOTAL}</th>
+					<th>{TR_USED}</th>
+					<th>{TR_FREE}</th>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>{SWAP_TOTAL}</td>
+					<td>{SWAP_USED}</td>
+					<td>{SWAP_FREE}</td>
+				</tr>
+			</table>
 
             <h2 class="tools"><span>{TR_FILE_SYSTEM_INFO}</span></h2>
 
             <!-- BDP: disk_list -->
             <table>
                 <tr>
-                    <th style="width:300px;">{TR_MOUNT}</th>
+                    <th>{TR_MOUNT}</th>
                     <th>{TR_TYPE}</th>
                     <th>{TR_PARTITION}</th>
                     <th>{TR_PERCENT}</th>
@@ -127,6 +129,5 @@
                 <!-- EDP: disk_list_item -->
             </table>
             <!-- EDP: disk_list -->
-            <br />
         </div>
 <!-- INCLUDE "../shared/layout/footer.tpl" -->
